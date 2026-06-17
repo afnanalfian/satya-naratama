@@ -1,0 +1,1060 @@
+@import "tom-select/dist/css/tom-select.css";
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@keyframes toast-progress {
+    from {
+        width: 100%;
+    }
+    to {
+        width: 0%;
+    }
+}
+
+@supports (-webkit-touch-callout: none) {
+  .min-h-screen {
+    min-height: -webkit-fill-available;
+  }
+}
+
+.dark .toast {
+    box-shadow: 0 10px 30px rgba(0,0,0,.4);
+}
+
+/* Optional: styling global */
+html {
+    scroll-behavior: smooth;
+}
+
+[x-cloak] { display: none !important; }
+
+.form-label-required::after {
+    content: " *";
+    color: red;
+    font-weight: bold;
+}
+
+.input-primary {
+    @apply mt-1 w-full px-4 py-3 rounded-xl
+    bg-white dark:bg-gray-800
+    border border-gray-300 dark:border-gray-700
+    text-gray-800 dark:text-white
+    focus:ring-primary focus:border-primary;
+}
+
+.input-file {
+    @apply mt-1 block w-full text-sm
+    file:mr-4 file:py-2 file:px-4
+    file:rounded-xl file:border-0
+    file:bg-primary file:text-white
+    hover:file:bg-azwara-medium
+    bg-white dark:bg-gray-800
+    border border-gray-300 dark:border-gray-700
+    rounded-xl cursor-pointer;
+}
+
+.btn-primary {
+    @apply py-3 rounded-xl font-bold text-white
+    bg-gradient-to-r from-primary to-azwara-medium
+    hover:shadow-xl hover:scale-[1.02] transition;
+}
+
+/* Sidebar & Menu */
+@layer components {
+
+    /* ===== MAIN MENU ITEM ===== */
+    .menu-item {
+        @apply relative flex items-center gap-3
+               px-4 py-3 rounded-xl
+               cursor-pointer font-medium text-sm
+               text-azwara-darkest dark:text-azwara-lighter
+               transition-all duration-200
+               hover:bg-azwara-light/40
+               dark:hover:bg-azwara-darkest/80;
+    }
+
+    /* subtle lift on hover */
+    .menu-item:hover {
+        transform: translateX(2px);
+    }
+
+    /* icon */
+    .menu-item svg {
+        @apply w-5 h-5 flex-shrink-0
+               text-azwara-medium
+               transition-colors duration-200;
+    }
+
+    .menu-item:hover svg {
+        @apply text-primary;
+    }
+
+    /* ===== ACTIVE STATE ===== */
+    .menu-item.active {
+        @apply bg-azwara-light/60
+               dark:bg-azwara-darkest
+               dark:text-azwara-lightest
+               text-primary;
+    }
+
+    .menu-item.active svg {
+        @apply text-primary;
+    }
+
+    /* left accent bar */
+    .menu-item.active::before {
+        content: '';
+        @apply absolute left-0 top-2 bottom-2 w-1
+               bg-primary rounded-r-full;
+    }
+
+    /* ===== SUB MENU ===== */
+    .menu-subitem {
+        @apply relative flex items-center gap-2
+               px-3 py-2 rounded-lg
+               text-xs font-medium
+               text-azwara-darkest/80 dark:text-azwara-lighter/70
+               transition-all duration-150
+               hover:bg-azwara-light/30
+               dark:hover:bg-azwara-darkest;
+    }
+
+    .menu-subitem:hover {
+        transform: translateX(2px);
+    }
+
+    .menu-subitem.active {
+        @apply text-blue-600 dark:text-azwara-lightest;
+    }
+
+    /* dot indicator */
+    .menu-subitem span {
+        @apply opacity-60;
+    }
+
+    /* badge */
+    .badge {
+        @apply text-[10px] font-semibold
+               px-2 py-0.5 rounded-full
+               bg-primary text-white;
+    }
+}
+
+
+/* Sidebar desktop behavior */
+@media (min-width: 768px) {
+    #sidebar {
+        transform: translateX(0) !important;
+    }
+    .sidebar-closed-desktop {
+        transform: translateX(-100%) !important;
+    }
+}
+
+/* ============================================
+   SELECT2 — MATCH TAILWIND INPUT STYLE
+   ============================================ */
+
+/* WRAPPER */
+.select2-container .select2-selection--single {
+    @apply w-full px-4 py-3 h-[48px] rounded-xl
+           bg-white dark:bg-gray-800
+           border border-gray-300 dark:border-gray-700
+           text-gray-800 dark:text-white
+           flex items-center;
+}
+
+/* TEXT */
+.select2-container--default .select2-selection--single .select2-selection__rendered {
+    @apply text-gray-800 dark:text-white leading-6;
+    padding-left: 0 !important;
+}
+
+/* ARROW */
+.select2-container--default .select2-selection--single .select2-selection__arrow {
+    height: 100%;
+    right: 12px;
+}
+
+.select2-container--default .select2-selection--single .select2-selection__arrow b {
+    @apply border-gray-500 dark:border-gray-300;
+}
+
+/* ON FOCUS */
+.select2-container--default.select2-container--focus
+.select2-selection--single {
+    @apply border-primary ring-1 ring-primary;
+}
+
+/* DROPDOWN */
+.select2-dropdown {
+    @apply bg-white dark:bg-gray-800
+           border border-gray-300 dark:border-gray-700
+           rounded-xl shadow-lg;
+}
+
+/* SEARCH BOX */
+.select2-search--dropdown .select2-search__field {
+    @apply px-3 py-2 rounded-lg
+           bg-white dark:bg-gray-800
+           border border-gray-300 dark:border-gray-700
+           text-gray-800 dark:text-white;
+}
+
+/* OPTION NORMAL */
+.select2-results__option {
+    @apply px-3 py-2 text-gray-800 dark:text-white;
+}
+
+/* OPTION HOVER */
+.select2-results__option--highlighted {
+    @apply bg-primary text-white;
+}
+
+/* OPTION SELECTED */
+.select2-results__option[aria-selected=true] {
+    @apply bg-azwara-medium text-white;
+}
+
+
+/* LANDING PAGE CSS
+LANDING PAGE CSS
+LANDING PAGE CSS
+LANDING PAGE CSS
+LANDING PAGE CSS */
+
+/*-----------------------------*/
+/*------ LANDING PAGE ---------*/
+/*-----------------------------*/
+
+/* Reset untuk landing page */
+.landing-page {
+    overflow-x: hidden;
+}
+
+/* ===== HEADER & NAVIGATION ===== */
+/* Header fixed */
+#site-header {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    z-index: 50;
+    transition: all 0.3s ease-in-out;
+}
+
+/* Pastikan tinggi header konsisten */
+#site-header .h-20 {
+    height: 80px; /* Desktop */
+}
+
+/* Nav link hover effect */
+.nav-link {
+    position: relative;
+    color: var(--color-secondary);
+    transition: all 0.3s ease;
+}
+
+.nav-link:hover {
+    color: var(--color-primary);
+}
+
+.nav-link::after {
+    content: '';
+    position: absolute;
+    bottom: -4px;
+    left: 0;
+    width: 0;
+    height: 2px;
+    background-color: var(--color-primary);
+    transition: all 0.3s ease;
+}
+
+.nav-link:hover::after {
+    width: 100%;
+}
+
+/* Mobile menu */
+#mobile-menu {
+    position: fixed;
+    top: 80px;
+    left: 0;
+    right: 0;
+    z-index: 40;
+    transform: translateY(-20px);
+    opacity: 0;
+    visibility: hidden;
+    transition: transform 0.3s ease-in-out, opacity 0.3s ease-in-out;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+}
+
+#mobile-menu.block {
+    transform: translateY(0);
+    opacity: 1;
+    visibility: visible;
+}
+
+/* ===== HERO SECTION ===== */
+#home {
+    padding-top: 80px; /* Sesuaikan dengan tinggi header */
+    min-height: calc(100vh - 80px);
+    display: flex;
+    align-items: center;
+    position: relative;
+    overflow: hidden;
+}
+
+/* Hero animations */
+@keyframes float {
+    0%, 100% {
+        transform: translateY(0px);
+    }
+    50% {
+        transform: translateY(-15px);
+    }
+}
+
+.animate-float {
+    animation: float 4s ease-in-out infinite;
+}
+
+/* Hero decorative background */
+.hero-bg-gradient {
+    background: linear-gradient(135deg, #012A36 0%, #014F56 80%, #027373 100%);
+    opacity: 0.9;
+}
+
+/* ===== SECTIONS COMMON ===== */
+section[id]:not(#home) {
+    scroll-margin-top: 80px; /* Offset untuk anchor links */
+}
+
+/* Section spacing */
+section {
+    position: relative;
+}
+
+/* ===== BUTTONS ===== */
+.btn-primary {
+    background-color: var(--color-primary);
+    color: white;
+    transition: all 0.3s ease;
+    box-shadow: 0 4px 6px rgba(2, 115, 115, 0.2);
+}
+
+.btn-primary:hover {
+    background-color: var(--color-azwara-medium);
+    transform: translateY(-2px);
+    box-shadow: 0 6px 12px rgba(2, 115, 115, 0.3);
+}
+
+.btn-outline {
+    border: 2px solid var(--color-primary);
+    color: var(--color-primary);
+    transition: all 0.3s ease;
+}
+
+.btn-outline:hover {
+    background-color: rgba(169, 214, 214, 0.2);
+}
+
+/* ===== SCROLL TO TOP ===== */
+#scroll-to-top {
+    transition: all 0.3s ease;
+}
+
+#scroll-to-top:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 6px 12px rgba(0, 0, 0, 0.15);
+}
+
+/* ===== RESPONSIVE DESIGN ===== */
+@media (max-width: 768px) {
+    /* Header mobile */
+    #site-header .h-20 {
+        height: 72px;
+    }
+
+    /* Mobile menu position */
+    #mobile-menu {
+        top: 72px;
+    }
+
+    /* Hero section mobile */
+    #home {
+        padding-top: 72px;
+        min-height: calc(100vh - 72px);
+        padding-bottom: 40px;
+    }
+
+    /* Adjust scroll margin for mobile */
+    section[id]:not(#home) {
+        scroll-margin-top: 72px;
+    }
+
+    /* Hero content order for mobile */
+    .hero-content {
+        order: 2;
+    }
+
+    .hero-image {
+        order: 1;
+        margin-bottom: 32px;
+    }
+
+    /* Mobile navigation items */
+    .mobile-nav-item {
+        padding: 12px 16px;
+        font-size: 1.125rem;
+        border-radius: 0.5rem;
+    }
+
+    .mobile-nav-item:hover {
+        background-color: rgba(242, 239, 231, 0.5);
+    }
+}
+
+@media (min-width: 769px) and (max-width: 1024px) {
+    /* Tablet adjustments */
+    #home {
+        min-height: 85vh;
+    }
+
+    .hero-bg-gradient {
+        width: 70%;
+    }
+}
+
+/* ===== ANIMATIONS ===== */
+.fade-in {
+    animation: fadeIn 0.8s ease-out;
+}
+
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+        transform: translateY(20px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+.slide-in-left {
+    animation: slideInLeft 0.8s ease-out;
+}
+
+@keyframes slideInLeft {
+    from {
+        opacity: 0;
+        transform: translateX(-30px);
+    }
+    to {
+        opacity: 1;
+        transform: translateX(0);
+    }
+}
+
+.slide-in-right {
+    animation: slideInRight 0.8s ease-out;
+}
+
+@keyframes slideInRight {
+    from {
+        opacity: 0;
+        transform: translateX(30px);
+    }
+    to {
+        opacity: 1;
+        transform: translateX(0);
+    }
+}
+
+/* ===== UTILITY CLASSES ===== */
+.text-balance {
+    text-wrap: balance;
+}
+
+.backdrop-blur-sm {
+    backdrop-filter: blur(8px);
+    -webkit-backdrop-filter: blur(8px);
+}
+
+/* ===== SCROLL BEHAVIOR ===== */
+html {
+    scroll-behavior: smooth;
+    scroll-padding-top: 80px; /* Untuk anchor links */
+}
+
+/* ===== ACCESSIBILITY ===== */
+@media (prefers-reduced-motion: reduce) {
+    *,
+    *::before,
+    *::after {
+        animation-duration: 0.01ms !important;
+        animation-iteration-count: 1 !important;
+        transition-duration: 0.01ms !important;
+    }
+}
+
+/* ===== PRINT STYLES ===== */
+@media print {
+    #site-header,
+    #mobile-menu-btn,
+    #scroll-to-top,
+    #mobile-menu {
+        display: none !important;
+    }
+
+    #home {
+        padding-top: 0;
+        min-height: auto;
+    }
+}
+
+/* resources/css/landing.css - Tambahkan di bagian bawah */
+
+/* ===== FOOTER STYLES ===== */
+footer {
+    position: relative;
+    z-index: 10;
+}
+
+footer::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 1px;
+    background: linear-gradient(90deg,
+        transparent 0%,
+        rgba(38, 166, 154, 0.3) 50%,
+        transparent 100%);
+}
+
+/* Footer link animations */
+footer a:not(.btn) {
+    position: relative;
+    transition: all 0.3s ease;
+}
+
+footer a:not(.btn)::after {
+    content: '';
+    position: absolute;
+    bottom: -2px;
+    left: 0;
+    width: 0;
+    height: 1px;
+    background-color: var(--color-primary);
+    transition: width 0.3s ease;
+}
+
+footer a:not(.btn):hover::after {
+    width: 100%;
+}
+
+/* Newsletter form focus states */
+footer input:focus {
+    box-shadow: 0 0 0 3px rgba(2, 115, 115, 0.2);
+}
+
+/* Responsive footer */
+@media (max-width: 768px) {
+    footer {
+        padding-top: 48px;
+        padding-bottom: 32px;
+    }
+
+    .footer-grid {
+        grid-template-columns: 1fr;
+        gap: 32px;
+    }
+
+    .footer-brand {
+        text-align: center;
+    }
+
+    .footer-brand .flex {
+        justify-content: center;
+    }
+
+    .footer-brand p {
+        margin-left: auto;
+        margin-right: auto;
+    }
+}
+
+/* Print styles for footer */
+@media print {
+    footer {
+        display: none !important;
+    }
+}
+
+/* Social Media Icons Styling */
+footer .social-icon {
+    position: relative;
+    overflow: hidden;
+    transition: all 0.3s ease;
+}
+
+footer .social-icon::before {
+    content: '';
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    width: 0;
+    height: 0;
+    border-radius: 50%;
+    background-color: rgba(255, 255, 255, 0.1);
+    transform: translate(-50%, -50%);
+    transition: width 0.3s ease, height 0.3s ease;
+}
+
+footer .social-icon:hover::before {
+    width: 100%;
+    height: 100%;
+}
+
+/* Instagram specific */
+footer .social-icon:hover.bg-\[#E4405F\] {
+    background-color: #E4405F !important;
+    transform: translateY(-3px);
+    box-shadow: 0 4px 12px rgba(228, 64, 95, 0.3);
+}
+
+/* TikTok specific */
+footer .social-icon:hover.bg-black {
+    background-color: #000000 !important;
+    transform: translateY(-3px);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+}
+
+/* YouTube specific */
+footer .social-icon:hover.bg-\[#FF0000\] {
+    background-color: #FF0000 !important;
+    transform: translateY(-3px);
+    box-shadow: 0 4px 12px rgba(255, 0, 0, 0.3);
+}
+
+/* Tooltip styling */
+footer .social-icon span {
+    pointer-events: none;
+    z-index: 100;
+}
+
+footer .social-icon span::before {
+    content: '';
+    position: absolute;
+    bottom: -4px;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 0;
+    height: 0;
+    border-left: 5px solid transparent;
+    border-right: 5px solid transparent;
+    border-top: 5px solid black;
+}
+
+/* ===== TEACHERS SECTION ===== */
+#teachers .grid > div {
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+
+#teachers .grid > div:hover {
+    transform: translateY(-4px);
+}
+
+/* Ensure bio text wraps properly */
+.whitespace-pre-line {
+    white-space: pre-line;
+}
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
+    #teachers .grid {
+        gap: 1.5rem;
+    }
+
+    #teachers .grid > div {
+        padding: 1.5rem;
+    }
+}
+
+
+/* ===== COURSES SECTION GRID DESIGN ===== */
+#courses .course-card {
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    height: 100%;
+}
+
+#courses .course-card:hover {
+    transform: translateY(-8px);
+    box-shadow: 0 20px 60px rgba(11, 31, 51, 0.15);
+}
+
+#courses .shadow-xl {
+    box-shadow: 0 10px 40px rgba(11, 31, 51, 0.08);
+}
+
+#courses .shadow-xl:hover {
+    box-shadow: 0 20px 60px rgba(11, 31, 51, 0.12);
+}
+
+/* Gradient backgrounds */
+.bg-gradient-to-bl {
+    background-size: 200% 200%;
+    animation: gradientShift 8s ease infinite;
+}
+
+@keyframes gradientShift {
+    0% { background-position: 0% 0%; }
+    50% { background-position: 100% 100%; }
+    100% { background-position: 0% 0%; }
+}
+
+/* Line clamp utilities */
+.line-clamp-1 {
+    display: -webkit-box;
+    -webkit-line-clamp: 1;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+}
+
+.line-clamp-2 {
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+}
+
+.line-clamp-3 {
+    display: -webkit-box;
+    -webkit-line-clamp: 3;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+}
+
+/* Teacher avatar stack */
+.flex.-space-x-2 > div {
+    transition: transform 0.3s ease;
+}
+
+.flex.-space-x-2 > div:hover {
+    transform: translateY(-2px);
+    z-index: 10;
+}
+
+/* Free course badge (gunakan warna hijau standar) */
+.bg-green-500.animate-pulse {
+    animation: pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+}
+
+@keyframes pulse {
+    0%, 100% {
+        opacity: 1;
+    }
+    50% {
+        opacity: 0.7;
+    }
+}
+
+/* Course thumbnail hover effect */
+.course-card img {
+    transition: transform 0.7s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.course-card:hover img {
+    transform: scale(1.1);
+}
+
+/* Grid responsive untuk jumlah course ganjil */
+@media (min-width: 768px) and (max-width: 1023px) {
+    #courses .grid {
+        grid-template-columns: repeat(2, 1fr);
+    }
+
+    /* Untuk 1 course di tengah */
+    #courses .grid:has(> :nth-child(1):last-child) {
+        justify-content: center;
+    }
+
+    #courses .grid:has(> :nth-child(1):last-child) > .course-card {
+        max-width: 400px;
+        margin: 0 auto;
+    }
+}
+
+@media (min-width: 1024px) {
+    #courses .grid {
+        grid-template-columns: repeat(3, 1fr);
+    }
+
+    /* Untuk 1 atau 2 course, layout lebih rapi */
+    #courses .grid:has(> :nth-child(1):last-child) > .course-card,
+    #courses .grid:has(> :nth-child(2):last-child) > .course-card {
+        max-width: 400px;
+    }
+}
+
+/* Gradient overlay untuk thumbnail */
+.course-card .bg-gradient-to-t {
+    pointer-events: none;
+}
+
+/* Card content flex untuk tinggi seragam */
+.course-card > div {
+    display: flex;
+    flex-direction: column;
+    height: 100%;
+}
+
+/* Responsive improvements */
+@media (max-width: 767px) {
+    #courses .course-card:hover {
+        transform: translateY(-4px);
+    }
+
+    #courses .course-card {
+        margin-bottom: 1.5rem;
+    }
+}
+
+/* Modern modal styling */
+#meetingsModal .bg-azwara-darkest\/90 {
+    backdrop-filter: blur(8px);
+}
+
+#meetingsModal .shadow-2xl {
+    box-shadow: 0 25px 50px rgba(11, 31, 51, 0.15);
+}
+
+/* Custom scrollbar dengan warna Azwara */
+#meetingsModal .max-h-\[50vh\] {
+    scrollbar-width: thin;
+    scrollbar-color: #3A6F8F #F2EFE7;
+}
+
+#meetingsModal .max-h-\[50vh\]::-webkit-scrollbar {
+    width: 8px;
+}
+
+#meetingsModal .max-h-\[50vh\]::-webkit-scrollbar-track {
+    background: #F2EFE7;
+    border-radius: 10px;
+}
+
+#meetingsModal .max-h-\[50vh\]::-webkit-scrollbar-thumb {
+    background: linear-gradient(to bottom, #1E4E6D, #102F4A);
+    border-radius: 10px;
+}
+
+#meetingsModal .max-h-\[50vh\]::-webkit-scrollbar-thumb:hover {
+    background: linear-gradient(to bottom, #102F4A, #0B1F33);
+}
+
+/* Status badges */
+.bg-azwara-lighter {
+    background-color: rgba(191, 211, 224, 0.2);
+}
+
+/* Tombol free course */
+.course-card .from-green-500.to-green-600 {
+    background-image: linear-gradient(to right, #10b981, #059669);
+}
+
+.course-card .from-green-500.to-green-600:hover {
+    background-image: linear-gradient(to right, #059669, #047857);
+}
+
+/* ===== ABOUT SECTION ===== */
+#about img {
+    border-radius: 1rem;
+}
+
+#about .experience-badge {
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
+}
+
+#about .feature-item {
+    transition: transform 0.3s ease;
+}
+
+#about .feature-item:hover {
+    transform: translateY(-5px);
+}
+
+#about .cta-button-whatsapp {
+    box-shadow: 0 10px 25px -5px rgba(59, 130, 246, 0.5);
+}
+
+#about .stat-item {
+    position: relative;
+}
+
+#about .stat-item:not(:last-child)::after {
+    content: '';
+    position: absolute;
+    right: -2rem;
+    top: 50%;
+    transform: translateY(-50%);
+    width: 1px;
+    height: 40px;
+    background-color: #e5e7eb;
+}
+
+/* Responsive adjustments */
+@media (max-width: 1024px) {
+    #about {
+        padding-top: 3rem;
+        padding-bottom: 3rem;
+    }
+}
+
+@media (max-width: 768px) {
+    #about {
+        padding-top: 2.5rem;
+        padding-bottom: 2.5rem;
+    }
+
+    #about h2 {
+        font-size: 2rem;
+    }
+
+    #about .stat-item:not(:last-child)::after {
+        display: none;
+    }
+
+    #about .stat-item {
+        flex: 1 0 33%;
+    }
+}
+
+@media (max-width: 640px) {
+    #about .cta-buttons {
+        flex-direction: column;
+    }
+
+    #about .cta-buttons a {
+        width: 100%;
+        justify-content: center;
+    }
+
+    #about .features-grid {
+        grid-template-columns: 1fr;
+    }
+}
+
+/* ===== TRYOUTS SECTION ===== */
+#tryouts .bg-white {
+    transition: all 0.3s ease;
+}
+
+#tryouts .bg-white:hover {
+    transform: translateY(-4px);
+}
+
+#tryouts .line-clamp-2 {
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+}
+
+/* Responsive adjustments */
+@media (max-width: 639px) {
+    #tryouts .grid {
+        max-width: 400px;
+        margin: 0 auto;
+    }
+}
+
+@media (min-width: 640px) and (max-width: 767px) {
+    #tryouts .grid {
+        grid-template-columns: repeat(2, 1fr);
+    }
+}
+
+@media (min-width: 768px) and (max-width: 1023px) {
+    #tryouts .grid {
+        grid-template-columns: repeat(2, 1fr);
+        gap: 1.5rem;
+    }
+}
+
+@media (min-width: 1024px) {
+    #tryouts .grid {
+        grid-template-columns: repeat(3, 1fr);
+        gap: 1.5rem;
+    }
+}
+
+/* Untuk jumlah tryout ganjil */
+#tryouts .grid:has(> :nth-child(1):last-child) {
+    grid-template-columns: 1fr;
+    max-width: 400px;
+    margin: 0 auto;
+}
+
+#tryouts .grid:has(> :nth-child(2):last-child) {
+    grid-template-columns: repeat(2, 1fr);
+    max-width: 600px;
+    margin: 0 auto;
+}
+
+/* Gradient button */
+#tryouts .from-primary.to-azwara-darker {
+    background-image: linear-gradient(to right, #1E4E6D, #102F4A);
+}
+
+#tryouts .from-primary.to-azwara-darker:hover {
+    background-image: linear-gradient(to right, #102F4A, #0B1F33);
+}
+
+/* ===== PROMO POPUP STYLES ===== */
+#promoPopup {
+    transition: opacity 0.3s ease;
+}
+
+#promoPopup .bg-black\/70 {
+    backdrop-filter: blur(4px);
+}
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
+    #promoPopup .max-w-4xl {
+        max-width: 95%;
+    }
+
+    #promoPopup .p-4 {
+        padding: 1rem;
+    }
+
+    #promoPopup img {
+        max-height: 70vh;
+    }
+}
+
+/* Animation for countdown */
+@keyframes countdownPulse {
+    0%, 100% {
+        transform: scale(1);
+    }
+    50% {
+        transform: scale(1.05);
+    }
+}
+
+#promoCountdown {
+    animation: countdownPulse 1s infinite;
+}
+
+/* Hide scrollbar when popup is open */
+body.popup-open {
+    overflow: hidden;
+}

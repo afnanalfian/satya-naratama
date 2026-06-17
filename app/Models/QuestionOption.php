@@ -1,0 +1,35 @@
+<?php
+
+namespace App\Models;
+
+use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Illuminate\Database\Eloquent\SoftDeletes;
+
+class QuestionOption extends Model
+{
+    use HasFactory;
+
+    protected $fillable = [
+        'question_id',
+        'option_text',
+        'image',
+        'is_correct',
+        'order',
+        'weight', //khusus untuk TKP
+    ];
+
+    protected $casts = [
+        'is_correct' => 'boolean',
+        'weight' => 'integer',
+    ];
+
+    public function question()
+    {
+        return $this->belongsTo(Question::class, 'question_id');
+    }
+    public function getLabelAttribute(): string
+    {
+        return chr(64 + $this->order); // 1=A, 2=B, 3=C
+    }
+}
