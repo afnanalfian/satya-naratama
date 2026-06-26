@@ -15,7 +15,7 @@ class TKPTOGRATIS2Seeder extends Seeder
     {
         // Cari atau buat material dengan id 49
         $material = QuestionMaterial::firstOrCreate(
-            ['id' => 2]
+            ['id' => 3]
         );
 
         $questions = [
