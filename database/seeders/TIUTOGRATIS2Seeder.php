@@ -15,7 +15,7 @@ class TIUTOGRATIS2Seeder extends Seeder
     {
         // Cari atau buat material dengan id 47
         $material = QuestionMaterial::firstOrCreate(
-            ['id' => 47]
+            ['id' => 1]
         );
 
         $questions = [

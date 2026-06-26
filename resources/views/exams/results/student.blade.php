@@ -253,7 +253,7 @@
     @endif
 
     {{-- ================= ACTION & FILTER ================= --}}
-    <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-8">
+    {{-- <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-8">
         <a href="{{ route('exams.ranking.student', $exam) }}"
            class="inline-flex items-center justify-center gap-2
                   px-5 py-2.5 rounded-lg text-sm font-semibold
@@ -280,7 +280,7 @@
                 @endforeach
             </select>
         </form>
-    </div>
+    </div> --}}
 
     {{-- ================= SOAL & PEMBAHASAN ================= --}}
     <div class="space-y-6">

@@ -15,7 +15,7 @@ class TWKTOGRATIS2Seeder extends Seeder
     {
         // Cari atau buat material dengan id 48
         $material = QuestionMaterial::firstOrCreate(
-            ['id' => 48]
+            ['id' => 2]
         );
 
         $questions = [
