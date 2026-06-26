@@ -10,12 +10,12 @@
                     <div class="h-14 w-14 rounded-full overflow-hidden border-2 border-primary">
                         <img
                             src="{{ asset('img/logo.png') }}"
-                            alt="Azwara Learning"
+                            alt="Satya Naratama"
                             class="h-full w-full object-cover"
                         >
                     </div>
                     <div>
-                        <h2 class="text-2xl font-bold">Azwara Learning</h2>
+                        <h2 class="text-2xl font-bold">Satya Naratama</h2>
                         <p class="text-azwara-lighter text-sm">Bimbel Online Terpercaya</p>
                     </div>
                 </div>
@@ -36,7 +36,7 @@
                             target="_blank"
                             rel="noopener noreferrer"
                             class="h-10 w-10 rounded-full bg-azwara-darker flex items-center justify-center hover:bg-[#E4405F] transition duration-300 group relative"
-                            aria-label="Instagram Azwara Learning"
+                            aria-label="Instagram Satya Naratama"
                             title="Instagram @azwara_learning"
                         >
                             <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 24 24">
@@ -53,7 +53,7 @@
                             target="_blank"
                             rel="noopener noreferrer"
                             class="h-10 w-10 rounded-full bg-azwara-darker flex items-center justify-center hover:bg-black transition duration-300 group relative"
-                            aria-label="TikTok Azwara Learning"
+                            aria-label="TikTok Satya Naratama"
                             title="TikTok @azwara.learning"
                         >
                             <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 24 24">
@@ -66,18 +66,18 @@
 
                         {{-- YouTube --}}
                         <a
-                            href="https://www.youtube.com/@AzwaraLearning"
+                            href="https://www.youtube.com/@SatyaNaratama"
                             target="_blank"
                             rel="noopener noreferrer"
                             class="h-10 w-10 rounded-full bg-azwara-darker flex items-center justify-center hover:bg-[#FF0000] transition duration-300 group relative"
-                            aria-label="YouTube Azwara Learning"
-                            title="YouTube @AzwaraLearning"
+                            aria-label="YouTube Satya Naratama"
+                            title="YouTube @SatyaNaratama"
                         >
                             <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 24 24">
                                 <path d="M23.498 6.186a3.016 3.016 0 0 0-2.122-2.136C19.505 3.545 12 3.545 12 3.545s-7.505 0-9.377.505A3.017 3.017 0 0 0 .502 6.186C0 8.07 0 12 0 12s0 3.93.502 5.814a3.016 3.016 0 0 0 2.122 2.136c1.871.505 9.376.505 9.376.505s7.505 0 9.377-.505a3.015 3.015 0 0 0 2.122-2.136C24 15.93 24 12 24 12s0-3.93-.502-5.814zM9.545 15.568V8.432L15.818 12l-6.273 3.568z"/>
                             </svg>
                             <span class="absolute -top-8 left-1/2 transform -translate-x-1/2 bg-black text-white text-xs px-2 py-1 rounded opacity-0 group-hover:opacity-100 transition-opacity duration-300 whitespace-nowrap">
-                                @AzwaraLearning
+                                @SatyaNaratama
                             </span>
                         </a>
                     </div>
@@ -236,7 +236,7 @@
         <div class="mt-12 pt-8 border-t border-azwara-darker">
             <div class="flex flex-col md:flex-row justify-between items-center gap-4">
                 <div class="text-azwara-lighter text-sm">
-                    &copy; {{ date('Y') }} Azwara Learning. All rights reserved.
+                    &copy; {{ date('Y') }} Satya Naratama. All rights reserved.
                 </div>
 
                 <div class="flex items-center gap-6 text-sm">

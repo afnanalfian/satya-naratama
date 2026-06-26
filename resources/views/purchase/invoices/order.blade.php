@@ -160,8 +160,8 @@
         <td class="right">
             <span class="muted">Hormat kami,</span><br>
             {{-- <img src="{{ public_path('img/signature.png') }}" class="signature" alt="Tanda Tangan"><br> --}}
-            <strong>Tim Azwara Learning</strong><br>
-            {{-- <span class="muted">Owner Azwara Learning</span> --}}
+            <strong>Tim Satya Naratama</strong><br>
+            {{-- <span class="muted">Owner Satya Naratama</span> --}}
         </td>
     </tr>
 </table>

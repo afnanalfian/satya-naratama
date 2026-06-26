@@ -1,6 +1,6 @@
-# 🎓 Azwara Learning – Online Tutoring Platform (Laravel 11)
+# 🎓 Satya Naratama – Online Tutoring Platform (Laravel 11)
 
-Azwara Learning is a web-based **online tutoring (bimbel) platform** built with **Laravel 11**, designed to manage courses, meetings, exams (tryout & quiz), purchases, entitlements, notifications, and interactive learning features.
+Satya Naratama is a web-based **online tutoring (bimbel) platform** built with **Laravel 11**, designed to manage courses, meetings, exams (tryout & quiz), purchases, entitlements, notifications, and interactive learning features.
 
 This project supports **Admin**, **Tentor (Teacher)**, and **Siswa (Student)** roles with a clear access control system.
 

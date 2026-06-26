@@ -1,6 +1,6 @@
 @extends('layouts.app')
 
-@section('title', 'Course Online Matematika & SKD | Azwara Learning')
+@section('title', 'Course Online Matematika & SKD | Satya Naratama')
 @section('description', 'Kumpulan berbagai subjek termasuk CPNS dan sekolah kedinasan dengan materi terstruktur, video, dan latihan soal.')
 @section('content')
 {{-- HEADER --}}

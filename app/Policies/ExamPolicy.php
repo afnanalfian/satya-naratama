@@ -20,7 +20,8 @@ class ExamPolicy
             // ======================
             // TRYOUT → akses global / paket
             // ======================
-            'tryout' => $user->hasTryoutAccess($exam->id),
+            // 'tryout' => $user->hasTryoutAccess($exam->id),
+            'tryout' => true,
 
             // ======================
             // QUIZ → akses global

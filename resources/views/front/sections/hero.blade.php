@@ -24,7 +24,7 @@
         <div class="lg:hidden relative flex justify-center order-1">
             <img
                 src="{{ asset('front/img/hero-img-1.png') }}"
-                alt="Azwara Learning Hero"
+                alt="Satya Naratama Hero"
                 class="w-full max-w-xs sm:max-w-sm md:max-w-md
                        drop-shadow-xl animate-float"
             >
@@ -37,7 +37,7 @@
                        bg-white/80 backdrop-blur-sm text-azwara-darkest
                        text-sm font-medium border border-azwara-lighter"
             >
-                Platform Bimbel Online Terpercaya
+                Platform Bimbel Kedinasan + TNI POLRI Terpercaya
             </span>
 
             <h1
@@ -46,14 +46,14 @@
                        text-azwara-darkest"
             >
                 Belajar Lebih Terarah
-                <span class="block text-primary">Azwara Learning</span>
+                <span class="block text-primary">Satya Naratama</span>
             </h1>
 
             <p
                 class="text-base sm:text-lg text-secondary/90 max-w-xl
                        leading-relaxed"
             >
-                Bimbel online dengan materi terstruktur, tentor berpengalaman,
+                Bimbel Kedinasan + TNI POLRI dengan materi terstruktur, tentor berpengalaman,
                 serta tryout dan pembahasan yang membantu kamu
                 mencapai target belajar dengan lebih efektif.
             </p>
@@ -92,7 +92,7 @@
         <div class="hidden lg:flex relative justify-center lg:justify-end order-1 lg:order-2">
             <img
                 src="{{ asset('front/img/hero-img-1.png') }}"
-                alt="Azwara Learning Hero"
+                alt="Satya Naratama Hero"
                 class="w-full max-w-lg xl:max-w-xl
                        drop-shadow-2xl animate-float"
             >

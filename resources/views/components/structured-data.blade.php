@@ -3,10 +3,10 @@
 {
   "@context": "https://schema.org",
   "@type": "EducationalOrganization",
-  "name": "Azwara Learning",
-  "description": "Bimbel online, tryout beragam, quiz harian, live zoom, materi lengkap, latihan soal terbaru.",
-  "url": "https://azwaralearning.com",
-  "logo": "https://azwaralearning.com/img/logo.png",
+  "name": "Satya Naratama",
+  "description": "Bimbel Kedinasan TNI POLRI, tryout beragam, quiz harian, live zoom, materi lengkap, latihan soal terbaru.",
+  "url": "https://satyanaratama.id",
+  "logo": "https://satyanaratama.id/img/logo.png",
   "address": {
     "@type": "PostalAddress",
     "addressCountry": "ID"
@@ -18,9 +18,9 @@
     "availableLanguage": "Indonesian"
   },
   "sameAs": [
-    "https://www.instagram.com/azwara_learning",
-    "https://www.tiktok.com/@azwara.learning",
-    "https://www.youtube.com/@AzwaraLearning"
+    "https://www.instagram.com/satya.naratama",
+    "https://www.tiktok.com/@satya.naratama",
+    "https://www.youtube.com/@SatyaNaratama"
   ],
   "offers": {
     "@type": "Offer",

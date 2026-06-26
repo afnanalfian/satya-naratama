@@ -13,7 +13,7 @@
                         <div class="h-12 w-12 rounded-full overflow-hidden border-2 border-white shadow-md">
                             <img
                                 src="{{ asset('img/logo.png') }}"
-                                alt="Azwara Learning"
+                                alt="Satya Naratama"
                                 class="h-full w-full object-cover"
                             >
                         </div>
@@ -22,7 +22,7 @@
                     </div>
                     <div class="flex flex-col">
                         <span class="font-bold text-2xl text-azwara-darkest leading-tight">
-                            Azwara<span class="text-primary">Learning</span>
+                            Satya<span class="text-primary">Naratama</span>
                         </span>
                     </div>
                 </a>

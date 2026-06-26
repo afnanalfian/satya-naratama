@@ -8,7 +8,7 @@
                     {{-- Main Image --}}
                     <img
                         src="{{ asset('front/img/about-1.png') }}"
-                        alt="Tentang Azwara Learning"
+                        alt="Tentang Satya Naratama"
                         class="w-full h-auto object-cover transform hover:scale-105 transition-transform duration-700"
                     >
                 </div>
@@ -31,7 +31,7 @@
                     {{-- Description --}}
                     <div class="space-y-4 mb-8">
                         <p class="text-secondary text-md leading-relaxed">
-                            Azwara Learning adalah platform bimbingan belajar profesional yang berkomitmen untuk memberikan pendidikan berkualitas tinggi dengan metode pengajaran yang inovatif dan efektif.
+                            Satya Naratama adalah platform bimbingan belajar profesional yang berkomitmen untuk memberikan pendidikan berkualitas tinggi dengan metode pengajaran yang inovatif dan efektif.
                         </p>
                         {{-- <p class="text-secondary text-md leading-relaxed">
                             Kami percaya bahwa setiap siswa memiliki potensi unik. Dengan pendekatan personalized learning, kami membantu siswa menemukan cara belajar yang paling sesuai dengan kebutuhan mereka.

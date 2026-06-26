@@ -16,7 +16,7 @@ class CustomVerifyEmail extends VerifyEmail implements ShouldQueue
         $url = $this->verificationUrl($notifiable);
 
         return (new MailMessage)
-            ->subject('Verifikasi Email Akun Azwara Learning')
+            ->subject('Verifikasi Email Akun Satya Naratama')
             ->view('emails.verify', [
                 'user' => $notifiable,
                 'verificationUrl' => $url,

@@ -231,7 +231,7 @@
                                 </div>
                                 <div>
                                     <h3 class="font-semibold text-blue-800 dark:text-blue-300 mb-1">
-                                        Follow Instagram Azwara Learning
+                                        Follow Instagram Satya Naratama
                                         <span class="text-red-500 ml-1">*</span>
                                     </h3>
                                     <p class="text-sm text-gray-600 dark:text-gray-400">

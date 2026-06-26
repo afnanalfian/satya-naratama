@@ -4,7 +4,7 @@
     <link rel="icon" href="/favicon.ico" sizes="any">
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Azwara Learning</title>
+    <title>Satya Naratama</title>
     <meta name="description" content="Bimbel online, tryout beragam, quiz harian, live zoom, materi lengkap, latihan soal terbaru.">
     <link href="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css" rel="stylesheet">
     <meta name="google-site-verification" content="exlEPP1kFOZJWZ_zxo5Qa-PoW-3oPa-9avX-Xbgcjb4" />
@@ -46,7 +46,7 @@
             {{-- Logo --}}
             <a href="{{ route('home') }}"
             class="text-xl font-bold text-azwara-darker dark:text-white tracking-wide">
-                Azwara<span class="text-primary dark:text-azwara-lighter">Learning</span>
+                Satya<span class="text-primary dark:text-azwara-lighter">Naratama</span>
             </a>
 
             <div class="flex items-center gap-4">
@@ -106,7 +106,7 @@
                 text-gray-600 dark:text-gray-400
                 border-t border-azwara-light/30
                 backdrop-blur-sm">
-        © {{ date('Y') }} Azwara Learning
+        © {{ date('Y') }} Satya Naratama
         </footer>
     </main>
     @include('layouts.partials.toast')

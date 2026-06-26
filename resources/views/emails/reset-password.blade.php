@@ -5,7 +5,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-    <title>Reset Password — Azwara Learning</title>
+    <title>Reset Password — Satya Naratama</title>
 
     <style>
         body {
@@ -87,7 +87,7 @@
 
         {{-- Header --}}
         <div class="header">
-            <div class="logo">Azwara Learning</div>
+            <div class="logo">Satya Naratama</div>
         </div>
 
         {{-- Content --}}
@@ -110,7 +110,7 @@
 
         {{-- Footer --}}
         <div class="footer">
-            Email ini dikirim otomatis oleh sistem Azwara Learning.
+            Email ini dikirim otomatis oleh sistem Satya Naratama.
             <br>
             Jika Anda mengalami masalah, hubungi:
             <a href="mailto:azwaralearning@gmail.com">azwaralearning@gmail.com</a>

@@ -1,6 +1,6 @@
 @extends('layouts.app')
 
-@section('title', $exam->title.' | Tryout Azwara Learning - Matematika, SKD, dll')
+@section('title', $exam->title.' | Tryout Satya Naratama - Matematika, SKD, dll')
 @section('description', 'Ikuti tryout '.$exam->title.' lengkap dengan pembahasan.')
 
 @section('content')

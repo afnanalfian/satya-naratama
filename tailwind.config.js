@@ -16,66 +16,48 @@ export default {
             fontFamily: {
                 sans: ["Inter", "ui-sans-serif", "system-ui"],
             },
-colors: {
-    azwara: {
-        darkest:  "#0B1F33", // Navy sangat gelap (sidebar / header)
-        darker:   "#102F4A", // Navy tua (secondary background)
-        medium:   "#1E4E6D", // Navy medium (PRIMARY UI color)
-        light:    "#3A6F8F", // Biru lembut untuk hover / active
-        lighter:  "#BFD3E0", // Biru abu pastel (border / subtle bg)
-        lightest: "#F2EFE7", // Krem lembut (TETAP)
-    },
-
-    primary:   "#1E4E6D",   // Navy medium
-    secondary: "#102F4A",   // Navy tua (BUKAN gold)
-},
-backgroundImage: {
-    "brand-gradient":
-        "linear-gradient(135deg, #0B1F33 0%, #102F4A 60%, #1E4E6D 100%)",
-},
-
         // colors: {
         //     azwara: {
-        //         darkest:  "#0B2A45", // Navy sangat gelap (background utama / header)
-        //         darker:   "#123A5A", // Navy tua elegan
-        //         medium:   "#1E5A7A", // Biru navy medium (primary action)
-        //         light:    "#C9A24D", // Gold elegan (accent / CTA / highlight)
-        //         lighter:  "#E6D3A3", // Gold pastel lembut (badge / subtle accent)
-        //         lightest: "#F2EFE7", // Krem lembut (TETAP, sesuai request)
+        //         darkest:  "#0B1F33", // Navy sangat gelap (sidebar / header)
+        //         darker:   "#102F4A", // Navy tua (secondary background)
+        //         medium:   "#1E4E6D", // Navy medium (PRIMARY UI color)
+        //         light:    "#3A6F8F", // Biru lembut untuk hover / active
+        //         lighter:  "#BFD3E0", // Biru abu pastel (border / subtle bg)
+        //         lightest: "#F2EFE7", // Krem lembut (TETAP)
         //     },
 
-        //     primary:   "#1E5A7A",   // Navy medium
-        //     secondary: "#C9A24D",   // Gold elegan
+        //     primary:   "#1E4E6D",   // Navy medium
+        //     secondary: "#102F4A",   // Navy tua (BUKAN gold)
         // },
         // backgroundImage: {
         //     "brand-gradient":
-        //         "linear-gradient(135deg, #0B2A45 0%, #123A5A 70%, #1E5A7A 100%)",
+        //         "linear-gradient(135deg, #0B1F33 0%, #102F4A 60%, #1E4E6D 100%)",
         // },
-    // colors: {
-    //     azwara: {
-    //         darkest:  "#012A36", // Hijau teal sangat gelap
-    //         darker:   "#014F56", // Teal tua elegan
-    //         medium:   "#027373", // Teal medium, segar & profesional
-    //         light:    "#38A3A5", // Teal terang untuk hover
-    //         lighter:  "#A9D6D6", // Teal pastel lembut
-    //         lightest: "#F2EFE7", // Sangat terang, hampir putih
-    //     },
 
-    //     primary:   "#027373",   // Teal medium
-    //     secondary: "#014F56",   // Teal tua elegan
-    // },
+        // },
+            colors: {
+                azwara: {
+                    darkest:  "#210405", // Maroon super gelap mendekati hitam (sangat cocok untuk sidebar/header)
+                    darker:   "#3D0B0D", // Maroon tua/gelap (background sekunder / kartu)
+                    medium:   "#5C1317", // Maroon medium (Warna UI Utama / Elemen Dominan)
+                    light:    "#E2A51E", // Emas/Gold Terang (Warna aksen / tombol utama / hover)
+                    lighter:  "#F5C842", // Kuning/Gold cerah (Border / teks penegas / highlight)
+                    lightest: "#FFFFFF", // Putih Bersih untuk teks utama di atas background gelap (TETAP)
+                },
 
-    // backgroundImage: {
-    //     "brand-gradient":
-    //         `linear-gradient(135deg, #012A36 0%, #014F56 80%, #027373 100%)`,
-    // },
-
-
-
+                // Mapping ulang alias untuk mempermudah penggunaan
+                primary:   "#5C1317",   // Maroon medium sebagai identitas utama
+                secondary: "#E2A51E",   // Emas/Gold sebagai aksen/aksentuasi (menggantikan peran navy tua)
+                accent:    "#F5C842",   // Kuning emas terang
+            },
+            backgroundImage: {
+                // Gradient mewah khas poster (dari maroon super gelap ke maroon medium)
+                "brand-gradient":
+                    "linear-gradient(135deg, #210405 0%, #3D0B0D 60%, #5C1317 100%)",
+            },
         },
-    },
 
     plugins: [
         require("@tailwindcss/forms"),
     ],
-};
+}};

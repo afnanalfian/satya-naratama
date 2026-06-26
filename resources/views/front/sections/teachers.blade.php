@@ -40,7 +40,7 @@
                                         {{ $teacher->user->name }}
                                     </h3>
                                     <p class="text-primary text-sm font-medium">
-                                        Tentor Azwara Learning
+                                        Tentor Satya Naratama
                                     </p>
                                 </div>
                             </div>

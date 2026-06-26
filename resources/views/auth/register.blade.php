@@ -1,6 +1,6 @@
 @extends('layouts.guest')
 
-@section('title', 'Register – Azwara Learning')
+@section('title', 'Register – Satya Naratama')
 @section('content')
 
 <div class="w-full py-12 sm:py-20 px-4 flex items-center justify-center">

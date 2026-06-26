@@ -1,6 +1,6 @@
 @extends('layouts.app')
 
-@section('title', $course->name.' | Course Azwara Learning')
+@section('title', $course->name.' | Course Satya Naratama')
 @section('description', Str::limit($course->description, 155))
 @section('content')
 <div class="space-y-8 max-w-6xl mx-auto">
