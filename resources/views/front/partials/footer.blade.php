@@ -16,12 +16,12 @@
                     </div>
                     <div>
                         <h2 class="text-2xl font-bold">Satya Naratama</h2>
-                        <p class="text-azwara-lighter text-sm">Bimbel Online Terpercaya</p>
+                        <p class="text-azwara-lighter text-sm">Bimbel Kedinasan TNI POLRI Terpercaya</p>
                     </div>
                 </div>
 
                 <p class="text-azwara-lighter max-w-lg leading-relaxed">
-                    Platform bimbel online dengan materi terstruktur, tentor berpengalaman,
+                    Platform bimbel Kedinasan TNI POLRI dengan materi terstruktur, tentor berpengalaman,
                     serta tryout dan pembahasan yang membantu siswa mencapai target belajar
                     dengan lebih efektif.
                 </p>
@@ -192,8 +192,8 @@
                         <div>
                             <p class="font-medium">Email</p>
                             <p class="text-azwara-lighter text-sm mt-1">
-                                azwaralearning@gmail.com
-                                {{-- support@azwaralearning.com --}}
+                                satyanaratama@gmail.com
+                                {{-- support@satyanaratama.com --}}
                             </p>
                         </div>
                     </li>
