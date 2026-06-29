@@ -60,7 +60,7 @@
 
             <div class="flex flex-wrap gap-3 sm:gap-4 pt-2">
                 <a
-                    href="{{ route('register') }}"
+                    href="{{ route('daftar.form') }}"
                     class="inline-flex items-center justify-center
                            px-5 sm:px-6 py-2.5 sm:py-3 rounded-xl
                            bg-primary text-white font-semibold
