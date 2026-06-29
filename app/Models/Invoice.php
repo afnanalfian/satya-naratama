@@ -32,7 +32,7 @@ class Invoice extends Model
 
     public function registration(): BelongsTo
     {
-        return $this->belongsTo(StudentRegistration::class);
+        return $this->belongsTo(StudentRegistration::class, 'registration_id');
     }
 
     public function verifiedBy(): BelongsTo

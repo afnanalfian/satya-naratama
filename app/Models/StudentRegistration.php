@@ -83,7 +83,7 @@ class StudentRegistration extends Model
 
     public function invoice(): HasOne
     {
-        return $this->hasOne(Invoice::class);
+        return $this->hasOne(Invoice::class, 'registration_id');
     }
 
     // Scopes
