@@ -57,7 +57,7 @@ class LandingService
             ])
             ->whereRelation('user', 'is_active', true)
             ->latest()
-            ->limit(6)
+            // ->limit(6)
             ->get();
 
         /* ======================
