@@ -57,7 +57,7 @@ class LandingService
             ])
             ->whereRelation('user', 'is_active', true)
             ->latest()
-            ->orderBy('id', 'asc')
+            ->orderBy('id', 'desc')
             // ->limit(6)
             ->get();
 
