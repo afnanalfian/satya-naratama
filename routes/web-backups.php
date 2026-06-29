@@ -1,5 +1,4 @@
 <?php
-// routes/web.php
 
 use Illuminate\Support\Facades\Route;
 use App\Models\User;
@@ -60,13 +59,6 @@ use App\Http\Controllers\Marketing\{
     PromoBannerController
 };
 
-// ============================================
-// TAMBAHAN: CONTROLLER PENDAFTARAN
-// ============================================
-use App\Http\Controllers\Auth\DaftarController;
-use App\Http\Controllers\Auth\CheckStatusController;
-use App\Http\Controllers\Admin\RegistrationManagementController;
-
 /*
 |--------------------------------------------------------------------------
 | PUBLIC ROUTES
@@ -94,34 +86,6 @@ Route::get('/sitemap.xml', function () {
 
     return response($sitemap->render(), 200, ['Content-Type' => 'application/xml']);
 });
-
-// ============================================
-// TAMBAHAN: ROUTES PENDAFTARAN (PUBLIC)
-// ============================================
-Route::prefix('daftar')->name('daftar.')->group(function () {
-    // Form pendaftaran
-    Route::get('/', [DaftarController::class, 'showForm'])->name('form');
-    Route::post('/', [DaftarController::class, 'store'])->name('store');
-    
-    // Get kelurahan by kecamatan (AJAX)
-    Route::get('/kelurahan', [DaftarController::class, 'getKelurahan'])->name('kelurahan');
-    
-    // Pembayaran
-    Route::get('/payment/{registrationId}', [DaftarController::class, 'showPayment'])->name('payment');
-    Route::post('/payment/{registrationId}', [DaftarController::class, 'uploadPayment'])->name('payment.upload');
-    Route::get('/payment/{registrationId}/bayar-nanti', [DaftarController::class, 'bayarNanti'])->name('payment.nanti');
-    
-    // Success page (menunggu verifikasi)
-    Route::get('/success/{registrationId}', [DaftarController::class, 'showSuccess'])->name('success');
-    
-    // Cek status pendaftaran
-    Route::get('/status', [CheckStatusController::class, 'index'])->name('status.form');
-    Route::post('/status', [CheckStatusController::class, 'check'])->name('status.check');
-    
-    // Redirect ke payment dari status
-    Route::get('/status/payment/{registrationId}', [CheckStatusController::class, 'goToPayment'])->name('status.payment');
-});
-
 /*
 |--------------------------------------------------------------------------
 | AUTH DAN API ROUTES
@@ -156,7 +120,6 @@ Route::middleware(['auth', 'verified'])->group(function () {
             ->orderBy('id')
             ->get();
     })->name('get.regencies');
-    
     /*
     |--------------------------------------------------------------------------
     | DASHBOARD ROUTES
@@ -605,42 +568,8 @@ Route::middleware(['auth', 'verified'])->group(function () {
         Route::resource('promo-banners', PromoBannerController::class);
         Route::put('/promo-banners/{promoBanner}/toggle-status', [PromoBannerController::class, 'toggleStatus'])->name('promo-banners.toggle-status');
     });
-
-    // ============================================
-    // TAMBAHAN: ROUTES ADMIN MANAJEMEN PENDAFTARAN
-    // ============================================
-    Route::prefix('admin')->name('admin.')->middleware(['role:admin'])->group(function () {
-        // Manajemen Pendaftaran
-        Route::prefix('registrations')->name('registrations.')->group(function () {
-            // List pendaftaran
-            Route::get('/', [RegistrationManagementController::class, 'index'])->name('index');
-            
-            // Detail pendaftaran
-            Route::get('/{id}', [RegistrationManagementController::class, 'show'])->name('show');
-            
-            // Verifikasi (terima)
-            Route::get('/{id}/verify', [RegistrationManagementController::class, 'verifyForm'])->name('verify.form');
-            Route::post('/{id}/verify', [RegistrationManagementController::class, 'verify'])->name('verify');
-            
-            // Penolakan
-            Route::get('/{id}/reject', [RegistrationManagementController::class, 'rejectForm'])->name('reject.form');
-            Route::post('/{id}/reject', [RegistrationManagementController::class, 'reject'])->name('reject');
-            
-            // Download bukti pembayaran
-            Route::get('/{id}/download-proof', [RegistrationManagementController::class, 'downloadProof'])->name('download-proof');
-            
-            // Export data
-            Route::get('/export', [RegistrationManagementController::class, 'export'])->name('export');
-            
-            // Hapus pendaftaran
-            Route::delete('/{id}', [RegistrationManagementController::class, 'destroy'])->name('destroy');
-        });
-    });
 });
 
-// ============================================
-// TAMBAHAN: ROUTES TEST NOTIF (DI LUAR AUTH)
-// ============================================
 Route::get('/test-notif-admin', function () {
 
     $admin = User::role('admin')->first();

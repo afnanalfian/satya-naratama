@@ -86,12 +86,12 @@
                 Login
             </a>
 
-            <a href="{{ route('register') }}"
+            <a href="{{ route('daftar.form')}}"
             class="text-sm font-medium rounded-xl transition
-                    {{ request()->routeIs('register')
+                    {{ request()->routeIs('daftar.form')
                         ? 'px-4 py-2 bg-primary text-white font-semibold shadow hover:shadow-lg hover:scale-105'
                         : 'text-gray-700 dark:text-gray-300 hover:text-primary' }}">
-                Register
+                Daftar Bimbel
             </a>
             </div>
         </div>

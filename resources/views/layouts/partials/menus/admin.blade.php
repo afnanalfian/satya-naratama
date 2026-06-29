@@ -96,7 +96,7 @@
     </svg>
     Course
 </a>
-{{-- ================= SCHEDULE ================= --}}
+{{-- ================= TRYOUTS ========== --}}
 <a href="{{ route('tryouts.index') }}"
    class="menu-item {{ request()->routeIs('tryouts.*') ? 'active' : '' }}">
     <svg class="menu-icon" xmlns="http://www.w3.org/2000/svg" fill="none"
@@ -224,6 +224,16 @@
               d="M20 9V5a2 2 0 00-2-2H6a2 2 0 00-2 2v4m16 0H4m16 0v10a2 2 0 01-2 2H6a2 2 0 01-2-2V9"/>
     </svg>
     Bank Soal
+</a>
+{{-- ================= MANAJEMEN PENDAFTARAN ========== --}}
+<a href="{{ route('admin.registrations.index') }}"
+   class="menu-item {{ request()->routeIs('admin.registrations.*') ? 'active' : '' }}">
+    <svg class="menu-icon" xmlns="http://www.w3.org/2000/svg" fill="none"
+            viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5">
+        <path stroke-linecap="round" stroke-linejoin="round"
+                d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4"/>
+    </svg>
+    Pendaftaran
 </a>
 {{-- ================= PROMO BANNER ================= --}}
 <a href="{{ route('promo-banners.index') }}"
