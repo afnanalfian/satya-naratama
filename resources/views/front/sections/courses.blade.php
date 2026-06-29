@@ -145,7 +145,7 @@
                         </li>
                         <li class="flex items-start gap-2.5">
                             <span class="w-1.5 h-1.5 rounded-full bg-azwara-medium mt-1.5 flex-shrink-0"></span>
-                            <span>Dievaluasi langsung oleh alumni IPDN dan taruna AKPOL</span>
+                            <span>Dievaluasi langsung oleh alumni IPDN dan alumni AKPOL</span>
                         </li>
                         <li class="flex items-start gap-2.5">
                             <span class="w-1.5 h-1.5 rounded-full bg-azwara-medium mt-1.5 flex-shrink-0"></span>
