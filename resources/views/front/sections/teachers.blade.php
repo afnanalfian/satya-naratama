@@ -1,106 +1,221 @@
-{{-- resources/views/front/sections/teachers.blade.php --}}
-<section id="teachers" class="scroll-mt-20 py-16 lg:py-24 bg-white">
+<section id="teachers" class="scroll-mt-20 py-16 lg:py-20 bg-white overflow-hidden">
     <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
 
         {{-- Section Header --}}
-        <div class="text-center mb-14">
-            <div class="inline-flex items-center gap-2 px-3.5 py-1.5 bg-azwara-medium/10 rounded-full mb-5 border border-azwara-medium/20">
-                <span class="w-1.5 h-1.5 bg-azwara-medium rounded-full"></span>
-                <span class="text-[11px] font-bold text-azwara-medium uppercase tracking-[0.18em]">Tim Pengajar</span>
+        <div class="flex flex-col sm:flex-row sm:items-end sm:justify-between gap-4 mb-10">
+            <div>
+                <p class="text-xs font-semibold tracking-widest text-primary uppercase mb-2">Belajar dari yang Terbaik</p>
+                <h2 class="text-3xl md:text-4xl font-bold text-azwara-darkest leading-tight">
+                    Tim <span class="text-primary">Tentor</span> Profesional
+                </h2>
             </div>
-            <h2 class="text-3xl md:text-4xl font-bold text-azwara-darkest mb-4 tracking-tight">
-                Tentor <span class="text-azwara-medium">Profesional</span>
-            </h2>
-            <p class="text-base lg:text-lg text-secondary/80 max-w-xl mx-auto leading-relaxed">
-                Belajar langsung dari tentor berpengalaman yang membimbing kamu mencapai hasil belajar terbaik.
-            </p>
+            @if($teachers->count() > 0)
+            {{-- Carousel Nav Arrows --}}
+            <div class="flex items-center gap-3 flex-shrink-0" id="teacher-nav">
+                <button
+                    id="teacher-prev"
+                    aria-label="Sebelumnya"
+                    class="group h-10 w-10 rounded-full border-2 border-azwara-lighter flex items-center justify-center text-azwara-medium hover:bg-primary hover:border-primary hover:text-white transition-all duration-200 disabled:opacity-30 disabled:cursor-not-allowed"
+                >
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2.5">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M15 19l-7-7 7-7"/>
+                    </svg>
+                </button>
+                <button
+                    id="teacher-next"
+                    aria-label="Berikutnya"
+                    class="group h-10 w-10 rounded-full border-2 border-azwara-lighter flex items-center justify-center text-azwara-medium hover:bg-primary hover:border-primary hover:text-white transition-all duration-200 disabled:opacity-30 disabled:cursor-not-allowed"
+                >
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2.5">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M9 5l7 7-7 7"/>
+                    </svg>
+                </button>
+            </div>
+            @endif
         </div>
 
         @if($teachers->count() > 0)
-            {{-- Teachers Grid --}}
-            <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 lg:gap-8">
-                @foreach($teachers as $teacher)
-                    <div class="teacher-card group relative rounded-2xl overflow-hidden border border-azwara-lighter/70 bg-azwara-lightest shadow-sm hover:shadow-xl hover:shadow-azwara-darkest/10 transition-shadow duration-500">
 
-                        {{-- Foto --}}
-                        <div class="relative aspect-[4/5] overflow-hidden bg-azwara-darker">
-                            @if($teacher->user->avatar)
-                                <img
-                                    src="{{ Storage::url($teacher->user->avatar) }}"
-                                    alt="{{ $teacher->user->name }}"
-                                    class="absolute inset-0 w-full h-full object-cover transition-transform duration-700 ease-out group-hover:scale-105"
-                                >
-                            @else
-                                <div class="absolute inset-0 w-full h-full bg-gradient-to-br from-azwara-medium to-azwara-darkest flex items-center justify-center">
-                                    <span class="text-6xl font-bold text-white/90">
-                                        {{ substr($teacher->user->name, 0, 1) }}
-                                    </span>
-                                </div>
-                            @endif
+            {{-- Carousel Track Wrapper --}}
+            <div class="relative">
+                {{-- Fade edges --}}
+                <div class="pointer-events-none absolute left-0 top-0 bottom-0 w-6 bg-gradient-to-r from-white to-transparent z-10"></div>
+                <div class="pointer-events-none absolute right-0 top-0 bottom-0 w-6 bg-gradient-to-l from-white to-transparent z-10"></div>
 
-                            {{-- gradient dasar selalu ada supaya nama terbaca --}}
-                            <div class="absolute inset-0 bg-gradient-to-t from-azwara-darkest/90 via-azwara-darkest/10 to-transparent"></div>
+                <div
+                    id="teacher-carousel"
+                    class="flex gap-5 overflow-x-auto scroll-smooth snap-x snap-mandatory pb-4 cursor-grab active:cursor-grabbing select-none"
+                    style="scrollbar-width: none; -ms-overflow-style: none;"
+                >
+                    @foreach($teachers as $teacher)
+                        <div class="snap-start flex-shrink-0 w-72 sm:w-80">
+                            {{-- Card --}}
+                            <div class="group relative bg-white rounded-2xl border border-azwara-lighter shadow-sm hover:shadow-lg hover:-translate-y-1 transition-all duration-300 overflow-hidden h-full flex flex-col">
 
-                            {{-- Nama — selalu terlihat --}}
-                            <div class="absolute inset-x-0 bottom-0 p-5 transition-transform duration-500 ease-out group-hover:-translate-y-1">
-                                <h3 class="text-lg font-bold text-white leading-tight">
-                                    {{ $teacher->user->name }}
-                                </h3>
-                                <p class="text-azwara-lighter text-xs font-medium mt-0.5 flex items-center gap-1.5">
-                                    Tentor Satya Naratama
-                                    <svg class="w-3.5 h-3.5 transition-transform duration-500 group-hover:rotate-90" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path>
-                                    </svg>
-                                </p>
-                            </div>
+                                {{-- Top accent bar --}}
+                                <div class="h-1 w-full bg-gradient-to-r from-azwara-medium to-azwara-light"></div>
 
-                            {{-- Panel bio — reveal dari bawah saat hover / tap --}}
-                            <div
-                                tabindex="0"
-                                class="absolute inset-0 bg-azwara-darkest/95 backdrop-blur-sm px-5 py-6 flex flex-col justify-center opacity-0 translate-y-3 pointer-events-none transition-all duration-500 ease-out group-hover:opacity-100 group-hover:translate-y-0 group-hover:pointer-events-auto group-focus-within:opacity-100 group-focus-within:translate-y-0 group-focus-within:pointer-events-auto"
-                            >
-                                <p class="text-xs font-bold text-azwara-light uppercase tracking-widest mb-2">
-                                    {{ $teacher->user->name }}
-                                </p>
-                                <p class="text-white/90 text-sm leading-relaxed whitespace-pre-line max-h-full overflow-y-auto pr-1">
+                                <div class="p-6 flex flex-col flex-1">
+                                    {{-- Avatar --}}
+                                    <div class="flex justify-center mb-5">
+                                        <div class="relative">
+                                            <div class="h-24 w-24 rounded-full overflow-hidden ring-4 ring-azwara-lighter group-hover:ring-primary/30 transition-all duration-300 shadow-md">
+                                                @if($teacher->user->avatar)
+                                                    <img
+                                                        src="{{ Storage::url($teacher->user->avatar) }}"
+                                                        alt="{{ $teacher->user->name }}"
+                                                        class="h-full w-full object-cover"
+                                                        draggable="false"
+                                                    >
+                                                @else
+                                                    <div class="h-full w-full bg-gradient-to-br from-azwara-medium to-azwara-darker flex items-center justify-center">
+                                                        <span class="text-2xl font-bold text-white">
+                                                            {{ strtoupper(substr($teacher->user->name, 0, 1)) }}
+                                                        </span>
+                                                    </div>
+                                                @endif
+                                            </div>
+                                            {{-- Active dot --}}
+                                            <span class="absolute bottom-1 right-1 h-3.5 w-3.5 rounded-full bg-emerald-400 border-2 border-white shadow-sm"></span>
+                                        </div>
+                                    </div>
+
+                                    {{-- Name --}}
+                                    <h3 class="text-center text-lg font-bold text-azwara-darkest leading-snug mb-1">
+                                        {{ $teacher->user->name }}
+                                    </h3>
+                                    <p class="text-center text-xs font-semibold tracking-wide text-primary uppercase mb-4">
+                                        Tentor Profesional
+                                    </p>
+
+                                    {{-- Divider --}}
+                                    <div class="w-10 h-px bg-azwara-lighter mx-auto mb-4"></div>
+
+                                    {{-- Bio --}}
                                     @if($teacher->bio)
-                                        {{ $teacher->bio }}
+                                        <p class="text-secondary text-sm leading-relaxed text-center flex-1 whitespace-pre-line">
+                                            {{ $teacher->bio }}
+                                        </p>
                                     @else
-                                        Tentor berpengalaman dengan metode pengajaran yang mudah dipahami dan fokus pada pemahaman konsep dasar.
+                                        <p class="text-secondary text-sm leading-relaxed text-center flex-1">
+                                            Tentor berpengalaman dengan metode pengajaran yang mudah dipahami dan fokus pada pemahaman konsep dasar.
+                                        </p>
                                     @endif
-                                </p>
+                                </div>
                             </div>
                         </div>
-
-                        {{-- Hint tap untuk mobile --}}
-                        <button
-                            type="button"
-                            aria-label="Lihat profil {{ $teacher->user->name }}"
-                            class="sm:hidden absolute top-3 right-3 h-8 w-8 rounded-full bg-white/90 flex items-center justify-center shadow-md"
-                            onclick="this.closest('.group').classList.toggle('is-open'); this.closest('.group').querySelector('[tabindex]').classList.toggle('opacity-100'); this.closest('.group').querySelector('[tabindex]').classList.toggle('translate-y-0'); this.closest('.group').querySelector('[tabindex]').classList.toggle('pointer-events-auto');"
-                        >
-                            <svg class="w-4 h-4 text-azwara-medium" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
-                            </svg>
-                        </button>
-                    </div>
-                @endforeach
+                    @endforeach
+                </div>
             </div>
+
+            {{-- Dot Indicators --}}
+            <div id="teacher-dots" class="flex justify-center gap-2 mt-6">
+                {{-- Dots injected by JS --}}
+            </div>
+
         @else
             {{-- Empty State --}}
-            <div class="text-center py-12">
-                <div class="inline-flex items-center justify-center h-20 w-20 rounded-full bg-azwara-lighter text-azwara-medium mb-6">
-                    <svg class="w-10 h-10" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197m13.5 0c-.66 0-1.293.092-1.892.262M10.5 21c.66 0 1.293-.092 1.892-.262M7 10.5h.01M21 10.5h.01"></path>
+            <div class="text-center py-16">
+                <div class="inline-flex items-center justify-center h-16 w-16 rounded-full bg-azwara-lightest text-primary mb-5">
+                    <svg class="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197"/>
                     </svg>
                 </div>
-                <h3 class="text-xl font-bold text-azwara-darkest mb-2">
-                    Tim Tentor Sedang Disiapkan
-                </h3>
-                <p class="text-secondary max-w-md mx-auto">
-                    Tim tentor profesional kami sedang mempersiapkan materi terbaik untuk kamu.
+                <h3 class="text-lg font-bold text-azwara-darkest mb-2">Tim Tentor Sedang Disiapkan</h3>
+                <p class="text-secondary text-sm max-w-sm mx-auto">
+                    Tim tentor profesional kami sedang mempersiapkan materi terbaik untuk Anda.
                 </p>
             </div>
         @endif
     </div>
 </section>
+
+<style>
+    #teacher-carousel::-webkit-scrollbar { display: none; }
+</style>
+
+<script>
+(function () {
+    const carousel  = document.getElementById('teacher-carousel');
+    if (!carousel) return;
+
+    const btnPrev   = document.getElementById('teacher-prev');
+    const btnNext   = document.getElementById('teacher-next');
+    const dotsWrap  = document.getElementById('teacher-dots');
+    const cards     = carousel.querySelectorAll(':scope > div');
+    const total     = cards.length;
+
+    if (total === 0) return;
+
+    // ── Dot creation ──────────────────────────────────────────────
+    const dots = [];
+    cards.forEach((_, i) => {
+        const d = document.createElement('button');
+        d.className = 'h-1.5 rounded-full bg-azwara-lighter transition-all duration-300';
+        d.style.width = '24px';
+        d.setAttribute('aria-label', `Tentor ${i + 1}`);
+        d.addEventListener('click', () => scrollToCard(i));
+        dotsWrap.appendChild(d);
+        dots.push(d);
+    });
+
+    function activeDot(idx) {
+        dots.forEach((d, i) => {
+            d.style.width        = i === idx ? '40px' : '24px';
+            d.style.background   = i === idx ? '#1E4E6D' : '#BFD3E0';
+        });
+    }
+
+    // ── Card width helper ──────────────────────────────────────────
+    function cardWidth() {
+        return cards[0].getBoundingClientRect().width + 20; // 20 = gap-5
+    }
+
+    function currentIndex() {
+        return Math.round(carousel.scrollLeft / cardWidth());
+    }
+
+    function scrollToCard(idx) {
+        carousel.scrollTo({ left: idx * cardWidth(), behavior: 'smooth' });
+    }
+
+    // ── Button nav ─────────────────────────────────────────────────
+    btnPrev.addEventListener('click', () => scrollToCard(Math.max(0, currentIndex() - 1)));
+    btnNext.addEventListener('click', () => scrollToCard(Math.min(total - 1, currentIndex() + 1)));
+
+    // ── Sync dots + button state on scroll ────────────────────────
+    function onScroll() {
+        const idx = currentIndex();
+        activeDot(idx);
+        if (btnPrev) btnPrev.disabled = idx === 0;
+        if (btnNext) btnNext.disabled = idx === total - 1;
+    }
+
+    carousel.addEventListener('scroll', onScroll, { passive: true });
+    onScroll(); // init
+
+    // ── Drag-to-scroll (mouse) ─────────────────────────────────────
+    let isDragging = false, startX, scrollStart;
+
+    carousel.addEventListener('mousedown', e => {
+        isDragging  = true;
+        startX      = e.pageX - carousel.offsetLeft;
+        scrollStart = carousel.scrollLeft;
+        carousel.classList.add('active:cursor-grabbing');
+    });
+
+    carousel.addEventListener('mousemove', e => {
+        if (!isDragging) return;
+        e.preventDefault();
+        const dx = e.pageX - carousel.offsetLeft - startX;
+        carousel.scrollLeft = scrollStart - dx;
+    });
+
+    ['mouseup', 'mouseleave'].forEach(ev => carousel.addEventListener(ev, () => {
+        if (!isDragging) return;
+        isDragging = false;
+        // Snap to nearest card after drag ends
+        scrollToCard(currentIndex());
+    }));
+})();
+</script>
