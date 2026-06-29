@@ -75,11 +75,11 @@
             Kehadiran
         </a>
 
-        <a href="{{ route('admin.user-entitlements.index') }}"
+        {{-- <a href="{{ route('admin.user-entitlements.index') }}"
            class="menu-subitem {{ request()->routeIs('admin.user-entitlements.*') ? 'active' : '' }}">
             <span class="w-1 h-1 rounded-full bg-current"></span>
             Entitlement
-        </a>
+        </a> --}}
     </div>
 </div>
 
@@ -97,7 +97,19 @@
     Course
 </a>
 {{-- ================= SCHEDULE ================= --}}
-<a href="{{ route('schedule.index') }}"
+<a href="{{ route('tryouts.index') }}"
+   class="menu-item {{ request()->routeIs('tryouts.*') ? 'active' : '' }}">
+    <svg class="menu-icon" xmlns="http://www.w3.org/2000/svg" fill="none"
+            viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5">
+        <path stroke-linecap="round" stroke-linejoin="round"
+                d="M9 12h6m-6 4h6m2 4H7a2 2 0 01-2-2V6
+                    a2 2 0 012-2h3.5a2 2 0 004 0H17
+                    a2 2 0 012 2v12a2 2 0 01-2 2z"/>
+    </svg>
+    Tryout
+</a>
+{{-- ================= SCHEDULE ================= --}}
+{{-- <a href="{{ route('schedule.index') }}"
    class="menu-item {{ request()->routeIs('schedule.*') ? 'active' : '' }}">
     <svg class="menu-icon" xmlns="http://www.w3.org/2000/svg" fill="none"
          viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5">
@@ -107,10 +119,10 @@
                  00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"/>
     </svg>
     Schedule
-</a>
+</a> --}}
 
 {{-- ================= PEMBELIAN (DROPDOWN) ================= --}}
-@php
+{{-- @php
     $purchaseActive = request()->routeIs(
         'orders.*',
         'products.*',
@@ -201,7 +213,7 @@
             Promo Banner
         </a>
     </div>
-</div>
+</div> --}}
 
 {{-- ================= BANK SOAL ================= --}}
 <a href="{{ route('bank.category.index') }}"
@@ -213,9 +225,19 @@
     </svg>
     Bank Soal
 </a>
+{{-- ================= PROMO BANNER ================= --}}
+<a href="{{ route('promo-banners.index') }}"
+   class="menu-item {{ request()->routeIs('promo-banners.*') ? 'active' : '' }}">
+    <svg class="menu-icon" xmlns="http://www.w3.org/2000/svg" fill="none"
+            viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5">
+        <path stroke-linecap="round" stroke-linejoin="round"
+                d="M3 3h2l.4 2M7 13h10l4-8H5.4M7 13l-1.6 8h13.2L17 13H7z"/>
+    </svg>
+    Promo Banner
+</a>
 
 {{-- ================= EXAMS ================= --}}
-@php
+{{-- @php
     $evaluasiActive = request()->routeIs(
         'tryouts.*',
         'quizzes.*',
@@ -268,19 +290,19 @@
             Daily Quiz
         </a>
     </div>
-</div>
+</div> --}}
 
 {{-- ================= SIMPLE GAMES MENU ================= --}}
-<div x-data="{ open: {{ request()->routeIs('game.*') ? 'true' : 'false' }} }" class="relative">
+{{-- <div x-data="{ open: {{ request()->routeIs('game.*') ? 'true' : 'false' }} }" class="relative">
 
     <button
         @click="open = !open"
         class="menu-item w-full flex justify-between items-center
                {{ request()->routeIs('game.*') ? 'active' : '' }}"
     >
-        <div class="flex items-center gap-2">
+        <div class="flex items-center gap-2"> --}}
             {{-- Game Console Icon --}}
-            <svg class="menu-icon" xmlns="http://www.w3.org/2000/svg" fill="none"
+            {{-- <svg class="menu-icon" xmlns="http://www.w3.org/2000/svg" fill="none"
                 viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5">
                 <path stroke-linecap="round" stroke-linejoin="round"
                     d="M6.75 12a.75.75 0 01.75-.75h1.5V9.75a.75.75 0 011.5 0v1.5h1.5a.75.75 0 010 1.5h-1.5v1.5a.75.75 0 01-1.5 0v-1.5H7.5a.75.75 0 01-.75-.75zm7.5 0a.75.75 0 01.75-.75h.008a.75.75 0 010 1.5h-.008a.75.75 0 01-.75-.75zm3 0a.75.75 0 01.75-.75h.008a.75.75 0 010 1.5h-.008a.75.75 0 01-.75-.75zM4.5 6.75h15a2.25 2.25 0 012.25 2.25v6a2.25 2.25 0 01-2.25 2.25h-15A2.25 2.25 0 012.25 15V9a2.25 2.25 0 012.25-2.25z" />
@@ -303,19 +325,19 @@
         class="ml-6 mt-2 space-y-1 border-l
                border-azwara-medium/30
                dark:border-azwara-light/20 pl-4"
-    >
+    > --}}
         {{-- Math Quiz Game --}}
-        <a href="{{ route('game.math') }}"
+        {{-- <a href="{{ route('game.math') }}"
            class="menu-subitem {{ request()->routeIs('game.math') ? 'active' : '' }}">
             <span class="w-1 h-1 rounded-full bg-current"></span>
             Math Quiz
-        </a>
+        </a> --}}
 
         {{-- Snake Game --}}
-        <a href="{{ route('game.snake') }}"
+        {{-- <a href="{{ route('game.snake') }}"
            class="menu-subitem {{ request()->routeIs('game.snake') ? 'active' : '' }}">
             <span class="w-1 h-1 rounded-full bg-current"></span>
             Snake Game
         </a>
     </div>
-</div>
+</div> --}}

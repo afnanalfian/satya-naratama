@@ -26,13 +26,15 @@ class ExamPolicy
             // ======================
             // QUIZ → akses global
             // ======================
-            'quiz' => $user->hasQuizAccess(),
+            'quiz' => true,
+            // 'quiz' => $user->hasQuizAccess(),
 
             // ======================
             // BLIND & POST TEST
             // ======================
             'blind_test',
-            'post_test' => $this->canAccessMeetingExam($user, $exam),
+            'post_test' => true,
+            // 'post_test' => $this->canAccessMeetingExam($user, $exam),
 
             default => false,
         };
