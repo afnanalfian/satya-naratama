@@ -58,10 +58,10 @@
                             Login
                         </a>
                         <a
-                            href="{{ route('register') }}"
+                            href="{{ route('daftar.form') }}""
                             class="px-5 py-2.5 rounded-lg bg-primary text-white font-medium hover:bg-azwara-darker transition duration-300 shadow-md hover:shadow-lg"
                         >
-                            Register
+                            Daftar
                         </a>
                     @endguest
                 </div>
