@@ -174,7 +174,7 @@
                     <div class="flex-1">
                         <div class="inline-flex items-center gap-2 px-3 py-1 bg-white/10 rounded-full mb-3 border border-white/15">
                             <span class="w-1.5 h-1.5 bg-emerald-400 rounded-full"></span>
-                            <span class="text-[11px] font-bold text-white/90 uppercase tracking-widest">Promo 10 Pendaftar Pertama</span>
+                            <span class="text-[11px] font-bold text-white/90 uppercase tracking-widest">Harga yang Pangkep-able</span>
                         </div>
                         <div class="flex items-baseline gap-3 flex-wrap">
                             <span class="text-3xl sm:text-4xl font-bold text-white">Rp 6.000.000</span>
