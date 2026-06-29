@@ -98,7 +98,7 @@
                     </div>
 
                     {{-- CTA Buttons --}}
-                    <div class="flex flex-col sm:flex-row gap-4">
+                    {{-- <div class="flex flex-col sm:flex-row gap-4">
                         <a
                             href="https://wa.me/6285141339645?text=Halo%20saya%20tertarik%20dengan%20kelas%20atau%20tryout%20di%20Azwara%20Learning"
                             target="_blank"
@@ -111,7 +111,7 @@
                             <svg class="w-5 h-5 transform group-hover:translate-x-1 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14 5l7 7m0 0l-7 7m7-7H3"></path>
                             </svg>
-                        </a>
+                        </a> --}}
 
                         {{-- <a
                             href="#courses"
@@ -122,7 +122,7 @@
                             </svg>
                             <span class="text-lg">Lihat Kelas Kami</span>
                         </a> --}}
-                    </div>
+                    {{-- </div> --}}
 
                     {{-- Additional Info
                     <div class="mt-12 pt-8 border-t border-azwara-lighter">

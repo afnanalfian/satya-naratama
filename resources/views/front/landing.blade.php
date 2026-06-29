@@ -15,9 +15,9 @@
         @include('front.sections.photo')
     </section>
     
-    {{-- <section id="courses">
+    <section id="courses">
         @include('front.sections.courses')
-    </section> --}}
+    </section>
 
     <section id="teachers">
         @include('front.sections.teachers')

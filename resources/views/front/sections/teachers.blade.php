@@ -82,7 +82,7 @@
             </div>
 
             {{-- CTA Section --}}
-            <div class="mt-16 text-center">
+            {{-- <div class="mt-16 text-center">
                 <div class="inline-flex flex-col sm:flex-row items-center gap-4 bg-gradient-to-r from-primary/5 to-azwara-lighter/30 rounded-xl p-8">
                     <div class="text-left">
                         <h3 class="text-xl font-bold text-azwara-darkest mb-2">
@@ -101,7 +101,7 @@
                         </a>
                     </div>
                 </div>
-            </div>
+            </div> --}}
         @else
             {{-- Empty State --}}
             <div class="text-center py-12">

@@ -35,27 +35,6 @@ export default {
         },
 
         },
-        //     colors: {
-        //         azwara: {
-        //             darkest:  "#210405", // Maroon super gelap mendekati hitam (sangat cocok untuk sidebar/header)
-        //             darker:   "#3D0B0D", // Maroon tua/gelap (background sekunder / kartu)
-        //             medium:   "#5C1317", // Maroon medium (Warna UI Utama / Elemen Dominan)
-        //             light:    "#E2A51E", // Emas/Gold Terang (Warna aksen / tombol utama / hover)
-        //             lighter:  "#F5C842", // Kuning/Gold cerah (Border / teks penegas / highlight)
-        //             lightest: "#FFFFFF", // Putih Bersih untuk teks utama di atas background gelap (TETAP)
-        //         },
-
-        //         // Mapping ulang alias untuk mempermudah penggunaan
-        //         primary:   "#5C1317",   // Maroon medium sebagai identitas utama
-        //         secondary: "#E2A51E",   // Emas/Gold sebagai aksen/aksentuasi (menggantikan peran navy tua)
-        //         accent:    "#F5C842",   // Kuning emas terang
-        //     },
-        //     backgroundImage: {
-        //         // Gradient mewah khas poster (dari maroon super gelap ke maroon medium)
-        //         "brand-gradient":
-        //             "linear-gradient(135deg, #210405 0%, #3D0B0D 60%, #5C1317 100%)",
-        //     },
-        // },
 
     plugins: [
         require("@tailwindcss/forms"),
