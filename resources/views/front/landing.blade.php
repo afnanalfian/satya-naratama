@@ -1,6 +1,6 @@
 @extends('front.layouts.app')
 @section('title', 'Satya Naratama')
-@section('description', 'Tryout SKD CPNS Kedinasan gratis dan premium dengan pembahasan lengkap.')
+@section('description', 'Bimbingan Belajar Persiapan Kedinasan TNI POLR lengkap paket latihan jasmani dan kelas belajar - Kabupaten Pangkajene dan Kepulauan.')
 @section('content')
 
     <section id="home">
