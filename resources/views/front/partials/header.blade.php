@@ -113,7 +113,7 @@
                         Login
                     </a>
                     <a
-                        href="{{ route('register') }}"
+                        href="{{ route('daftar.form') }}"
                         class="block text-center py-3 px-4 rounded-lg bg-primary text-white font-medium hover:bg-azwara-darker transition duration-300"
                     >
                         Register

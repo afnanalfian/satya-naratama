@@ -95,7 +95,7 @@
         {{-- Footer --}}
         <p class="text-sm text-center mt-6 text-gray-600 dark:text-gray-400">
             Belum punya akun?
-            <a href="{{ route('register') }}"
+            <a href="{{ route('daftar.form') }}"
                class="text-primary font-semibold hover:underline">
                 Daftar sekarang
             </a>
