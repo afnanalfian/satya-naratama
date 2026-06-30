@@ -1,6 +1,6 @@
 @extends('front.layouts.app')
 @section('title', 'Satya Naratama')
-@section('description', 'Bimbingan Belajar Persiapan Kedinasan TNI POLR lengkap paket latihan jasmani dan kelas belajar - Kabupaten Pangkajene dan Kepulauan.')
+@section('description', 'Bimbingan Belajar Persiapan Kedinasan TNI POLRI lengkap paket latihan jasmani dan kelas belajar - Kabupaten Pangkajene dan Kepulauan.')
 @section('content')
 
     <section id="home">
