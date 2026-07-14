@@ -307,10 +307,20 @@ $testTypeLabels = [
                         'accuracy' => 0,
                         'correct' => 0,
                         'answered' => 0,
+                        'total_participants' => $totalParticipants,
+                        'is_tkp' => ($examQuestion->question?->test_type === 'tkp'),
                     ];
-                    $accuracyColor = $stat['accuracy'] >= 70 ? 'text-green-600 dark:text-green-400' :
-                                   ($stat['accuracy'] >= 40 ? 'text-yellow-600 dark:text-yellow-400' :
-                                   'text-red-600 dark:text-red-400');
+                    
+                    // Untuk TKP, akurasi dihitung dari bobot maksimum
+                    if ($stat['is_tkp']) {
+                        $accuracyColor = $stat['accuracy'] >= 70 ? 'text-green-600 dark:text-green-400' :
+                                       ($stat['accuracy'] >= 40 ? 'text-yellow-600 dark:text-yellow-400' :
+                                       'text-red-600 dark:text-red-400');
+                    } else {
+                        $accuracyColor = $stat['accuracy'] >= 70 ? 'text-green-600 dark:text-green-400' :
+                                       ($stat['accuracy'] >= 40 ? 'text-yellow-600 dark:text-yellow-400' :
+                                       'text-red-600 dark:text-red-400');
+                    }
                 @endphp
 
                 <div class="rounded-xl border border-azwara-lighter dark:border-azwara-darker
@@ -327,6 +337,13 @@ $testTypeLabels = [
                                             dark:bg-azwara-medium dark:text-white">
                                     {{ $testTypeLabels[$examQuestion->question->test_type] ?? '-' }}
                                 </span>
+
+                                @if($stat['is_tkp'])
+                                    <span class="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium
+                                                bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-400">
+                                        TKP (Bobot)
+                                    </span>
+                                @endif
                             </div>
 
                             <div class="flex flex-wrap items-center gap-4">
@@ -338,6 +355,14 @@ $testTypeLabels = [
                                     <span class="text-sm font-bold {{ $accuracyColor }}">
                                         {{ $stat['accuracy'] }}%
                                     </span>
+                                    <div class="w-24 h-1.5 rounded-full bg-gray-200 dark:bg-gray-700 overflow-hidden">
+                                        <div class="h-full rounded-full 
+                                            @if($stat['accuracy'] >= 70) bg-green-500
+                                            @elseif($stat['accuracy'] >= 40) bg-yellow-500
+                                            @else bg-red-500 @endif" 
+                                            style="width: {{ $stat['accuracy'] }}%">
+                                        </div>
+                                    </div>
                                 </div>
                                 <div class="flex items-center gap-2">
                                     <svg class="w-4 h-4 text-gray-500 dark:text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -347,7 +372,17 @@ $testTypeLabels = [
                                     <span class="text-sm font-semibold text-gray-900 dark:text-white">
                                         {{ $stat['correct'] }} / {{ $stat['answered'] }}
                                     </span>
+                                    @if($stat['is_tkp'])
+                                        <span class="text-xs text-gray-400 dark:text-gray-500">
+                                            (dari {{ $stat['total_participants'] }} peserta)
+                                        </span>
+                                    @endif
                                 </div>
+                                @if($stat['is_tkp'])
+                                    <span class="text-xs text-gray-400 dark:text-gray-500 italic">
+                                        💡 Bobot maksimum dianggap benar
+                                    </span>
+                                @endif
                             </div>
                         </div>
 

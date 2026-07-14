@@ -39,7 +39,7 @@ class ExamResultController extends Controller
         $totalQuestions = $exam->questions()->count();
         $rankingQuery = ExamAttempt::with([
                 'user',
-                'answers.question.options', // untuk hitung subscore SKD
+                'answers.question.options',
             ])
             ->where('exam_id', $exam->id)
             ->where('is_submitted', true);
@@ -121,19 +121,23 @@ class ExamResultController extends Controller
         });
 
         // ======================================================
-        // SOAL + AKURASI
+        // SOAL + AKURASI - DIPERBAIKI UNTUK TKP
         // ======================================================
-        $questions = ExamQuestion::with('question')
+        $questions = ExamQuestion::with([
+                'question',
+                'question.options'
+            ])
             ->where('exam_id', $exam->id)
-            ->orderBy('order')
             ->paginate($perPageQuestions);
 
         $questionStats = [];
 
         foreach ($questions as $examQuestion) {
-
             $qid = $examQuestion->question_id;
+            $question = $examQuestion->question;
+            $isTkp = ($question->test_type === 'tkp');
 
+            // Total yang menjawab (tidak kosong)
             $totalAnswered = DB::table('exam_answers')
                 ->join('exam_attempts', 'exam_answers.attempt_id', '=', 'exam_attempts.id')
                 ->where('exam_attempts.exam_id', $exam->id)
@@ -141,12 +145,47 @@ class ExamResultController extends Controller
                 ->whereNotNull('exam_answers.selected_options')
                 ->count();
 
-            $totalCorrect = DB::table('exam_answers')
-                ->join('exam_attempts', 'exam_answers.attempt_id', '=', 'exam_attempts.id')
-                ->where('exam_attempts.exam_id', $exam->id)
-                ->where('exam_answers.question_id', $qid)
-                ->where('exam_answers.is_correct', true)
-                ->count();
+            // ============================
+            // HITUNG TOTAL CORRECT
+            // ============================
+            $totalCorrect = 0;
+
+            if ($isTkp) {
+                // Untuk TKP: hitung berdasarkan bobot maksimum
+                $maxWeight = $question->options->max('weight') ?? 0;
+                
+                // Ambil semua jawaban untuk soal ini
+                $answers = DB::table('exam_answers')
+                    ->join('exam_attempts', 'exam_answers.attempt_id', '=', 'exam_attempts.id')
+                    ->where('exam_attempts.exam_id', $exam->id)
+                    ->where('exam_answers.question_id', $qid)
+                    ->whereNotNull('exam_answers.selected_options')
+                    ->select('exam_answers.selected_options')
+                    ->get();
+
+                foreach ($answers as $answer) {
+                    $selectedOptions = json_decode($answer->selected_options, true);
+                    $selectedIds = $selectedOptions['mcq_answers'] ?? [];
+                    
+                    // Hitung bobot yang dipilih
+                    $selectedWeight = $question->options
+                        ->whereIn('id', $selectedIds)
+                        ->sum('weight');
+                    
+                    // Benar jika bobot = maksimum
+                    if ($selectedWeight === $maxWeight && $maxWeight > 0) {
+                        $totalCorrect++;
+                    }
+                }
+            } else {
+                // Untuk non-TKP: gunakan is_correct
+                $totalCorrect = DB::table('exam_answers')
+                    ->join('exam_attempts', 'exam_answers.attempt_id', '=', 'exam_attempts.id')
+                    ->where('exam_attempts.exam_id', $exam->id)
+                    ->where('exam_answers.question_id', $qid)
+                    ->where('exam_answers.is_correct', true)
+                    ->count();
+            }
 
             $questionStats[$qid] = [
                 'answered' => $totalAnswered,
@@ -154,6 +193,8 @@ class ExamResultController extends Controller
                 'accuracy' => $totalAnswered > 0
                     ? round(($totalCorrect / $totalAnswered) * 100, 2)
                     : 0,
+                'total_participants' => $totalParticipants,
+                'is_tkp' => $isTkp,
             ];
         }
 
@@ -208,6 +249,9 @@ class ExamResultController extends Controller
     public function adminQuestionAnalysis(Exam $exam, ExamQuestion $examQuestion)
     {
         $question = $examQuestion->question->load('options');
+        
+        // Cek apakah soal TKP
+        $isTkp = ($question->test_type === 'tkp');
 
         // ============================
         // AMBIL SEMUA ATTEMPT + JAWABAN SOAL INI
@@ -237,6 +281,20 @@ class ExamResultController extends Controller
 
             if (!$answer || empty($answer->selected_options)) {
                 $summary['empty']++;
+            } elseif ($isTkp) {
+                // TKP: Cek bobot
+                $selectedWeight = $question->options
+                    ->whereIn('id', $answer->selected_ids ?? [])
+                    ->sum('weight');
+                $maxWeight = $question->options->max('weight');
+                
+                if ($selectedWeight === $maxWeight && $maxWeight > 0) {
+                    $summary['correct']++;
+                    $summary['answered']++;
+                } else {
+                    $summary['wrong']++;
+                    $summary['answered']++;
+                }
             } elseif ($answer->is_correct) {
                 $summary['correct']++;
                 $summary['answered']++;
@@ -286,16 +344,75 @@ class ExamResultController extends Controller
         }
 
         // ============================
-        // DATA ATTEMPT (UNTUK TABEL)
+        // DATA ATTEMPT (UNTUK TABEL) - TAMBAHKAN JAWABAN
         // ============================
-        $attemptRows = $attempts->map(function ($attempt) {
+        $attemptRows = $attempts->map(function ($attempt) use ($question, $isTkp) {
             $answer = $attempt->answers->first();
+            
+            // Ambil opsi yang dipilih
+            $selectedOptions = [];
+            $selectedLabels = [];
+            $selectedTexts = [];
+            $selectedWeight = 0;
+            $maxWeight = $question->options->max('weight') ?? 0;
+            
+            if ($answer && !empty($answer->selected_ids)) {
+                foreach ($question->options as $option) {
+                    if (in_array($option->id, $answer->selected_ids)) {
+                        $selectedOptions[] = $option;
+                        $selectedLabels[] = $option->label;
+                        $selectedTexts[] = $option->option_text;
+                        
+                        if ($isTkp) {
+                            $selectedWeight += $option->weight ?? 0;
+                        }
+                    }
+                }
+            }
+            
+            // Tentukan status
+            if (!$answer || empty($answer->selected_options)) {
+                $status = 'empty';
+                $statusLabel = 'Kosong';
+                $statusColor = 'bg-gray-100 dark:bg-gray-700 text-gray-600 dark:text-gray-400';
+                $statusIcon = '⬜';
+            } elseif ($isTkp) {
+                $isCorrect = ($selectedWeight === $maxWeight && $maxWeight > 0);
+                if ($isCorrect) {
+                    $status = 'correct';
+                    $statusLabel = 'Benar (Bobot ' . $selectedWeight . '/' . $maxWeight . ')';
+                    $statusColor = 'bg-green-100 dark:bg-green-900/30 text-green-700 dark:text-green-400';
+                    $statusIcon = '✅';
+                } else {
+                    $status = 'wrong';
+                    $statusLabel = 'Salah (Bobot ' . $selectedWeight . '/' . $maxWeight . ')';
+                    $statusColor = 'bg-red-100 dark:bg-red-900/30 text-red-700 dark:text-red-400';
+                    $statusIcon = '❌';
+                }
+            } elseif ($answer->is_correct) {
+                $status = 'correct';
+                $statusLabel = 'Benar';
+                $statusColor = 'bg-green-100 dark:bg-green-900/30 text-green-700 dark:text-green-400';
+                $statusIcon = '✅';
+            } else {
+                $status = 'wrong';
+                $statusLabel = 'Salah';
+                $statusColor = 'bg-red-100 dark:bg-red-900/30 text-red-700 dark:text-red-400';
+                $statusIcon = '❌';
+            }
 
             return [
-                'user'   => $attempt->user,
-                'status' => !$answer || empty($answer->selected_options)
-                    ? 'empty'
-                    : ($answer->is_correct ? 'correct' : 'wrong'),
+                'user' => $attempt->user,
+                'status' => $status,
+                'status_label' => $statusLabel,
+                'status_color' => $statusColor,
+                'status_icon' => $statusIcon,
+                'selected_options' => $selectedOptions,
+                'selected_labels' => $selectedLabels,
+                'selected_texts' => $selectedTexts,
+                'selected_weight' => $selectedWeight,
+                'max_weight' => $maxWeight,
+                'is_tkp' => $isTkp,
             ];
         });
 
@@ -306,7 +423,8 @@ class ExamResultController extends Controller
             'summary',
             'optionStats',
             'totalAnswered',
-            'attemptRows'
+            'attemptRows',
+            'isTkp'
         ));
     }
     /**

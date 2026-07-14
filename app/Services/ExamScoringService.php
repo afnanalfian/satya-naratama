@@ -344,4 +344,49 @@ class ExamScoringService
             ->whereIn('id', $answer->selected_ids ?? [])
             ->sum('weight');
     }
+    /**
+     * 🔥 TAMBAHKAN METHOD INI
+     * Get raw score breakdown for recalculation
+     */
+    public function getScoreBreakdown(ExamAttempt $attempt): array
+    {
+        $attempt->load([
+            'exam.questions.question.options',
+            'exam.questions.question.subItems.answers',
+            'answers'
+        ]);
+
+        $exam = $attempt->exam;
+        $breakdown = [
+            'correct' => 0,
+            'wrong' => 0,
+            'score' => 0,
+        ];
+
+        foreach ($exam->questions as $examQuestion) {
+            $question = $examQuestion->question;
+            $answer = $attempt->answers->firstWhere('question_id', $question->id);
+
+            if (!$answer || $answer->isEmpty) {
+                $breakdown['wrong']++;
+                continue;
+            }
+
+            $isCorrect = match ($question->type) {
+                'mcq', 'truefalse' => $this->checkMcqSingle($question, $answer),
+                'mcma' => $this->checkMcmaExact($question, $answer),
+                'compound' => $this->checkCompound($question, $answer),
+                'short_answer' => $this->checkShortAnswer($question, $answer),
+                default => false,
+            };
+
+            if ($isCorrect) {
+                $breakdown['correct']++;
+            } else {
+                $breakdown['wrong']++;
+            }
+        }
+
+        return $breakdown;
+    }
 }

@@ -413,7 +413,8 @@ Route::middleware(['auth', 'verified'])->group(function () {
                 ->name('exams.ranking.student');
         });
     });
-
+    Route::get('/exams/{exam}/time-sync', [ExamAttemptController::class, 'timeSync'])
+        ->name('exams.time.sync');
     /*
     |--------------------------------------------------------------------------
     | BANK SOAL (AJAX)

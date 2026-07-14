@@ -78,7 +78,7 @@ class QuestionController extends Controller
     public function update(Request $request, Question $question)
     {
         $this->validateRequest($request);
-        // validasi  test_type
+        // validasi test_type
         $this->validateTypeByTestType(
             $question->test_type,
             $request->type
@@ -93,7 +93,11 @@ class QuestionController extends Controller
             }
         }
 
-        DB::transaction(function () use ($request, $question) {
+        // Simpan data lama untuk deteksi perubahan
+        $oldOptions = $question->options()->get()->toArray();
+        $oldSubItems = $question->subItems()->with('answers')->get()->toArray();
+
+        DB::transaction(function () use ($request, $question, $oldOptions, $oldSubItems) {
 
             if ($request->hasFile('question_image')) {
                 if ($question->image) {
@@ -111,10 +115,80 @@ class QuestionController extends Controller
             ]);
 
             $this->updateQuestionOptions($question, $request);
+
+            // Reload question dengan relasi terbaru
+            $question->refresh();
+            $question->load(['options', 'subItems.answers']);
+
+            // Cek apakah ada perubahan kunci jawaban
+            $this->checkAndTriggerRecalculation($question, $oldOptions, $oldSubItems);
         });
 
-        toast('success', 'Soal diperbarui');
+        // Cek apakah soal sudah digunakan di exam
+        $usedInExams = $question->examQuestions()->count();
+
+        $message = 'Soal diperbarui';
+        if ($usedInExams > 0) {
+            $message .= ' - Nilai siswa akan dihitung ulang secara otomatis karena kunci jawaban berubah.';
+        }
+
+        toast('success', $message);
         return redirect()->route('bank.material.questions.index', $question->material);
+    }
+
+    /**
+     * Cek apakah ada perubahan kunci jawaban dan trigger event jika perlu
+     */
+    protected function checkAndTriggerRecalculation($question, $oldOptions, $oldSubItems)
+    {
+        $shouldRecalculate = false;
+
+        // Cek perubahan pada options (is_correct atau weight)
+        $currentOptions = $question->options()->get()->toArray();
+
+        foreach ($currentOptions as $index => $currentOption) {
+            $oldOption = $oldOptions[$index] ?? [];
+
+            $oldIsCorrect = $oldOption['is_correct'] ?? false;
+            $currentIsCorrect = $currentOption['is_correct'] ?? false;
+
+            $oldWeight = $oldOption['weight'] ?? 0;
+            $currentWeight = $currentOption['weight'] ?? 0;
+
+            if ($oldIsCorrect !== $currentIsCorrect || $oldWeight !== $currentWeight) {
+                $shouldRecalculate = true;
+                break;
+            }
+        }
+
+        // Cek perubahan pada subItems untuk compound
+        if ($question->isCompound()) {
+            $currentSubItems = $question->subItems()->with('answers')->get()->toArray();
+
+            foreach ($currentSubItems as $index => $currentSub) {
+                $oldSub = $oldSubItems[$index] ?? [];
+
+                // Cek perubahan boolean_answer untuk truefalse
+                if (isset($currentSub['answers'][0]['boolean_answer']) && isset($oldSub['answers'][0]['boolean_answer'])) {
+                    if ($currentSub['answers'][0]['boolean_answer'] !== $oldSub['answers'][0]['boolean_answer']) {
+                        $shouldRecalculate = true;
+                        break;
+                    }
+                }
+
+                // Cek perubahan answer_text untuk short_answer
+                if (isset($currentSub['answers'][0]['answer_text']) && isset($oldSub['answers'][0]['answer_text'])) {
+                    if ($currentSub['answers'][0]['answer_text'] !== $oldSub['answers'][0]['answer_text']) {
+                        $shouldRecalculate = true;
+                        break;
+                    }
+                }
+            }
+        }
+
+        if ($shouldRecalculate) {
+            event(new \App\Events\QuestionKeyChanged($question));
+        }
     }
 
     public function destroy(Question $question)

@@ -221,7 +221,32 @@
                             </td>
                         </tr>
 
-                        {{-- SCORE --}}
+                        {{-- KOSONG (TAMBAHAN) --}}
+                        <tr class="hover:bg-azwara-lightest/50 dark:hover:bg-azwara-medium/20">
+                            <td class="px-6 py-4">
+                                <div class="flex items-center gap-2">
+                                    <div class="w-2 h-2 rounded-full bg-gray-400"></div>
+                                    <span class="text-sm text-gray-600 dark:text-gray-400">Kosong</span>
+                                </div>
+                            </td>
+                            <td class="px-6 py-4 text-center">
+                                <span class="text-sm font-semibold text-gray-500 dark:text-gray-400">
+                                    {{ $skdSummary['tiu']['empty'] ?? 0 }}
+                                </span>
+                            </td>
+                            <td class="px-6 py-4 text-center">
+                                <span class="text-sm font-semibold text-gray-500 dark:text-gray-400">
+                                    {{ $skdSummary['twk']['empty'] ?? 0 }}
+                                </span>
+                            </td>
+                            <td class="px-6 py-4 text-center">
+                                <span class="text-sm font-semibold text-gray-500 dark:text-gray-400">
+                                    {{ $skdSummary['tkp']['empty'] ?? 0 }}
+                                </span>
+                            </td>
+                        </tr>
+
+                        {{-- SKOR --}}
                         <tr class="bg-azwara-lightest/30 dark:bg-azwara-medium/10 hover:bg-azwara-lightest/50 dark:hover:bg-azwara-medium/20">
                             <td class="px-6 py-4">
                                 <div class="flex items-center gap-2">
@@ -253,7 +278,7 @@
     @endif
 
     {{-- ================= ACTION & FILTER ================= --}}
-    {{-- <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-8">
+    <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-8">
         <a href="{{ route('exams.ranking.student', $exam) }}"
            class="inline-flex items-center justify-center gap-2
                   px-5 py-2.5 rounded-lg text-sm font-semibold
@@ -280,7 +305,7 @@
                 @endforeach
             </select>
         </form>
-    </div> --}}
+    </div>
 
     {{-- ================= SOAL & PEMBAHASAN ================= --}}
     <div class="space-y-6">
@@ -290,13 +315,27 @@
                 $answer   = $attempt->answers->firstWhere('question_id', $question->id);
                 $selected = $answer?->selected_ids ?? [];
                 $questionNumber = $loop->iteration + ($questions->firstItem() - 1);
+                
+                // Variabel untuk TKP
+                $isTkp = ($question->test_type === 'tkp');
+                $selectedWeight = 0;
+                $maxWeight = 0;
+                
+                if ($isTkp) {
+                    $maxWeight = $question->options->max('weight') ?? 0;
+                    if ($answer && !empty($selected)) {
+                        $selectedWeight = $question->options
+                            ->whereIn('id', $selected)
+                            ->sum('weight');
+                    }
+                }
             @endphp
 
             <div class="rounded-xl border border-azwara-lighter dark:border-azwara-darker
                         bg-white dark:bg-azwara-darker p-6 hover:shadow-sm transition-shadow">
 
                 {{-- HEADER SOAL --}}
-                <div class="flex items-center justify-between mb-5">
+                <div class="flex flex-wrap items-center justify-between gap-3 mb-5">
 
                     {{-- KIRI: NOMOR SOAL --}}
                     <div class="flex items-center gap-3">
@@ -310,35 +349,38 @@
                         <span class="text-base font-semibold text-azwara-darkest dark:text-white">
                             Soal {{ $questionNumber }}
                         </span>
+                        
+                        @if($isTkp)
+                            <span class="text-xs font-medium px-2 py-0.5 rounded-full bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-400">
+                                TKP
+                            </span>
+                        @endif
                     </div>
 
                     {{-- KANAN: STATUS SOAL --}}
                     <div class="text-sm text-gray-500 dark:text-gray-400">
-                        @if ($question->test_type === 'tkp')
-                            @php
-                                $selectedWeight = $question->options
-                                    ->whereIn('id', $selected)
-                                    ->sum('weight');
-
-                                $maxWeight = $question->options->max('weight');
-                            @endphp
-
-                            @if (!$answer)
+                        @if($isTkp)
+                            {{-- TKP: Tampilkan bobot --}}
+                            @if (!$answer || $answer->isEmpty)
                                 <span class="inline-flex px-3 py-1 rounded-full text-xs font-semibold
                                             bg-gray-100 dark:bg-gray-800 text-gray-700 dark:text-gray-300">
                                     Kosong
                                 </span>
                             @else
                                 <span class="inline-flex px-3 py-1 rounded-full text-xs font-semibold
-                                    {{ $selectedWeight === $maxWeight
+                                    {{ $selectedWeight === $maxWeight && $maxWeight > 0
                                         ? 'bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-300'
-                                        : 'bg-yellow-100 text-yellow-800 dark:bg-yellow-900/30 dark:text-yellow-300'
+                                        : ($selectedWeight > 0
+                                            ? 'bg-yellow-100 text-yellow-800 dark:bg-yellow-900/30 dark:text-yellow-300'
+                                            : 'bg-red-100 text-red-800 dark:bg-red-900/30 dark:text-red-300'
+                                        )
                                     }}">
                                     Bobot {{ $selectedWeight }} / {{ $maxWeight }}
                                 </span>
                             @endif
                         @else
-                            @if ($answer)
+                            {{-- Non-TKP: Tampilkan benar/salah --}}
+                            @if ($answer && !$answer->isEmpty)
                                 @if (in_array($question->options->where('is_correct', true)->first()->id ?? null, $selected))
                                     <span class="inline-flex items-center gap-1 px-3 py-1 rounded-full text-xs font-semibold
                                                 bg-green-100 dark:bg-green-900/30 text-green-800 dark:text-green-300">
@@ -375,71 +417,70 @@
                             {!! $question->question_text !!}
                         </div>
                     @endif
+                    
+                    {{-- Informasi tambahan untuk TKP --}}
+                    {{-- @if($isTkp)
+                        <div class="text-xs text-gray-500 dark:text-gray-400 italic bg-blue-50 dark:bg-blue-900/10 p-3 rounded-lg">
+                            💡 Pilih jawaban yang paling sesuai. Setiap pilihan memiliki bobot nilai berbeda.
+                        </div>
+                    @endif --}}
                 </div>
 
                 {{-- PILIHAN JAWABAN --}}
                 <div class="space-y-3 mb-6">
-                    @php
-                        $maxWeight = $question->test_type === 'tkp'
-                            ? $question->options->max('weight')
-                            : null;
-                    @endphp
-
                     @foreach ($question->options as $option)
                         @php
                             $isChosen = in_array($option->id, $selected ?? []);
                             $hasImage = !empty($option->image);
-
-                            // NON TKP
-                            $isCorrect = $question->test_type !== 'tkp' && $option->is_correct;
-
-                            // TKP
-                            $isBestTkp = $question->test_type === 'tkp' && $option->weight === $maxWeight;
+                            $optionWeight = $option->weight ?? 0;
+                            
+                            // Untuk TKP
+                            $isBestTkp = $isTkp && $optionWeight === $maxWeight && $maxWeight > 0;
+                            
+                            // Untuk non-TKP
+                            $isCorrect = !$isTkp && $option->is_correct;
+                            
+                            // Tentukan warna border dan background
+                            if ($isTkp) {
+                                if ($isChosen && $optionWeight === $maxWeight && $maxWeight > 0) {
+                                    $borderClass = 'border-green-500 bg-green-50 dark:bg-green-900/30';
+                                    $labelClass = 'bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-300 border border-green-300 dark:border-green-700';
+                                } elseif ($isChosen && $optionWeight > 0) {
+                                    $borderClass = 'border-yellow-500 bg-yellow-50 dark:bg-yellow-900/30';
+                                    $labelClass = 'bg-yellow-100 text-yellow-800 dark:bg-yellow-900 dark:text-yellow-300 border border-yellow-300 dark:border-yellow-700';
+                                } elseif ($isChosen) {
+                                    $borderClass = 'border-red-500 bg-red-50 dark:bg-red-900/30';
+                                    $labelClass = 'bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-300 border border-red-300 dark:border-red-700';
+                                } elseif ($optionWeight === $maxWeight && $maxWeight > 0) {
+                                    $borderClass = 'border-green-300 bg-green-50/50 dark:bg-green-900/10';
+                                    $labelClass = 'bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400 border border-green-300 dark:border-green-700';
+                                } else {
+                                    $borderClass = 'border-azwara-lighter dark:border-azwara-darker bg-white dark:bg-azwara-darker';
+                                    $labelClass = 'bg-azwara-lightest dark:bg-azwara-medium text-azwara-medium dark:text-white border border-azwara-lighter dark:border-azwara-medium';
+                                }
+                            } else {
+                                if ($isCorrect && $isChosen) {
+                                    $borderClass = 'border-green-500 bg-green-50 dark:bg-green-900/30';
+                                    $labelClass = 'bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-300 border border-green-300 dark:border-green-700';
+                                } elseif ($isCorrect) {
+                                    $borderClass = 'border-green-300 bg-green-50/50 dark:bg-green-900/10';
+                                    $labelClass = 'bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400 border border-green-300 dark:border-green-700';
+                                } elseif ($isChosen) {
+                                    $borderClass = 'border-red-500 bg-red-50 dark:bg-red-900/30';
+                                    $labelClass = 'bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-300 border border-red-300 dark:border-red-700';
+                                } else {
+                                    $borderClass = 'border-azwara-lighter dark:border-azwara-darker bg-white dark:bg-azwara-darker';
+                                    $labelClass = 'bg-azwara-lightest dark:bg-azwara-medium text-azwara-medium dark:text-white border border-azwara-lighter dark:border-azwara-medium';
+                                }
+                            }
                         @endphp
 
-                        <div class="rounded-lg border p-4 transition-all duration-200
-                            @if ($question->test_type === 'tkp')
-                                {{ $isBestTkp
-                                    ? 'border-green-400 bg-green-50 dark:bg-green-900/30'
-                                    : ($isChosen
-                                        ? 'border-yellow-400 bg-yellow-50 dark:bg-yellow-900/30'
-                                        : 'border-azwara-lighter dark:border-azwara-darker bg-white dark:bg-azwara-darker'
-                                    )
-                                }}
-                            @else
-                                {{ $isCorrect
-                                    ? 'border-green-400 bg-gradient-to-r from-green-50 to-white dark:from-green-900/20 dark:to-azwara-darker shadow-sm'
-                                    : ($isChosen
-                                        ? 'border-red-400 bg-gradient-to-r from-red-50 to-white dark:from-red-900/20 dark:to-azwara-darker shadow-sm'
-                                        : 'border-azwara-lighter dark:border-azwara-darker bg-white dark:bg-azwara-darker hover:border-azwara-light dark:hover:border-azwara-light'
-                                    )
-                                }}
-                            @endif
-                        ">
-
+                        <div class="rounded-lg border p-4 transition-all duration-200 {{ $borderClass }}">
                             <div class="flex flex-col md:flex-row md:items-start gap-4">
 
                                 {{-- LABEL OPSI --}}
                                 <div class="flex-shrink-0">
-                                    <div class="w-8 h-8 rounded-lg flex items-center justify-center font-bold text-sm
-                                        @if ($question->test_type === 'tkp')
-                                            {{ $isBestTkp
-                                                ? 'bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-300 border border-green-300'
-                                                : ($isChosen
-                                                    ? 'bg-yellow-100 text-yellow-800 dark:bg-yellow-900 dark:text-yellow-300 border border-yellow-300'
-                                                    : 'bg-azwara-lightest dark:bg-azwara-medium text-azwara-medium dark:text-white border border-azwara-lighter'
-                                                )
-                                            }}
-                                        @else
-                                            {{ $isCorrect
-                                                ? 'bg-green-100 dark:bg-green-900 text-green-800 dark:text-green-300 border border-green-300 dark:border-green-700'
-                                                : ($isChosen
-                                                    ? 'bg-red-100 dark:bg-red-900 text-red-800 dark:text-red-300 border border-red-300 dark:border-red-700'
-                                                    : 'bg-azwara-lightest dark:bg-azwara-medium text-azwara-medium dark:text-white border border-azwara-lighter dark:border-azwara-medium'
-                                                )
-                                            }}
-                                        @endif
-                                    ">
+                                    <div class="w-8 h-8 rounded-lg flex items-center justify-center font-bold text-sm {{ $labelClass }}">
                                         {{ $option->label }}
                                     </div>
                                 </div>
@@ -464,8 +505,26 @@
                                     {{-- STATUS OPSI --}}
                                     <div class="flex flex-wrap items-center gap-3 mt-3">
 
-                                        {{-- NON TKP --}}
-                                        @if ($question->test_type !== 'tkp')
+                                        @if($isTkp)
+                                            {{-- TKP: Tampilkan bobot --}}
+                                            <span class="inline-flex items-center gap-1 px-3 py-1 rounded-full text-xs font-semibold
+                                                {{ $optionWeight === $maxWeight && $maxWeight > 0
+                                                    ? 'bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-300'
+                                                    : 'bg-gray-100 text-gray-800 dark:bg-gray-800 dark:text-gray-300'
+                                                }}">
+                                                Bobot: {{ $optionWeight }}
+                                                @if($optionWeight === $maxWeight && $maxWeight > 0)
+                                                    ⭐ Maksimal
+                                                @endif
+                                            </span>
+
+                                            @if ($isChosen)
+                                                <span class="inline-flex items-center gap-1 px-3 py-1 rounded-full text-xs font-semibold bg-yellow-100 dark:bg-yellow-900 text-yellow-800 dark:text-yellow-300">
+                                                    👤 Pilihan Anda
+                                                </span>
+                                            @endif
+                                        @else
+                                            {{-- Non-TKP --}}
                                             @if ($isCorrect)
                                                 <span class="inline-flex items-center gap-1 px-3 py-1 rounded-full text-xs font-semibold bg-green-100 dark:bg-green-900 text-green-800 dark:text-green-300">
                                                     ✔ Jawaban Benar
@@ -473,25 +532,8 @@
                                             @endif
 
                                             @if ($isChosen)
-                                                <span class="inline-flex items-center gap-1 px-3 py-1 rounded-full text-xs font-semibold bg-red-100 dark:bg-red-900 text-red-800 dark:text-red-300">
+                                                <span class="inline-flex items-center gap-1 px-3 py-1 rounded-full text-xs font-semibold bg-blue-100 dark:bg-blue-900 text-blue-800 dark:text-blue-300">
                                                     👤 Jawaban Anda
-                                                </span>
-                                            @endif
-                                        @endif
-
-                                        {{-- TKP --}}
-                                        @if ($question->test_type === 'tkp')
-                                            <span class="inline-flex items-center gap-1 px-3 py-1 rounded-full text-xs font-semibold
-                                                {{ $isBestTkp
-                                                    ? 'bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-300'
-                                                    : 'bg-gray-100 text-gray-800 dark:bg-gray-800 dark:text-gray-300'
-                                                }}">
-                                                Bobot: {{ $option->weight }}
-                                            </span>
-
-                                            @if ($isChosen)
-                                                <span class="inline-flex items-center gap-1 px-3 py-1 rounded-full text-xs font-semibold bg-yellow-100 dark:bg-yellow-900 text-yellow-800 dark:text-yellow-300">
-                                                    👤 Pilihan Anda
                                                 </span>
                                             @endif
                                         @endif

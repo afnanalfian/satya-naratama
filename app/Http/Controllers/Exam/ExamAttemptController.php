@@ -126,7 +126,7 @@ class ExamAttemptController extends Controller
 
         $attempt = $exam->attempts()
             ->where('user_id', auth()->id())
-            ->where('is_submitted', false)
+            // ->where('is_submitted', false)
             ->firstOrFail();
 
         if ($attempt->is_submitted) {
@@ -150,7 +150,17 @@ class ExamAttemptController extends Controller
         return redirect()
             ->route('exams.result.student', $exam);
     }
+    public function timeSync(Exam $exam)
+    {
+        $attempt = $exam->attempts()
+            ->where('user_id', auth()->id())
+            ->where('is_submitted', false)
+            ->firstOrFail();
 
+        return response()->json([
+            'remaining_seconds' => $attempt->remainingSeconds(),
+        ]);
+    }
     public function saveAnswer(Request $request, Exam $exam)
     {
         if (

@@ -25,6 +25,11 @@
                 <p class="text-gray-600 dark:text-gray-400">
                     Soal #{{ $examQuestion->order ?? '-' }}
                 </p>
+                @if($isTkp ?? false)
+                    <span class="text-xs font-medium px-2 py-0.5 rounded-full bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-400">
+                        TKP (Bobot)
+                    </span>
+                @endif
             </div>
         </div>
     </div>
@@ -98,9 +103,14 @@
             <h2 class="text-xl font-bold text-azwara-darkest dark:text-white">
                 Soal
             </h2>
+            @if($isTkp ?? false)
+                <span class="text-xs font-medium px-2 py-0.5 rounded-full bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-400">
+                    TKP (Bobot)
+                </span>
+            @endif
         </div>
 
-        <div class="prose prose-sm dark:prose-invert max-w-none mb-5">
+        <div class="prose prose-sm dark:prose-invert max-w-none mb-5 tex2jax_process">
             {!! $question->question_text !!}
         </div>
 
@@ -109,6 +119,12 @@
                 <img src="{{ asset('storage/'.$question->image) }}"
                      class="w-full h-auto max-w-2xl mx-auto"
                      alt="Gambar soal">
+            </div>
+        @endif
+
+        @if($isTkp ?? false)
+            <div class="mt-4 text-xs text-gray-500 dark:text-gray-400 italic bg-blue-50 dark:bg-blue-900/10 p-3 rounded-lg">
+                💡 Soal TKP menggunakan sistem bobot. Jawaban dengan bobot maksimum dianggap benar.
             </div>
         @endif
     </div>
@@ -130,7 +146,7 @@
         </div>
 
         @php
-            $maxWeight = $question->options->max('weight');
+            $maxWeight = $question->options->max('weight') ?? 0;
         @endphp
 
         @foreach ($question->options as $option)
@@ -143,38 +159,48 @@
                     : ($stat['percentage'] > 25 ? 'bg-yellow-500' : 'bg-red-500');
 
                 // ===== KHUSUS TKP =====
-                $isMaxWeight = $question->test_type === 'tkp' && $option->weight === $maxWeight;
+                $isTkpQuestion = $isTkp ?? false;
+                $isMaxWeight = $isTkpQuestion && $option->weight === $maxWeight && $maxWeight > 0;
+                $optionWeight = $option->weight ?? 0;
             @endphp
 
             <div class="rounded-xl border p-5 transition-all duration-200
-                {{ $isMaxWeight
-                    ? 'border-green-400 bg-gradient-to-r from-green-50 to-white dark:from-green-900/20 dark:to-azwara-darker shadow-sm'
-                    : 'border-azwara-lighter dark:border-azwara-darker bg-white dark:bg-azwara-darker'
+                {{ $isTkpQuestion 
+                    ? ($isMaxWeight 
+                        ? 'border-green-400 bg-gradient-to-r from-green-50 to-white dark:from-green-900/20 dark:to-azwara-darker shadow-sm'
+                        : 'border-azwara-lighter dark:border-azwara-darker bg-white dark:bg-azwara-darker')
+                    : ($option->is_correct 
+                        ? 'border-green-400 bg-gradient-to-r from-green-50 to-white dark:from-green-900/20 dark:to-azwara-darker shadow-sm'
+                        : 'border-azwara-lighter dark:border-azwara-darker bg-white dark:bg-azwara-darker')
                 }}">
 
                 <div class="flex flex-col md:flex-row md:items-start gap-4">
 
                     {{-- LABEL OPSI --}}
                     <div class="flex-shrink-0">
-                        <div class="flex items-center gap-3">
+                        <div class="flex items-center gap-3 flex-wrap">
                             <div class="w-10 h-10 rounded-lg flex items-center justify-center font-bold
-                                {{ $isMaxWeight
-                                    ? 'bg-green-100 dark:bg-green-900 text-green-800 dark:text-green-300'
-                                    : 'bg-azwara-lightest dark:bg-azwara-medium text-azwara-medium dark:text-white'
+                                {{ $isTkpQuestion 
+                                    ? ($isMaxWeight 
+                                        ? 'bg-green-100 dark:bg-green-900 text-green-800 dark:text-green-300'
+                                        : 'bg-azwara-lightest dark:bg-azwara-medium text-azwara-medium dark:text-white')
+                                    : ($option->is_correct 
+                                        ? 'bg-green-100 dark:bg-green-900 text-green-800 dark:text-green-300'
+                                        : 'bg-azwara-lightest dark:bg-azwara-medium text-azwara-medium dark:text-white')
                                 }}">
                                 {{ $option->label }}
                             </div>
 
                             {{-- BADGE STATUS --}}
-                            @if ($question->test_type === 'tkp')
+                            @if ($isTkpQuestion)
                                 <span class="inline-flex items-center px-3 py-1 rounded-full text-xs font-semibold
                                     {{ $isMaxWeight
                                         ? 'bg-green-100 dark:bg-green-900 text-green-800 dark:text-green-300'
                                         : 'bg-gray-100 dark:bg-gray-800 text-gray-600 dark:text-gray-300'
                                     }}">
-                                    Bobot {{ $option->weight }}
+                                    Bobot {{ $optionWeight }}
                                     @if ($isMaxWeight)
-                                        / {{ $maxWeight }}
+                                        ⭐ (Maksimal)
                                     @endif
                                 </span>
                             @else
@@ -190,7 +216,7 @@
 
                     {{-- KONTEN OPSI --}}
                     <div class="flex-1">
-                        <div class="text-gray-800 dark:text-gray-200 mb-3">
+                        <div class="text-gray-800 dark:text-gray-200 mb-3 tex2jax_process">
                             {!! $option->option_text !!}
                         </div>
 
@@ -253,7 +279,7 @@
 
             <div x-show="open" x-collapse
                  class="mt-6 pt-6 border-t border-azwara-lighter dark:border-azwara-medium">
-                <div class="prose prose-sm dark:prose-invert max-w-none">
+                <div class="prose prose-sm dark:prose-invert max-w-none tex2jax_process">
                     {!! $question->explanation !!}
                 </div>
             </div>
@@ -281,6 +307,9 @@
                             <th scope="col" class="px-6 py-4 text-left text-sm font-semibold text-gray-700 dark:text-gray-300">
                                 Nama Peserta
                             </th>
+                            <th scope="col" class="px-6 py-4 text-left text-sm font-semibold text-gray-700 dark:text-gray-300">
+                                Jawaban
+                            </th>
                             <th scope="col" class="px-6 py-4 text-center text-sm font-semibold text-gray-700 dark:text-gray-300">
                                 Status Jawaban
                             </th>
@@ -294,34 +323,44 @@
                                         {{ $row['user']->name }}
                                     </div>
                                 </td>
-                                <td class="px-6 py-4 text-center">
-                                    @if($row['status'] === 'correct')
-                                        <span class="inline-flex items-center gap-1 px-3 py-1.5 rounded-full text-xs font-semibold bg-green-100 dark:bg-green-900/30 text-green-800 dark:text-green-300">
-                                            <svg class="w-3 h-3" fill="currentColor" viewBox="0 0 20 20">
-                                                <path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"/>
-                                            </svg>
-                                            Benar
-                                        </span>
-                                    @elseif($row['status'] === 'wrong')
-                                        <span class="inline-flex items-center gap-1 px-3 py-1.5 rounded-full text-xs font-semibold bg-red-100 dark:bg-red-900/30 text-red-800 dark:text-red-300">
-                                            <svg class="w-3 h-3" fill="currentColor" viewBox="0 0 20 20">
-                                                <path fill-rule="evenodd" d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z" clip-rule="evenodd"/>
-                                            </svg>
-                                            Salah
-                                        </span>
+                                <td class="px-6 py-4">
+                                    @if($row['status'] === 'empty')
+                                        <span class="text-gray-400 dark:text-gray-500 text-sm">Tidak menjawab</span>
                                     @else
-                                        <span class="inline-flex items-center gap-1 px-3 py-1.5 rounded-full text-xs font-semibold bg-gray-100 dark:bg-gray-800 text-gray-700 dark:text-gray-300">
-                                            <svg class="w-3 h-3" fill="currentColor" viewBox="0 0 20 20">
-                                                <path fill-rule="evenodd" d="M3 3a1 1 0 00-1 1v12a1 1 0 001 1h12a1 1 0 001-1V4a1 1 0 00-1-1H3zm0 1h12v12H3V4z" clip-rule="evenodd"/>
-                                            </svg>
-                                            Kosong
-                                        </span>
+                                        <div class="flex flex-wrap items-center gap-2">
+                                            @foreach($row['selected_options'] as $index => $option)
+                                                <span class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg text-xs font-medium
+                                                    {{ ($isTkp ?? false) 
+                                                        ? ($option->weight === $row['max_weight'] && $row['max_weight'] > 0 
+                                                            ? 'bg-green-100 dark:bg-green-900/30 text-green-700 dark:text-green-400'
+                                                            : 'bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300')
+                                                        : ($option->is_correct 
+                                                            ? 'bg-green-100 dark:bg-green-900/30 text-green-700 dark:text-green-400'
+                                                            : 'bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300')
+                                                    }}">
+                                                    {{ $option->label }}
+                                                    @if($isTkp ?? false)
+                                                        <span class="text-xs opacity-75">({{ $option->weight }})</span>
+                                                    @endif
+                                                </span>
+                                            @endforeach
+                                            @if($isTkp ?? false)
+                                                <span class="text-xs text-gray-400 dark:text-gray-500 ml-1">
+                                                    Bobot: {{ $row['selected_weight'] }}/{{ $row['max_weight'] }}
+                                                </span>
+                                            @endif
+                                        </div>
                                     @endif
+                                </td>
+                                <td class="px-6 py-4 text-center">
+                                    <span class="inline-flex items-center gap-1 px-3 py-1.5 rounded-full text-xs font-semibold {{ $row['status_color'] }}">
+                                        {{ $row['status_icon'] }} {{ $row['status_label'] }}
+                                    </span>
                                 </td>
                             </tr>
                         @empty
                             <tr>
-                                <td colspan="2" class="px-6 py-8 text-center">
+                                <td colspan="3" class="px-6 py-8 text-center">
                                     <div class="text-gray-500 dark:text-gray-400">
                                         <svg class="w-12 h-12 mx-auto mb-3 text-gray-300 dark:text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/>
