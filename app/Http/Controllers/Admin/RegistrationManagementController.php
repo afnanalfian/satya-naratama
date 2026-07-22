@@ -69,7 +69,7 @@ class RegistrationManagementController extends Controller
             'paid' => 'Sudah Bayar',
             'verified' => 'Diverifikasi',
             'rejected' => 'Ditolak',
-            'expired' => 'Kadaluarsa',
+            // 'expired' => 'Kadaluarsa',
         ];
 
         $stats = [
@@ -81,8 +81,8 @@ class RegistrationManagementController extends Controller
         ];
 
         return view('admin.registrations.index', compact(
-            'registrations', 
-            'statuses', 
+            'registrations',
+            'statuses',
             'paymentStatuses',
             'stats'
         ));
@@ -94,9 +94,9 @@ class RegistrationManagementController extends Controller
     public function show($id)
     {
         $registration = StudentRegistration::with([
-            'user', 
-            'kecamatan', 
-            'kelurahan', 
+            'user',
+            'kecamatan',
+            'kelurahan',
             'verifiedBy',
             'invoice'
         ])->findOrFail($id);
@@ -274,7 +274,7 @@ class RegistrationManagementController extends Controller
         }
 
         $path = storage_path('app/public/' . $registration->payment_proof);
-        
+
         if (!file_exists($path)) {
             return redirect()->back()->with('error', 'File bukti pembayaran tidak ditemukan.');
         }

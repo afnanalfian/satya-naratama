@@ -53,10 +53,11 @@ class CheckStatusController extends Controller
 
         // Cek apakah bisa melakukan pembayaran
         if (!$registration->canMakePayment()) {
-            if ($registration->isExpired()) {
-                return redirect()->route('daftar.status.form')
-                    ->with('error', 'Waktu pembayaran telah habis. Silakan daftar ulang.');
-            }
+            // HAPUS CEK EXPIRED
+            // if ($registration->isExpired()) {
+            //     return redirect()->route('daftar.status.form')
+            //         ->with('error', 'Waktu pembayaran telah habis. Silakan daftar ulang.');
+            // }
 
             if ($registration->isAwaitingVerification()) {
                 return redirect()->route('daftar.status.form')

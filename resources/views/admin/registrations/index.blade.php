@@ -173,7 +173,7 @@
                                         'paid' => 'yellow',
                                         'verified' => 'green',
                                         'rejected' => 'red',
-                                        'expired' => 'red',
+                                        // 'expired' => 'red',
                                     ];
                                     $pColor = $paymentColors[$reg->payment_status] ?? 'gray';
                                 @endphp

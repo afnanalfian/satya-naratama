@@ -36,12 +36,13 @@
                     Rp {{ number_format($registration->registration_fee, 0, ',', '.') }}
                 </span>
             </div>
-            <div class="flex justify-between items-center mt-2 text-sm">
+            {{-- HAPUS BAGIAN BATAS PEMBAYARAN --}}
+            {{-- <div class="flex justify-between items-center mt-2 text-sm">
                 <span class="text-gray-500 dark:text-gray-400">Batas Pembayaran</span>
                 <span class="text-red-600 dark:text-red-400 font-medium">
                     {{ $registration->payment_expires_at->format('d M Y H:i') }}
                 </span>
-            </div>
+            </div> --}}
             <div class="flex justify-between items-center mt-2 text-sm">
                 <span class="text-gray-500 dark:text-gray-400">Kode Pendaftaran</span>
                 <span class="font-mono text-sm font-medium text-azwara-darker dark:text-white">
@@ -58,14 +59,14 @@
 
             {{-- Tab Metode --}}
             <div class="grid grid-cols-2 gap-3 mb-4">
-                <button 
+                <button
                     onclick="switchPayment('qris')"
                     id="tab-qris"
                     class="py-3 rounded-xl font-medium text-center transition-all duration-300
                            bg-primary text-white shadow-md hover:shadow-lg">
                     📱 QRIS
                 </button>
-                <button 
+                <button
                     onclick="switchPayment('transfer')"
                     id="tab-transfer"
                     class="py-3 rounded-xl font-medium text-center transition-all duration-300
@@ -83,7 +84,7 @@
                     </p>
                     <div class="inline-block p-4 bg-white rounded-2xl shadow-md border border-gray-200 dark:border-gray-700">
                         {{-- Ganti dengan path QRIS Anda --}}
-                        <img src="{{ asset('img/qris-satya-naratama.png') }}" 
+                        <img src="{{ asset('img/qris-satya-naratama.png') }}"
                              alt="QRIS Pembayaran"
                              class="w-48 h-48 object-contain">
                     </div>
@@ -99,7 +100,7 @@
                     <p class="text-sm font-medium text-blue-800 dark:text-blue-200 mb-3">
                         💰 Transfer ke Rekening Berikut:
                     </p>
-                    
+
                     <div class="space-y-3">
                         {{-- Bank BRI --}}
                         <div class="bg-white dark:bg-gray-800 rounded-lg p-3 border border-gray-200 dark:border-gray-700">
@@ -116,7 +117,7 @@
                                         a.n. Muhammad Afnan Alfian
                                     </p>
                                 </div>
-                                <button 
+                                <button
                                     onclick="copyRekening('022301059553505')"
                                     class="px-3 py-1.5 text-xs font-medium rounded-lg
                                            bg-primary/10 text-primary hover:bg-primary/20 transition">
@@ -128,10 +129,8 @@
                         {{-- Info Tambahan --}}
                         <div class="bg-yellow-50 dark:bg-yellow-900/20 border border-yellow-200 dark:border-yellow-800 rounded-lg p-3">
                             <p class="text-xs text-yellow-800 dark:text-yellow-200">
-                                <span class="font-medium">📌 Penting:</span> 
-                                Transfer sesuai nominal <strong>Rp {{ number_format($registration->registration_fee, 0, ',', '.') }}</strong> 
-                                {{-- dan gunakan kode pendaftaran <strong>#{{ str_pad($registration->id, 6, '0', STR_PAD_LEFT) }}</strong> 
-                                sebagai berita transfer. --}}
+                                <span class="font-medium">📌 Penting:</span>
+                                Transfer sesuai nominal <strong>Rp {{ number_format($registration->registration_fee, 0, ',', '.') }}</strong>
                             </p>
                         </div>
                     </div>
@@ -165,8 +164,8 @@
         </div>
 
         {{-- Upload Bukti --}}
-        <form action="{{ route('daftar.payment.upload', $registration->id) }}" 
-              method="POST" 
+        <form action="{{ route('daftar.payment.upload', $registration->id) }}"
+              method="POST"
               enctype="multipart/form-data"
               class="space-y-4">
             @csrf
@@ -194,7 +193,7 @@
                         hover:shadow-xl hover:scale-[1.01] transition-all duration-300">
                     Kirim Bukti Pembayaran
                 </button>
-                
+
                 <a href="{{ route('daftar.payment.nanti', $registration->id) }}"
                    class="flex-1 py-3 rounded-xl font-medium text-center
                         border-2 border-azwara-lighter dark:border-gray-700
@@ -226,7 +225,7 @@ function switchPayment(method) {
     // Update tabs
     const tabQris = document.getElementById('tab-qris');
     const tabTransfer = document.getElementById('tab-transfer');
-    
+
     if (method === 'qris') {
         tabQris.className = 'py-3 rounded-xl font-medium text-center transition-all duration-300 bg-primary text-white shadow-md hover:shadow-lg';
         tabTransfer.className = 'py-3 rounded-xl font-medium text-center transition-all duration-300 bg-gray-100 dark:bg-gray-800 text-gray-600 dark:text-gray-400 hover:bg-gray-200 dark:hover:bg-gray-700';
@@ -241,14 +240,14 @@ function switchPayment(method) {
 }
 
 // Copy rekening to clipboard
-function copyRekening(rekening, bank) {
+function copyRekening(rekening) {
+    const btn = event.target;
+    const originalText = btn.textContent;
+
     navigator.clipboard.writeText(rekening).then(() => {
-        // Show feedback
-        const btn = event.target;
-        const originalText = btn.textContent;
         btn.textContent = '✅ Tersalin!';
         btn.className = 'px-3 py-1.5 text-xs font-medium rounded-lg bg-green-100 text-green-700';
-        
+
         setTimeout(() => {
             btn.textContent = originalText;
             btn.className = 'px-3 py-1.5 text-xs font-medium rounded-lg bg-primary/10 text-primary hover:bg-primary/20 transition';
@@ -261,8 +260,8 @@ function copyRekening(rekening, bank) {
         input.select();
         document.execCommand('copy');
         document.body.removeChild(input);
-        
-        alert('Nomor rekening ' + bank + ' ' + rekening + ' telah disalin!');
+
+        alert('Nomor rekening ' + rekening + ' telah disalin!');
     });
 }
 

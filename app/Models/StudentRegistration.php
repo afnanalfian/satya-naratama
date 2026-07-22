@@ -34,7 +34,7 @@ class StudentRegistration extends Model
         'payment_status',
         'payment_proof',
         'payment_verified_at',
-        'payment_expires_at',
+        // 'payment_expires_at',
         'verified_by',
         'verification_notes',
         'verified_at',
@@ -49,7 +49,7 @@ class StudentRegistration extends Model
     protected $casts = [
         'birth_date' => 'date',
         'payment_verified_at' => 'datetime',
-        'payment_expires_at' => 'datetime',
+        // 'payment_expires_at' => 'datetime',
         'verified_at' => 'datetime',
         'rejected_at' => 'datetime',
         'registration_fee' => 'decimal:2',
@@ -142,7 +142,7 @@ class StudentRegistration extends Model
             'paid' => 'Menunggu Verifikasi',
             'verified' => 'Diverifikasi',
             'rejected' => 'Ditolak',
-            'expired' => 'Kadaluarsa',
+            // 'expired' => 'Kadaluarsa',
             default => $this->payment_status,
         };
     }
@@ -160,26 +160,26 @@ class StudentRegistration extends Model
     }
 
     // Helper Methods
-    public function isExpired(): bool
-    {
-        if (!$this->payment_expires_at) {
-            return false;
-        }
-        return now()->gt($this->payment_expires_at);
-    }
+    // public function isExpired(): bool
+    // {
+    //     if (!$this->payment_expires_at) {
+    //         return false;
+    //     }
+    //     return now()->gt($this->payment_expires_at);
+    // }
 
     public function canMakePayment(): bool
     {
-        return true; //$this->registration_status === 'pending_payment'
-            // && $this->payment_status === 'pending';
+        return $this->registration_status === 'pending_payment'
+            && $this->payment_status === 'pending';
             // && !$this->isExpired();
     }
 
     public function canUploadProof(): bool
     {
         return $this->registration_status === 'pending_payment'
-            && $this->payment_status === 'pending'
-            && !$this->isExpired();
+            && $this->payment_status === 'pending';
+            // && !$this->isExpired();
     }
 
     public function isAwaitingVerification(): bool

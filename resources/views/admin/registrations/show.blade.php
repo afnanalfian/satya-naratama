@@ -269,12 +269,12 @@
                         </a>
                     </div>
                 @endif
-                @if($registration->payment_expires_at)
+                {{-- @if($registration->payment_expires_at)
                     <div class="flex justify-between">
                         <span class="text-gray-500 dark:text-gray-400">Batas Bayar</span>
                         <span class="font-medium">{{ $registration->payment_expires_at->format('d M Y H:i') }}</span>
                     </div>
-                @endif
+                @endif --}}
             </div>
         </div>
 

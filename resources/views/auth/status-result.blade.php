@@ -102,13 +102,17 @@
                         💳 Menunggu Pembayaran
                     </h3>
                     <p class="text-sm text-blue-600 dark:text-blue-300 mt-1">
-                        Silakan lakukan pembayaran sebelum {{ $registration->payment_expires_at->format('d M Y H:i') }}
+                        Silakan lakukan pembayaran untuk menyelesaikan pendaftaran.
                     </p>
-                    @if($registration->isExpired())
+                    {{-- HAPUS TAMPILAN BATAS WAKTU --}}
+                    {{-- <p class="text-sm text-blue-600 dark:text-blue-300 mt-1">
+                        Silakan lakukan pembayaran sebelum {{ $registration->payment_expires_at->format('d M Y H:i') }}
+                    </p> --}}
+                    {{-- @if($registration->isExpired())
                         <p class="text-sm text-red-600 dark:text-red-400 mt-1 font-medium">
                             ⚠️ Waktu pembayaran telah habis!
                         </p>
-                    @endif
+                    @endif --}}
                 @else
                     <div class="inline-flex items-center justify-center w-16 h-16 rounded-full bg-gray-100 dark:bg-gray-800 mb-3">
                         <svg class="w-8 h-8 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -135,19 +139,19 @@
                         @if($registration->payment_status == 'verified') text-green-600
                         @elseif($registration->payment_status == 'rejected') text-red-600
                         @elseif($registration->payment_status == 'paid') text-yellow-600
-                        @elseif($registration->payment_status == 'expired') text-red-600
                         @else text-blue-600 @endif">
                         {{ $registration->payment_status_label }}
                     </span>
                 </div>
-                @if($registration->payment_expires_at)
+                {{-- HAPUS TAMPILAN BATAS BAYAR --}}
+                {{-- @if($registration->payment_expires_at)
                     <div class="flex justify-between">
                         <span class="text-gray-600 dark:text-gray-400">Batas Bayar</span>
                         <span class="font-medium text-azwara-darker dark:text-white">
                             {{ $registration->payment_expires_at->format('d M Y H:i') }}
                         </span>
                     </div>
-                @endif
+                @endif --}}
             </div>
         </div>
 

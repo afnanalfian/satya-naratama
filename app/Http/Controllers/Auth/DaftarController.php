@@ -61,8 +61,8 @@ class DaftarController extends Controller
             $avatarPath = $request->file('avatar')->store('avatars/pendaftaran', 'public');
         }
 
-        // Set expiration date (7 days from now)
-        $paymentExpiresAt = Carbon::now()->addDays(7);
+        // HAPUS: payment expiration date
+        // $paymentExpiresAt = Carbon::now()->addDays(7);
 
         // Create registration
         $registration = StudentRegistration::create([
@@ -101,7 +101,7 @@ class DaftarController extends Controller
             // Pembayaran
             'registration_fee' => 6000000,
             'payment_status' => 'pending',
-            'payment_expires_at' => $paymentExpiresAt,
+            // 'payment_expires_at' => $paymentExpiresAt, // <-- HAPUS INI
 
             // Meta
             'ip_address' => $request->ip(),
@@ -133,16 +133,16 @@ class DaftarController extends Controller
         $registration = StudentRegistration::with(['kecamatan', 'kelurahan'])
             ->findOrFail($registrationId);
 
-        // Cek apakah pendaftaran sudah expired
-        if ($registration->isExpired()) {
-            $registration->update([
-                'payment_status' => 'expired',
-                'registration_status' => 'rejected',
-            ]);
-
-            return redirect()->route('daftar.status.form')
-                ->with('error', 'Waktu pembayaran telah habis. Silakan daftar ulang.');
-        }
+        // HAPUS CEK EXPIRED
+        // if ($registration->isExpired()) {
+        //     $registration->update([
+        //         'payment_status' => 'expired',
+        //         'registration_status' => 'rejected',
+        //     ]);
+        //
+        //     return redirect()->route('daftar.status.form')
+        //         ->with('error', 'Waktu pembayaran telah habis. Silakan daftar ulang.');
+        // }
 
         // Cek apakah sudah bayar dan diverifikasi
         if ($registration->isVerified()) {
@@ -154,6 +154,12 @@ class DaftarController extends Controller
         if ($registration->isAwaitingVerification()) {
             return redirect()->route('daftar.status.form')
                 ->with('info', 'Pembayaran Anda sedang diverifikasi oleh admin.');
+        }
+
+        // Cek apakah status pending payment
+        if ($registration->registration_status !== 'pending_payment') {
+            return redirect()->route('daftar.status.form')
+                ->with('error', 'Status pendaftaran tidak valid untuk pembayaran.');
         }
 
         $invoice = $registration->invoice;
@@ -170,10 +176,11 @@ class DaftarController extends Controller
 
         // Cek apakah bisa upload bukti
         if (!$registration->canUploadProof()) {
-            if ($registration->isExpired()) {
-                return redirect()->route('daftar.status.form')
-                    ->with('error', 'Waktu pembayaran telah habis.');
-            }
+            // HAPUS CEK EXPIRED
+            // if ($registration->isExpired()) {
+            //     return redirect()->route('daftar.status.form')
+            //         ->with('error', 'Waktu pembayaran telah habis.');
+            // }
 
             return redirect()->route('daftar.status.form')
                 ->with('error', 'Status pendaftaran tidak valid untuk upload bukti.');
@@ -232,7 +239,7 @@ class DaftarController extends Controller
         $registration = StudentRegistration::findOrFail($registrationId);
 
         return redirect()->route('daftar.status.form')
-            ->with('info', 'Anda dapat melakukan pembayaran kapan saja sebelum batas waktu berakhir.');
+            ->with('info', 'Anda dapat melakukan pembayaran kapan saja.');
     }
 
     /**
