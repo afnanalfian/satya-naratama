@@ -152,6 +152,10 @@
                     <span class="text-gray-500 dark:text-gray-400">Berat Badan</span>
                     <span class="font-medium">{{ $registration->weight_kg ? $registration->weight_kg . ' kg' : '-' }}</span>
                 </div>
+                <div class="flex justify-between">
+                    <span class="text-gray-500 dark:text-gray-400">Ukuran Baju</span>
+                    <span class="font-medium">{{ $registration->shirt_size_label }}</span>
+                </div>
             </div>
         </div>
 

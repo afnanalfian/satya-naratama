@@ -42,7 +42,9 @@ class SiswaController extends Controller
 
     public function show($id)
     {
-        $user = User::role('siswa')->with(['province', 'regency'])->findOrFail($id);
+        $user = User::role('siswa')
+            ->with(['province', 'regency', 'studentRegistration.kecamatan', 'studentRegistration.kelurahan'])
+            ->findOrFail($id);
         return view('siswa.show', compact('user'));
     }
 

@@ -29,7 +29,7 @@ class DaftarController extends Controller
             ->get();
 
         $universities = [
-            'STIS', 'STAN', 'IPDN', 'STMKG', 'SSN', 
+            'STIS', 'STAN', 'IPDN', 'STMKG', 'SSN',
             'STIN', 'STTD', 'POLTEKIMIPAS', 'AKPOL', 'AKMIL', 'UNHAN'
         ];
 
@@ -72,40 +72,41 @@ class DaftarController extends Controller
             'birth_date' => $request->birth_date,
             'gender' => $request->gender,
             'school_origin' => $request->school_origin,
+            'shirt_size' => $request->shirt_size,
             'class' => $request->class,
             'phone' => $request->phone,
-            
+
             // Wilayah
             'kecamatan_id' => $request->kecamatan_id,
             'kelurahan_id' => $request->kelurahan_id,
-            
+
             // Fisik
             'height_cm' => $request->height_cm,
             'weight_kg' => $request->weight_kg,
-            
+
             // Kampus Impian
             'priority_university_1' => $request->priority_university_1,
             'priority_university_2' => $request->priority_university_2,
-            
+
             // Orangtua
             'parent_name' => $request->parent_name,
             'parent_occupation' => $request->parent_occupation,
             'parent_phone' => $request->parent_phone,
-            
+
             // Akun
             'email' => $request->email,
             'password' => Hash::make($request->password),
             'avatar' => $avatarPath,
-            
+
             // Pembayaran
             'registration_fee' => 6000000,
             'payment_status' => 'pending',
             'payment_expires_at' => $paymentExpiresAt,
-            
+
             // Meta
             'ip_address' => $request->ip(),
             'user_agent' => $request->userAgent(),
-            
+
             // Status
             'registration_status' => 'pending_payment',
         ]);
@@ -138,7 +139,7 @@ class DaftarController extends Controller
                 'payment_status' => 'expired',
                 'registration_status' => 'rejected',
             ]);
-            
+
             return redirect()->route('daftar.status.form')
                 ->with('error', 'Waktu pembayaran telah habis. Silakan daftar ulang.');
         }
@@ -173,7 +174,7 @@ class DaftarController extends Controller
                 return redirect()->route('daftar.status.form')
                     ->with('error', 'Waktu pembayaran telah habis.');
             }
-            
+
             return redirect()->route('daftar.status.form')
                 ->with('error', 'Status pendaftaran tidak valid untuk upload bukti.');
         }
@@ -229,7 +230,7 @@ class DaftarController extends Controller
     public function bayarNanti($registrationId)
     {
         $registration = StudentRegistration::findOrFail($registrationId);
-        
+
         return redirect()->route('daftar.status.form')
             ->with('info', 'Anda dapat melakukan pembayaran kapan saja sebelum batas waktu berakhir.');
     }

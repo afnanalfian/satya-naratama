@@ -24,29 +24,29 @@ class StudentRegistrationRequest extends FormRequest
             'school_origin' => 'required|string|max:255',
             'class' => 'required|in:X,XI,XII,Alumni',
             'phone' => 'required|string|max:20|regex:/^[0-9]+$/',
-            
+
             // Wilayah
             'kecamatan_id' => 'required|exists:kecamatans,id',
             'kelurahan_id' => 'required|exists:kelurahans,id',
-            
+
             // Fisik
             'height_cm' => 'nullable|integer|min:50|max:300',
             'weight_kg' => 'nullable|integer|min:10|max:500',
-            
+
             // Kampus Impian
             'priority_university_1' => 'required|in:STIS,STAN,IPDN,STMKG,SSN,STIN,STTD,POLTEKIMIPAS,AKPOL,AKMIL,UNHAN',
             'priority_university_2' => 'nullable|in:STIS,STAN,IPDN,STMKG,SSN,STIN,STTD,POLTEKIMIPAS,AKPOL,AKMIL,UNHAN',
-            
+
             // Orangtua
             'parent_name' => 'required|string|max:191',
             'parent_occupation' => 'nullable|string|max:255',
             'parent_phone' => 'required|string|max:20|regex:/^[0-9]+$/',
-            
+            'shirt_size' => 'nullable|in:S,M,L,XL,XXL',
             // Akun
             'email' => 'required|email|max:191|unique:student_registrations,email|unique:users,email',
             'password' => 'required|string|min:8|confirmed',
             'password_confirmation' => 'required|string|min:8',
-            
+
             // Upload
             'avatar' => 'nullable|image|mimes:jpeg,png,jpg,gif|max:2048',
         ];

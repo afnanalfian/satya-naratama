@@ -101,7 +101,7 @@
                         </label>
                         <div class="flex gap-4 mt-1">
                             <label class="flex items-center gap-2 text-sm text-gray-700 dark:text-gray-300">
-                                <input type="radio" name="gender" value="L" 
+                                <input type="radio" name="gender" value="L"
                                     {{ old('gender') == 'L' ? 'checked' : '' }}
                                     class="text-primary focus:ring-primary">
                                 Laki-laki
@@ -233,7 +233,25 @@
                     </div>
                 </div>
             </div>
-
+            {{-- Ukuran Baju --}}
+            <div>
+                <label class="text-sm font-medium text-gray-700 dark:text-gray-300">
+                    Ukuran Baju
+                </label>
+                <select name="shirt_size"
+                    class="mt-1 w-full px-4 py-3 rounded-xl
+                            bg-white dark:bg-gray-800
+                            border-gray-300 dark:border-gray-700
+                            text-gray-800 dark:text-white
+                            focus:ring-primary focus:border-primary">
+                    <option value="">-- Pilih Ukuran --</option>
+                    <option value="S" {{ old('shirt_size') == 'S' ? 'selected' : '' }}>S (Small)</option>
+                    <option value="M" {{ old('shirt_size') == 'M' ? 'selected' : '' }}>M (Medium)</option>
+                    <option value="L" {{ old('shirt_size') == 'L' ? 'selected' : '' }}>L (Large)</option>
+                    <option value="XL" {{ old('shirt_size') == 'XL' ? 'selected' : '' }}>XL (Extra Large)</option>
+                    <option value="XXL" {{ old('shirt_size') == 'XXL' ? 'selected' : '' }}>XXL (Double Extra Large)</option>
+                </select>
+            </div>
             {{-- Kampus Impian --}}
             <div class="border-b border-azwara-lighter dark:border-gray-700 pb-4">
                 <h3 class="text-lg font-semibold text-azwara-darker dark:text-white mb-4">
@@ -454,7 +472,7 @@ $(document).ready(function () {
 
         $.get('/daftar/kelurahan', { kecamatan_id: kecamatanId }, function (data) {
             kelurahanSelect.empty().append('<option value="">-- Pilih Kelurahan --</option>');
-            
+
             data.forEach(function (item) {
                 kelurahanSelect.append(new Option(item.name, item.id));
             });
@@ -464,7 +482,7 @@ $(document).ready(function () {
     // Jika ada old value, trigger change untuk load kelurahan
     @if(old('kecamatan_id'))
         $('#kecamatan_id').val('{{ old('kecamatan_id') }}').trigger('change');
-        
+
         // Set kelurahan setelah load
         setTimeout(function() {
             $('#kelurahan_id').val('{{ old('kelurahan_id') }}');

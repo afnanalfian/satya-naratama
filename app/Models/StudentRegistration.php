@@ -16,6 +16,7 @@ class StudentRegistration extends Model
         'gender',
         'school_origin',
         'class',
+        'shirt_size',
         'phone',
         'kecamatan_id',
         'kelurahan_id',
@@ -52,6 +53,7 @@ class StudentRegistration extends Model
         'verified_at' => 'datetime',
         'rejected_at' => 'datetime',
         'registration_fee' => 'decimal:2',
+        'shirt_size' => 'string',
         'height_cm' => 'integer',
         'weight_kg' => 'integer',
     ];
@@ -59,7 +61,17 @@ class StudentRegistration extends Model
     protected $hidden = [
         'password',
     ];
-
+    public function getShirtSizeLabelAttribute(): string
+    {
+        $sizes = [
+            'S' => 'S (Small)',
+            'M' => 'M (Medium)',
+            'L' => 'L (Large)',
+            'XL' => 'XL (Extra Large)',
+            'XXL' => 'XXL (Double Extra Large)',
+        ];
+        return $sizes[$this->shirt_size] ?? $this->shirt_size ?? '-';
+    }
     // Relationships
     public function kecamatan(): BelongsTo
     {
@@ -158,14 +170,14 @@ class StudentRegistration extends Model
 
     public function canMakePayment(): bool
     {
-        return $this->registration_status === 'pending_payment' 
+        return $this->registration_status === 'pending_payment'
             && $this->payment_status === 'pending'
             && !$this->isExpired();
     }
 
     public function canUploadProof(): bool
     {
-        return $this->registration_status === 'pending_payment' 
+        return $this->registration_status === 'pending_payment'
             && $this->payment_status === 'pending'
             && !$this->isExpired();
     }
