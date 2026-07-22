@@ -170,9 +170,9 @@ class StudentRegistration extends Model
 
     public function canMakePayment(): bool
     {
-        return $this->registration_status === 'pending_payment'
-            && $this->payment_status === 'pending'
-            && !$this->isExpired();
+        return true; //$this->registration_status === 'pending_payment'
+            // && $this->payment_status === 'pending';
+            // && !$this->isExpired();
     }
 
     public function canUploadProof(): bool
