@@ -26,186 +26,195 @@
     ];
 @endphp
 
-<div class="space-y-8">
+<div class="py-6 md:py-8">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
 
-    {{-- HEADER --}}
-    <div class="rounded-xl border border-azwara-lighter bg-white px-6 py-5 dark:border-gray-700 dark:bg-gray-800">
-        <div class="flex items-center justify-between">
-            <div class="flex items-center gap-4">
-                <div class="flex h-12 w-12 items-center justify-center rounded-lg bg-azwara-lighter/30 dark:bg-azwara-darker">
-                    <svg class="h-6 w-6 text-azwara-medium dark:text-azwara-lighter" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                              d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
-                    </svg>
-                </div>
-                <div>
-                    <h1 class="text-xl font-bold text-azwara-darker dark:text-white">Jadwal Akademik</h1>
-                    <div class="mt-1 flex items-center gap-3">
-                        <span class="text-lg font-semibold text-azwara-medium dark:text-gray-300">
-                            {{ $current->translatedFormat('F Y') }}
-                        </span>
-                        @if($current->isCurrentMonth())
-                        <span class="inline-flex items-center gap-1.5 rounded-full bg-green-100 px-2.5 py-0.5 text-xs font-medium text-green-800 dark:bg-green-900/30 dark:text-green-300">
-                            <svg class="h-2 w-2" fill="currentColor" viewBox="0 0 8 8">
-                                <circle cx="4" cy="4" r="4" />
-                            </svg>
-                            Bulan Ini
-                        </span>
-                        @endif
+        {{-- Header --}}
+        <div class="relative overflow-hidden rounded-2xl md:rounded-3xl bg-white dark:bg-primary-900/40 border border-primary-100 dark:border-primary-800/30 p-6 md:p-8 mb-6 md:mb-8">
+            <div class="absolute top-0 right-0 w-64 h-64 bg-primary-500/5 rounded-full blur-3xl -translate-y-1/2 translate-x-1/4"></div>
+            <div class="absolute bottom-0 left-0 w-48 h-48 bg-accent-500/5 rounded-full blur-3xl translate-y-1/2 -translate-x-1/4"></div>
+
+            <div class="relative flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4">
+                <div class="flex items-center gap-4">
+                    <div class="p-3 rounded-xl bg-primary-500/10 text-primary-600 dark:bg-primary-400/10 dark:text-primary-300">
+                        <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"/>
+                        </svg>
+                    </div>
+                    <div>
+                        <h1 class="text-xl md:text-2xl font-bold text-primary-900 dark:text-white tracking-tight">Jadwal Akademik</h1>
+                        <div class="flex items-center gap-3 mt-0.5">
+                            <span class="text-base md:text-lg font-semibold text-primary-600 dark:text-primary-300">
+                                {{ $current->translatedFormat('F Y') }}
+                            </span>
+                            @if($current->isCurrentMonth())
+                            <span class="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-xs font-medium bg-emerald-100 text-emerald-700 dark:bg-emerald-900/20 dark:text-emerald-300 border border-emerald-200 dark:border-emerald-800/30">
+                                <span class="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse"></span>
+                                Bulan Ini
+                            </span>
+                            @endif
+                        </div>
                     </div>
                 </div>
-            </div>
 
-            <div class="flex items-center gap-2">
-                <a href="{{ route('schedule.index', ['month' => $prev->month, 'year' => $prev->year]) }}"
-                   class="inline-flex items-center gap-2 rounded-lg border border-azwara-lighter bg-white px-4 py-2.5 text-sm font-medium text-azwara-medium transition-colors hover:bg-azwara-lightest dark:border-gray-600 dark:bg-gray-700 dark:text-gray-200 dark:hover:bg-gray-600">
-                    <svg class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7" />
-                    </svg>
-                    {{ $prev->translatedFormat('M') }}
-                </a>
+                {{-- Navigation --}}
+                <div class="flex flex-wrap items-center gap-2">
+                    <a href="{{ route('schedule.index', ['month' => $prev->month, 'year' => $prev->year]) }}"
+                       class="inline-flex items-center gap-1.5 px-3.5 py-2.5 rounded-xl border border-primary-200 dark:border-primary-700/50 bg-white dark:bg-primary-800/20 text-sm font-medium text-secondary-600 dark:text-secondary-300 hover:bg-primary-50 dark:hover:bg-primary-800/30 hover:border-primary-300 dark:hover:border-primary-600 transition-all duration-200">
+                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"/>
+                        </svg>
+                        <span class="hidden sm:inline">{{ $prev->translatedFormat('M') }}</span>
+                        <span class="sm:hidden">‹</span>
+                    </a>
 
-                <a href="{{ route('schedule.index', ['month' => now()->month, 'year' => now()->year]) }}"
-                   class="inline-flex items-center gap-2 rounded-lg bg-azwara-medium px-4 py-2.5 text-sm font-medium text-white transition-colors hover:bg-azwara-light focus:outline-none focus:ring-2 focus:ring-azwara-medium focus:ring-offset-2 dark:focus:ring-offset-gray-900">
-                    <svg class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
-                    </svg>
-                    Hari Ini
-                </a>
+                    <a href="{{ route('schedule.index', ['month' => now()->month, 'year' => now()->year]) }}"
+                       class="inline-flex items-center gap-1.5 px-4 py-2.5 rounded-xl bg-primary-600 hover:bg-primary-700 text-white text-sm font-medium transition-all duration-200 hover:shadow-lg hover:shadow-primary-500/25 active:scale-[0.98]">
+                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"/>
+                        </svg>
+                        Hari Ini
+                    </a>
 
-                <a href="{{ route('schedule.index', ['month' => $next->month, 'year' => $next->year]) }}"
-                   class="inline-flex items-center gap-2 rounded-lg border border-azwara-lighter bg-white px-4 py-2.5 text-sm font-medium text-azwara-medium transition-colors hover:bg-azwara-lightest dark:border-gray-600 dark:bg-gray-700 dark:text-gray-200 dark:hover:bg-gray-600">
-                    {{ $next->translatedFormat('M') }}
-                    <svg class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
-                    </svg>
-                </a>
-            </div>
-        </div>
-    </div>
-
-    {{-- CALENDAR --}}
-    <div class="overflow-hidden rounded-xl border border-azwara-lighter bg-white dark:border-gray-700 dark:bg-gray-800">
-        {{-- Day Headers --}}
-        <div class="grid grid-cols-7 border-b border-azwara-lighter dark:border-gray-700">
-            @foreach (['Senin', 'Selasa', 'Rabu', 'Kamis', 'Jumat', 'Sabtu', 'Minggu'] as $day)
-                <div class="px-4 py-3 text-center">
-                    <div class="text-sm font-semibold text-azwara-darker dark:text-white">{{ $day }}</div>
-                    <div class="mt-1 text-xs text-azwara-medium dark:text-gray-400">{{ substr($day, 0, 3) }}</div>
+                    <a href="{{ route('schedule.index', ['month' => $next->month, 'year' => $next->year]) }}"
+                       class="inline-flex items-center gap-1.5 px-3.5 py-2.5 rounded-xl border border-primary-200 dark:border-primary-700/50 bg-white dark:bg-primary-800/20 text-sm font-medium text-secondary-600 dark:text-secondary-300 hover:bg-primary-50 dark:hover:bg-primary-800/30 hover:border-primary-300 dark:hover:border-primary-600 transition-all duration-200">
+                        <span class="hidden sm:inline">{{ $next->translatedFormat('M') }}</span>
+                        <span class="sm:hidden">›</span>
+                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/>
+                        </svg>
+                    </a>
                 </div>
-            @endforeach
+            </div>
         </div>
 
-        {{-- Calendar Grid --}}
-        <div class="grid grid-cols-7 divide-x divide-y divide-azwara-lighter dark:divide-gray-700">
-            @for ($date = $start->copy(); $date <= $end; $date->addDay())
-                @php
-                    $dateKey = $date->format('Y-m-d');
-                    $isCurrentMonth = $date->month === $current->month;
-                    $isToday = $date->isToday();
-                    $isWeekend = $date->isWeekend();
-                    $events = $items[$dateKey] ?? [];
-                    $eventCount = count($events);
-                @endphp
+        {{-- Calendar --}}
+        <div class="bg-white dark:bg-primary-900/30 rounded-2xl border border-primary-100 dark:border-primary-800/30 overflow-hidden shadow-sm">
 
-                <div class="min-h-[140px] p-3 {{ !$isCurrentMonth ? 'bg-azwara-lightest/30 dark:bg-gray-900/30' : '' }} {{ $isWeekend ? 'bg-azwara-lightest/50 dark:bg-gray-900/20' : '' }}">
-                    {{-- Date Header --}}
-                    <div class="mb-2 flex items-center justify-between">
-                        <div class="flex items-center gap-2">
-                            <span class="text-sm font-medium {{ $isToday ? 'flex h-7 w-7 items-center justify-center rounded-full bg-azwara-medium text-white' : 'text-azwara-darker dark:text-white' }}">
-                                {{ $date->day }}
-                            </span>
-                            @if($isToday)
-                                <span class="text-xs font-medium text-azwara-medium dark:text-azwara-lighter">Hari Ini</span>
+            {{-- Day Headers --}}
+            <div class="grid grid-cols-7 border-b border-primary-100 dark:border-primary-800/30">
+                @foreach (['Senin', 'Selasa', 'Rabu', 'Kamis', 'Jumat', 'Sabtu', 'Minggu'] as $day)
+                    <div class="px-2 py-3 text-center">
+                        <div class="text-xs sm:text-sm font-semibold text-primary-700 dark:text-primary-200">{{ $day }}</div>
+                        <div class="mt-0.5 text-[10px] sm:text-xs text-secondary-400 dark:text-secondary-500">{{ substr($day, 0, 3) }}</div>
+                    </div>
+                @endforeach
+            </div>
+
+            {{-- Calendar Grid --}}
+            <div class="grid grid-cols-7 divide-x divide-y divide-primary-100 dark:divide-primary-800/30">
+                @for ($date = $start->copy(); $date <= $end; $date->addDay())
+                    @php
+                        $dateKey = $date->format('Y-m-d');
+                        $isCurrentMonth = $date->month === $current->month;
+                        $isToday = $date->isToday();
+                        $isWeekend = $date->isWeekend();
+                        $events = $items[$dateKey] ?? [];
+                        $eventCount = count($events);
+                    @endphp
+
+                    <div class="min-h-[120px] sm:min-h-[140px] p-1.5 sm:p-2.5 md:p-3 {{ !$isCurrentMonth ? 'bg-primary-50/30 dark:bg-primary-900/20' : '' }} {{ $isWeekend ? 'bg-primary-50/50 dark:bg-primary-900/10' : '' }}">
+
+                        {{-- Date --}}
+                        <div class="mb-1.5 sm:mb-2 flex items-center justify-between">
+                            <div class="flex items-center gap-1 sm:gap-2">
+                                <span class="text-xs sm:text-sm font-medium {{ $isToday ? 'flex h-6 w-6 sm:h-7 sm:w-7 items-center justify-center rounded-full bg-primary-600 text-white' : 'text-primary-800 dark:text-primary-100' }}">
+                                    {{ $date->day }}
+                                </span>
+                                @if($isToday)
+                                    <span class="hidden sm:inline text-[10px] font-medium text-primary-600 dark:text-primary-300">Hari Ini</span>
+                                @endif
+                            </div>
+
+                            @if($eventCount > 0)
+                                <span class="rounded-full bg-primary-100 dark:bg-primary-800/40 px-1.5 sm:px-2 py-0.5 text-[9px] sm:text-xs font-medium text-primary-600 dark:text-primary-300">
+                                    {{ $eventCount }}
+                                </span>
                             @endif
                         </div>
 
-                        @if($eventCount > 0)
-                            <span class="rounded-full bg-azwara-lightest px-2 py-0.5 text-xs font-medium text-azwara-medium dark:bg-gray-700 dark:text-gray-300">
-                                {{ $eventCount }} {{ $eventCount === 1 ? 'jadwal' : 'jadwal' }}
-                            </span>
-                        @endif
-                    </div>
-
-                    {{-- Events List --}}
-                    <div class="space-y-1.5">
-                        @foreach ($events as $item)
-                            @php
-                                if ($item['type'] === 'meeting') {
-                                    $courseId = $item['course_id'];
-                                    if (! isset($courseColors[$courseId])) {
-                                        $courseColors[$courseId] = $palette[count($courseColors) % count($palette)];
+                        {{-- Events --}}
+                        <div class="space-y-1 sm:space-y-1.5">
+                            @foreach ($events as $item)
+                                @php
+                                    if ($item['type'] === 'meeting') {
+                                        $courseId = $item['course_id'];
+                                        if (! isset($courseColors[$courseId])) {
+                                            $courseColors[$courseId] = $palette[count($courseColors) % count($palette)];
+                                        }
+                                        $bgClass = $courseColors[$courseId];
+                                        $icon = '<svg class="h-2.5 w-2.5 sm:h-3 sm:w-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 10l4.553-2.276A1 1 0 0121 8.618v6.764a1 1 0 01-1.447.894L15 14M5 18h8a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v8a2 2 0 002 2z" /></svg>';
+                                    } else {
+                                        $bgClass = 'bg-gradient-to-r from-accent-500 to-accent-600';
+                                        $icon = '<svg class="h-2.5 w-2.5 sm:h-3 sm:w-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>';
                                     }
-                                    $bgClass = $courseColors[$courseId];
-                                    $icon = '<svg class="h-3 w-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 10l4.553-2.276A1 1 0 0121 8.618v6.764a1 1 0 01-1.447.894L15 14M5 18h8a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v8a2 2 0 002 2z" /></svg>';
-                                } else {
-                                    $bgClass = 'bg-gradient-to-r from-red-500 to-red-600';
-                                    $icon = '<svg class="h-3 w-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>';
-                                }
-                            @endphp
+                                @endphp
 
-                            <a href="{{ $item['url'] }}"
-                               class="group flex items-center gap-2 rounded-lg p-2 text-xs transition-colors hover:opacity-90 {{ $bgClass }}">
-                                <div class="flex h-5 w-5 items-center justify-center rounded bg-white/20">
-                                    {!! $icon !!}
-                                </div>
-                                <div class="flex-1 overflow-hidden">
-                                    <div class="truncate font-semibold text-white">{{ $item['title'] }}</div>
-                                    <div class="flex items-center gap-1 text-white/90">
-                                        <svg class="h-3 w-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                                  d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
-                                        </svg>
-                                        <span>{{ $item['time']->format('H:i') }}</span>
-                                        <span class="ml-1 text-[10px] uppercase tracking-wider opacity-80">
-                                            {{ $item['type'] === 'meeting' ? 'KELAS' : 'TRYOUT' }}
-                                        </span>
+                                <a href="{{ $item['url'] }}"
+                                   class="group flex items-center gap-1.5 rounded-lg p-1.5 sm:p-2 text-[10px] sm:text-xs transition-all hover:opacity-90 hover:scale-[1.02] {{ $bgClass }}">
+                                    <div class="flex h-4 w-4 sm:h-5 sm:w-5 shrink-0 items-center justify-center rounded bg-white/20">
+                                        {!! $icon !!}
                                     </div>
+                                    <div class="flex-1 min-w-0 overflow-hidden">
+                                        <div class="truncate font-semibold text-white">{{ $item['title'] }}</div>
+                                        <div class="flex items-center gap-1 text-white/90">
+                                            <svg class="h-2 w-2 sm:h-2.5 sm:w-2.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/>
+                                            </svg>
+                                            <span class="text-[9px] sm:text-[10px]">{{ $item['time']->format('H:i') }}</span>
+                                            <span class="hidden sm:inline text-[8px] sm:text-[9px] uppercase tracking-wider opacity-80 ml-0.5">
+                                                {{ $item['type'] === 'meeting' ? 'KELAS' : 'TRYOUT' }}
+                                            </span>
+                                        </div>
+                                    </div>
+                                    <svg class="h-2.5 w-2.5 sm:h-3 sm:w-3 text-white/70 opacity-0 transition-opacity group-hover:opacity-100 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/>
+                                    </svg>
+                                </a>
+                            @endforeach
+
+                            {{-- Empty State --}}
+                            @if($eventCount === 0)
+                                <div class="flex h-12 sm:h-16 items-center justify-center rounded-lg border border-dashed border-primary-200 dark:border-primary-700/30">
+                                    <span class="text-[9px] sm:text-xs text-secondary-400 dark:text-secondary-500">Tidak ada</span>
                                 </div>
-                                <svg class="h-3 w-3 text-white/70 opacity-0 transition-opacity group-hover:opacity-100" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
-                                </svg>
-                            </a>
-                        @endforeach
-
-                        {{-- Empty State --}}
-                        @if($eventCount === 0)
-                            <div class="flex h-16 items-center justify-center rounded-lg border border-dashed border-azwara-lighter dark:border-gray-600">
-                                <span class="text-xs text-azwara-medium dark:text-gray-400">Tidak ada jadwal</span>
-                            </div>
-                        @endif
+                            @endif
+                        </div>
                     </div>
+                @endfor
+            </div>
+        </div>
+
+        {{-- Legend --}}
+        <div class="mt-6 bg-white dark:bg-primary-900/30 rounded-2xl border border-primary-100 dark:border-primary-800/30 p-5 shadow-sm">
+            <h3 class="text-sm font-semibold text-primary-800 dark:text-primary-100 mb-3">Legenda Jadwal</h3>
+            <div class="flex flex-wrap gap-3 sm:gap-4">
+                <div class="flex items-center gap-2">
+                    <div class="h-3 w-3 rounded-full bg-blue-500"></div>
+                    <span class="text-xs text-secondary-600 dark:text-secondary-300">Meeting Kelas</span>
                 </div>
-            @endfor
-        </div>
-    </div>
-
-    {{-- LEGEND --}}
-    <div class="rounded-xl border border-azwara-lighter bg-white p-5 dark:border-gray-700 dark:bg-gray-800">
-        <h3 class="mb-4 text-sm font-semibold text-azwara-darker dark:text-white">Legenda Jadwal</h3>
-        <div class="flex flex-wrap gap-4">
-            <div class="flex items-center gap-2">
-                <div class="h-3 w-3 rounded-full bg-blue-500"></div>
-                <span class="text-xs text-azwara-medium dark:text-gray-300">Meeting Kelas</span>
-            </div>
-            <div class="flex items-center gap-2">
-                <div class="h-3 w-3 rounded-full bg-gradient-to-r from-red-500 to-red-600"></div>
-                <span class="text-xs text-azwara-medium dark:text-gray-300">Sesi Tryout</span>
-            </div>
-            <div class="flex items-center gap-2">
-                <div class="h-7 w-7 rounded-full border-2 border-azwara-medium"></div>
-                <span class="text-xs text-azwara-medium dark:text-gray-300">Hari Ini</span>
-            </div>
-            <div class="flex items-center gap-2">
-                <div class="h-3 w-3 rounded bg-azwara-lightest dark:bg-gray-700"></div>
-                <span class="text-xs text-azwara-medium dark:text-gray-300">Akhir Pekan</span>
-            </div>
-            <div class="flex items-center gap-2">
-                <div class="h-3 w-3 rounded bg-azwara-lightest/50 dark:bg-gray-900"></div>
-                <span class="text-xs text-azwara-medium dark:text-gray-300">Bulan Lain</span>
+                <div class="flex items-center gap-2">
+                    <div class="h-3 w-3 rounded-full bg-accent-500"></div>
+                    <span class="text-xs text-secondary-600 dark:text-secondary-300">Sesi Tryout</span>
+                </div>
+                <div class="flex items-center gap-2">
+                    <div class="h-6 w-6 rounded-full border-2 border-primary-600"></div>
+                    <span class="text-xs text-secondary-600 dark:text-secondary-300">Hari Ini</span>
+                </div>
+                <div class="flex items-center gap-2">
+                    <div class="h-3 w-3 rounded bg-primary-50 dark:bg-primary-900/20"></div>
+                    <span class="text-xs text-secondary-600 dark:text-secondary-300">Akhir Pekan</span>
+                </div>
+                <div class="flex items-center gap-2">
+                    <div class="h-3 w-3 rounded bg-primary-50/30 dark:bg-primary-900/10"></div>
+                    <span class="text-xs text-secondary-600 dark:text-secondary-300">Bulan Lain</span>
+                </div>
+                <div class="flex items-center gap-2">
+                    <div class="h-3 w-3 rounded-full bg-primary-100 dark:bg-primary-800/40 flex items-center justify-center text-[8px] font-bold text-primary-600 dark:text-primary-300">1</div>
+                    <span class="text-xs text-secondary-600 dark:text-secondary-300">Jumlah Jadwal</span>
+                </div>
             </div>
         </div>
     </div>
-
 </div>
 @endsection

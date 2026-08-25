@@ -1,56 +1,100 @@
 @extends('layouts.app')
 
 @section('content')
+<div class="py-6 md:py-8">
+    <div class="max-w-2xl mx-auto px-4 sm:px-6 lg:px-8">
 
-<div class="max-w-xl mx-auto px-4 py-8">
+        {{-- Navigation --}}
+        <nav class="flex items-center gap-2 text-sm mb-6">
+            <a href="{{ route('bank.category.index') }}"
+               class="text-secondary-500 hover:text-primary-600 dark:text-secondary-400 dark:hover:text-primary-300 transition-colors group">
+                <span class="inline-flex items-center gap-1.5">
+                    <svg class="w-4 h-4 group-hover:-translate-x-0.5 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"/>
+                    </svg>
+                    Kategori Bank Soal
+                </span>
+            </a>
+            <span class="text-secondary-300 dark:text-secondary-600">/</span>
+            <a href="{{ route('bank.category.materials.index', $material->category) }}"
+               class="text-secondary-500 hover:text-primary-600 dark:text-secondary-400 dark:hover:text-primary-300 transition-colors group">
+                {{ $material->category->name }}
+            </a>
+            <span class="text-secondary-300 dark:text-secondary-600">/</span>
+            <span class="text-primary-600 dark:text-primary-300 font-medium">Edit Materi</span>
+        </nav>
 
-    <h1 class="text-2xl font-bold mb-6 text-gray-800 dark:text-gray-100">
-        Edit Materi: {{ $material->name }}
-    </h1>
+        {{-- Main Card --}}
+        <div class="bg-white dark:bg-primary-900/30 rounded-2xl border border-primary-100 dark:border-primary-800/30 overflow-hidden shadow-sm">
 
-    {{-- VALIDATION ERRORS --}}
-    @if ($errors->any())
-        <div class="p-4 mb-4 rounded-lg bg-red-100 text-red-700 border border-red-300">
-            <ul class="list-disc pl-5 space-y-1">
-                @foreach ($errors->all() as $error)
-                    <li>{{ $error }}</li>
-                @endforeach
-            </ul>
+            {{-- Header --}}
+            <div class="px-6 py-5 border-b border-primary-100 dark:border-primary-800/30">
+                <div class="flex items-center gap-3">
+                    <div class="p-2.5 rounded-xl bg-primary-500/10 text-primary-600 dark:bg-primary-400/10 dark:text-primary-300">
+                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"/>
+                        </svg>
+                    </div>
+                    <div>
+                        <h1 class="text-xl font-bold text-primary-800 dark:text-primary-100">Edit Materi</h1>
+                        <p class="text-sm text-secondary-500 dark:text-secondary-400">
+                            Perbarui informasi materi <span class="font-medium text-primary-600 dark:text-primary-300">{{ $material->name }}</span>
+                        </p>
+                    </div>
+                </div>
+            </div>
+
+            {{-- Form --}}
+            <form action="{{ route('bank.material.update', $material) }}" method="POST" class="p-6 space-y-6">
+                @csrf
+                @method('PUT')
+
+                {{-- Nama Materi --}}
+                <div>
+                    <label class="block text-sm font-medium text-primary-700 dark:text-primary-300 mb-1.5">
+                        Nama Materi <span class="text-accent-500">*</span>
+                    </label>
+                    <input type="text" name="name" value="{{ old('name', $material->name) }}" required
+                           placeholder="Contoh: Persamaan Linear, Trigonometri, Tata Surya..."
+                           class="w-full px-4 py-3 rounded-xl border border-primary-200 dark:border-primary-700/50 bg-white dark:bg-primary-800/30 text-primary-800 dark:text-primary-50 placeholder-secondary-400 focus:ring-2 focus:ring-primary-500/30 focus:border-primary-500 transition-all duration-200">
+                    @error('name')
+                        <p class="mt-1.5 text-sm text-red-600 dark:text-red-400">{{ $message }}</p>
+                    @enderror
+                </div>
+
+                {{-- Category Info --}}
+                <div class="rounded-xl bg-primary-50/50 dark:bg-primary-800/20 border border-primary-100 dark:border-primary-700/30 p-4">
+                    <div class="flex items-start gap-3">
+                        <svg class="w-5 h-5 text-primary-500 dark:text-primary-400 shrink-0 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
+                        </svg>
+                        <div>
+                            <p class="text-sm text-primary-700 dark:text-primary-300">
+                                Materi ini berada dalam kategori <strong>{{ $material->category->name }}</strong>
+                            </p>
+                            <p class="text-xs text-secondary-500 dark:text-secondary-400 mt-1">
+                                Materi ini memiliki <strong>{{ $material->questions->count() }}</strong> soal terkait.
+                            </p>
+                        </div>
+                    </div>
+                </div>
+
+                {{-- Actions --}}
+                <div class="flex flex-col sm:flex-row gap-3 pt-4 border-t border-primary-100 dark:border-primary-800/30">
+                    <button type="submit"
+                            class="flex-1 inline-flex items-center justify-center gap-2 px-6 py-3 rounded-xl bg-primary-600 hover:bg-primary-700 text-white font-medium transition-all duration-200 hover:shadow-lg hover:shadow-primary-500/25 active:scale-[0.98]">
+                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/>
+                        </svg>
+                        Update Materi
+                    </button>
+                    <a href="{{ route('bank.category.materials.index', $material->category) }}"
+                       class="flex-1 sm:flex-none inline-flex items-center justify-center gap-2 px-6 py-3 rounded-xl border border-primary-200 dark:border-primary-700/50 text-secondary-600 dark:text-secondary-400 hover:bg-primary-50 dark:hover:bg-primary-800/20 transition-all duration-200">
+                        Batal
+                    </a>
+                </div>
+            </form>
         </div>
-    @endif
-
-    <form
-        action="{{ route('bank.material.update', $material) }}"
-        method="POST"
-        class="space-y-5">
-
-        @csrf
-        @method('PUT')
-
-        {{-- Name --}}
-        <div class="space-y-1">
-            <label class="font-semibold text-gray-800 dark:text-gray-100">
-                Nama Materi <span class="text-red-500">*</span>
-            </label>
-
-            <input type="text" name="name"
-                value="{{ old('name', $material->name) }}" required
-                class="w-full px-3 py-2 rounded-lg border border-gray-300 dark:border-gray-700
-                       bg-white dark:bg-gray-800 text-gray-800 dark:text-gray-100
-                       focus:ring-2 focus:ring-primary focus:border-transparent transition">
-
-            @error('name')
-                <p class="text-sm text-red-500">{{ $message }}</p>
-            @enderror
-        </div>
-
-        <button
-            class="px-4 py-2 bg-primary text-white rounded-lg shadow hover:bg-primary/90 transition w-full">
-            Update
-        </button>
-
-    </form>
-
+    </div>
 </div>
-
 @endsection
