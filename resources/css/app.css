@@ -61,98 +61,383 @@ html {
     hover:shadow-xl hover:scale-[1.02] transition;
 }
 
-/* Sidebar & Menu */
+/* ========================================
+   SIDEBAR & MENU - Forest & Stone Theme
+   ======================================== */
+
 @layer components {
+
+    /* ===== SIDEBAR CONTAINER ===== */
+    .sidebar-brand {
+        @apply relative flex flex-col items-center py-8 gap-3
+               border-b border-primary-200/30 dark:border-primary-800/30;
+    }
+
+    .sidebar-brand .logo-wrapper {
+        @apply relative w-24 h-24 rounded-2xl overflow-hidden
+               border-2 border-primary-500/30 dark:border-primary-400/30
+               shadow-lg shadow-primary-500/20 dark:shadow-primary-400/10
+               bg-white dark:bg-primary-800
+               transition-all duration-300;
+    }
+
+    .sidebar-brand .logo-wrapper:hover {
+        @apply shadow-xl shadow-primary-500/30 dark:shadow-primary-400/20
+               scale-105;
+    }
+
+    .sidebar-brand .logo-wrapper img {
+        @apply object-cover w-full h-full
+               transition-transform duration-300;
+    }
+
+    .sidebar-brand .logo-wrapper:hover img {
+        @apply scale-110;
+    }
+
+    /* Glow effect untuk logo */
+    .sidebar-brand .logo-glow {
+        @apply absolute -inset-1 rounded-2xl
+               bg-primary-500/20 dark:bg-primary-400/10 blur-xl
+               opacity-0 transition-opacity duration-500 -z-10;
+    }
+
+    .sidebar-brand .logo-wrapper:hover + .logo-glow {
+        @apply opacity-100;
+    }
+
+    .sidebar-brand .brand-name {
+        @apply text-xl font-bold text-primary-700 dark:text-primary-200
+               tracking-tight;
+    }
+
+    .sidebar-brand .brand-subtitle {
+        @apply text-xs text-secondary-500 dark:text-secondary-400
+               font-medium tracking-wider uppercase;
+    }
 
     /* ===== MAIN MENU ITEM ===== */
     .menu-item {
         @apply relative flex items-center gap-3
                px-4 py-3 rounded-xl
                cursor-pointer font-medium text-sm
-               text-azwara-darkest dark:text-azwara-lighter
-               transition-all duration-200
-               hover:bg-azwara-light/40
-               dark:hover:bg-azwara-darkest/80;
+               text-primary-700 dark:text-primary-300
+               transition-all duration-200 ease-in-out
+               hover:bg-primary-100/50 dark:hover:bg-primary-800/40
+               hover:text-primary-800 dark:hover:text-primary-200
+               hover:translate-x-1;
     }
 
-    /* subtle lift on hover */
-    .menu-item:hover {
-        transform: translateX(2px);
-    }
-
-    /* icon */
+    /* Icon dalam menu item */
     .menu-item svg {
         @apply w-5 h-5 flex-shrink-0
-               text-azwara-medium
-               transition-colors duration-200;
+               text-secondary-500 dark:text-secondary-400
+               transition-all duration-200;
     }
 
     .menu-item:hover svg {
-        @apply text-primary;
+        @apply text-primary-600 dark:text-primary-300
+               scale-110;
     }
 
     /* ===== ACTIVE STATE ===== */
     .menu-item.active {
-        @apply bg-azwara-light/60
-               dark:bg-azwara-darkest
-               dark:text-azwara-lightest
-               text-primary;
+        @apply bg-primary-100/60 dark:bg-primary-800/40
+               text-primary-800 dark:text-primary-200
+               shadow-sm;
     }
 
     .menu-item.active svg {
-        @apply text-primary;
+        @apply text-primary-600 dark:text-primary-300;
     }
 
-    /* left accent bar */
+    /* Left accent bar - lebih elegan */
     .menu-item.active::before {
         content: '';
-        @apply absolute left-0 top-2 bottom-2 w-1
-               bg-primary rounded-r-full;
+        @apply absolute left-0 top-1/2 -translate-y-1/2
+               w-1 h-8
+               bg-gradient-to-b from-primary-500 to-accent-500
+               rounded-r-full
+               shadow-sm shadow-primary-500/30;
     }
 
     /* ===== SUB MENU ===== */
     .menu-subitem {
-        @apply relative flex items-center gap-2
-               px-3 py-2 rounded-lg
-               text-xs font-medium
-               text-azwara-darkest/80 dark:text-azwara-lighter/70
-               transition-all duration-150
-               hover:bg-azwara-light/30
-               dark:hover:bg-azwara-darkest;
-    }
-
-    .menu-subitem:hover {
-        transform: translateX(2px);
+        @apply relative flex items-center gap-3
+               px-4 py-2.5 rounded-lg
+               text-sm font-medium
+               text-secondary-600 dark:text-secondary-400
+               transition-all duration-150 ease-in-out
+               hover:bg-primary-100/30 dark:hover:bg-primary-800/30
+               hover:text-primary-700 dark:hover:text-primary-300
+               hover:translate-x-1
+               pl-11;
     }
 
     .menu-subitem.active {
-        @apply text-blue-600 dark:text-azwara-lightest;
+        @apply text-primary-700 dark:text-primary-300
+               bg-primary-100/40 dark:bg-primary-800/30;
     }
 
-    /* dot indicator */
-    .menu-subitem span {
-        @apply opacity-60;
+    /* Dot indicator untuk sub menu */
+    .menu-subitem::before {
+        content: '';
+        @apply absolute left-6 top-1/2 -translate-y-1/2
+               w-1.5 h-1.5 rounded-full
+               bg-secondary-300 dark:bg-secondary-600
+               transition-all duration-200;
     }
 
-    /* badge */
+    .menu-subitem:hover::before {
+        @apply bg-primary-500 dark:bg-primary-400
+               scale-125;
+    }
+
+    .menu-subitem.active::before {
+        @apply bg-primary-500 dark:bg-primary-400
+               shadow-sm shadow-primary-500/30;
+    }
+
+    /* ===== SUB MENU EXPAND/COLLAPSE ===== */
+    .menu-subitem.expandable {
+        @apply cursor-pointer;
+    }
+
+    .menu-subitem.expandable .chevron {
+        @apply ml-auto transition-transform duration-200;
+    }
+
+    .menu-subitem.expandable.open .chevron {
+        @apply rotate-180;
+    }
+
+    /* ===== DIVIDER ===== */
+    .menu-divider {
+        @apply my-4 border-t border-primary-200/30 dark:border-primary-800/30;
+    }
+
+    /* ===== MENU LABEL ===== */
+    .menu-label {
+        @apply px-4 py-2 text-[10px] font-bold uppercase tracking-wider
+               text-secondary-400 dark:text-secondary-500;
+    }
+
+    /* ===== BADGE ===== */
     .badge {
-        @apply text-[10px] font-semibold
-               px-2 py-0.5 rounded-full
-               bg-primary text-white;
+        @apply text-[10px] font-bold
+               px-2.5 py-0.5 rounded-full
+               bg-gradient-to-r from-primary-500 to-accent-500
+               text-white
+               shadow-sm shadow-primary-500/20;
     }
+
+    .badge-secondary {
+        @apply bg-secondary-500/20 text-secondary-700 dark:text-secondary-300;
+    }
+
+    .badge-success {
+        @apply bg-green-500/20 text-green-700 dark:text-green-300;
+    }
+
+    .badge-warning {
+        @apply bg-amber-500/20 text-amber-700 dark:text-amber-300;
+    }
+
+    /* ===== SIDEBAR FOOTER ===== */
+    .sidebar-footer {
+        @apply mt-auto pt-4 border-t border-primary-200/30 dark:border-primary-800/30;
+    }
+
+    .sidebar-footer .footer-item {
+        @apply flex items-center gap-3 px-4 py-2.5 rounded-xl
+               text-sm font-medium
+               text-secondary-600 dark:text-secondary-400
+               transition-all duration-200
+               hover:bg-primary-100/50 dark:hover:bg-primary-800/40
+               hover:text-primary-700 dark:hover:text-primary-300;
+    }
+
+    .sidebar-footer .footer-item svg {
+        @apply w-5 h-5 flex-shrink-0
+               text-secondary-400 dark:text-secondary-500;
+    }
+
+    .sidebar-footer .footer-item:hover svg {
+        @apply text-primary-500 dark:text-primary-400;
+    }
+
+    /* Logout button - special styling */
+    .sidebar-footer .logout-item {
+        @apply text-red-600 dark:text-red-400
+               hover:bg-red-50/50 dark:hover:bg-red-900/20
+               hover:text-red-700 dark:hover:text-red-300;
+    }
+
+    .sidebar-footer .logout-item svg {
+        @apply text-red-500/70 dark:text-red-400/70;
+    }
+
+    .sidebar-footer .logout-item:hover svg {
+        @apply text-red-600 dark:text-red-300;
+    }
+
+    /* ===== SCROLLBAR CUSTOMIZATION ===== */
+    .sidebar-scroll {
+        @apply scrollbar-thin
+               scrollbar-thumb-primary-400/30 dark:scrollbar-thumb-primary-600/30
+               scrollbar-track-transparent;
+    }
+
+    .sidebar-scroll::-webkit-scrollbar {
+        width: 3px;
+    }
+
+    .sidebar-scroll::-webkit-scrollbar-track {
+        @apply bg-transparent;
+    }
+
+    .sidebar-scroll::-webkit-scrollbar-thumb {
+        @apply bg-primary-400/30 dark:bg-primary-600/30 rounded-full;
+    }
+
+    .sidebar-scroll::-webkit-scrollbar-thumb:hover {
+        @apply bg-primary-500/50 dark:bg-primary-500/50;
+    }
+
+    /* ===== TOOLTIP (optional) ===== */
+    .menu-tooltip {
+        @apply absolute left-full ml-2 px-2 py-1 rounded-lg
+               bg-primary-800 text-primary-100 text-xs font-medium
+               opacity-0 invisible
+               transition-all duration-200
+               whitespace-nowrap
+               shadow-lg;
+    }
+
+    .menu-item:hover .menu-tooltip {
+        @apply opacity-100 visible;
+    }
+
+    /* ===== ANIMATIONS ===== */
+    @keyframes slideIn {
+        from {
+            opacity: 0;
+            transform: translateX(-10px);
+        }
+        to {
+            opacity: 1;
+            transform: translateX(0);
+        }
+    }
+
+    .menu-item,
+    .menu-subitem {
+        animation: slideIn 0.2s ease-out forwards;
+    }
+
+    /* Stagger animation delay */
+    .menu-item:nth-child(1) { animation-delay: 0.05s; }
+    .menu-item:nth-child(2) { animation-delay: 0.10s; }
+    .menu-item:nth-child(3) { animation-delay: 0.15s; }
+    .menu-item:nth-child(4) { animation-delay: 0.20s; }
+    .menu-item:nth-child(5) { animation-delay: 0.25s; }
+    .menu-item:nth-child(6) { animation-delay: 0.30s; }
 }
 
+/* ========================================
+   RESPONSIVE SIDEBAR
+   ======================================== */
 
-/* Sidebar desktop behavior */
+/* Desktop - sidebar selalu terlihat */
 @media (min-width: 768px) {
     #sidebar {
         transform: translateX(0) !important;
+        @apply shadow-none;
     }
+
     .sidebar-closed-desktop {
         transform: translateX(-100%) !important;
     }
+
+    /* Sidebar hover effect on desktop */
+    #sidebar:hover {
+        @apply shadow-2xl;
+    }
 }
 
+/* ========================================
+   DARK MODE OVERRIDES
+   ======================================== */
+
+.dark {
+    /* Sidebar background gradient */
+    #sidebar {
+        @apply bg-gradient-to-b from-primary-950 via-primary-950 to-primary-950/95;
+    }
+
+    /* Menu item active di dark mode */
+    .menu-item.active {
+        @apply bg-primary-800/40 text-primary-200;
+        box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.05);
+    }
+
+    .menu-item.active::before {
+        @apply bg-gradient-to-b from-primary-400 to-accent-400;
+    }
+
+    /* Sub menu di dark mode */
+    .menu-subitem.active {
+        @apply text-primary-300 bg-primary-800/30;
+    }
+
+    .menu-subitem.active::before {
+        @apply bg-primary-400 shadow-sm shadow-primary-400/30;
+    }
+}
+
+/* ========================================
+   MOBILE SIDEBAR OVERLAY
+   ======================================== */
+
+#sidebar-backdrop {
+    @apply fixed inset-0 bg-primary-900/40 backdrop-blur-sm
+           hidden md:hidden z-40;
+}
+
+#sidebar-backdrop.active {
+    @apply block;
+}
+
+/* ========================================
+   UTILITY - Collapsible Menu
+   ======================================== */
+
+.submenu-collapse {
+    @apply overflow-hidden transition-all duration-300 ease-in-out;
+}
+
+.submenu-collapse.collapsed {
+    @apply max-h-0 opacity-0;
+}
+
+.submenu-collapse.expanded {
+    @apply max-h-96 opacity-100;
+}
+
+/* ========================================
+   ACTIVE LINK HIGHLIGHT (for Livewire/Inertia)
+   ======================================== */
+
+[wire\:navigate] .menu-item.active,
+[data-navigate] .menu-item.active {
+    @apply bg-primary-100/60 dark:bg-primary-800/40
+           text-primary-800 dark:text-primary-200;
+}
+
+[wire\:navigate] .menu-item.active::before,
+[data-navigate] .menu-item.active::before {
+    @apply bg-gradient-to-b from-primary-500 to-accent-500;
+}
 /* ============================================
    SELECT2 — MATCH TAILWIND INPUT STYLE
    ============================================ */
