@@ -1,18 +1,9 @@
-{{-- Backdrop mobile.
-
-     `data-sidebar-close` dipakai oleh event delegation di
-     resources/js/sidebar.js. Listener-nya menempel di `document`,
-     bukan di elemen ini, sehingga tetap berfungsi walau elemen ini
-     dirender ulang (Livewire, wire:navigate, bfcache). Jangan hapus
-     atributnya. --}}
-<div id="sidebar-backdrop"
-     data-sidebar-close
-     aria-hidden="true"
-     class="fixed inset-0 bg-primary-900/40 backdrop-blur-sm hidden z-40">
+<div
+    id="sidebar-backdrop"
+    class="fixed inset-0 bg-primary-900/40 backdrop-blur-sm hidden z-40">
 </div>
 
 <aside id="sidebar"
-       aria-hidden="true"
        class="fixed md:static z-50 inset-y-0 left-0 w-72
               min-h-screen
               bg-gradient-to-b from-primary-50 via-white to-neutral-50
@@ -27,14 +18,8 @@
                 border-b border-primary-200/30 dark:border-primary-800/30
                 relative"> {{-- Tambahkan relative --}}
 
-        {{-- Tombol close untuk mobile.
-             `data-sidebar-close` adalah jalur utamanya; atribut
-             onclick dipertahankan sebagai cadangan kalau sidebar.js
-             belum sempat ter-load. --}}
-        <button type="button"
-                data-sidebar-close
-                onclick="closeSidebar()"
-                aria-label="Tutup menu"
+        {{-- Tombol close untuk mobile --}}
+        <button onclick="closeSidebar()"
                 class="md:hidden absolute top-4 right-4 p-2 rounded-full
                        hover:bg-primary-100/50 dark:hover:bg-primary-800/50
                        text-primary-700 dark:text-primary-300
