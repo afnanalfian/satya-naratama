@@ -1,6 +1,83 @@
 @push('script')
     <script>
         /* =====================================================
+           SIDEBAR MANAGEMENT - DIPERBAIKI UNTUK MOBILE
+        ===================================================== */
+        const sidebar = document.getElementById('sidebar');
+        const overlay = document.getElementById('sidebarOverlay');
+        const toggleBtn = document.getElementById('toggleSidebar');
+        const closeBtn = document.getElementById('closeSidebar');
+
+        function showSidebar() {
+            sidebar.classList.add('open');
+            overlay.classList.add('active');
+            document.body.style.overflow = 'hidden'; // Prevent scroll
+        }
+
+        function hideSidebar() {
+            sidebar.classList.remove('open');
+            overlay.classList.remove('active');
+            document.body.style.overflow = ''; // Restore scroll
+        }
+
+        // Toggle sidebar
+        toggleBtn?.addEventListener('click', function(e) {
+            e.stopPropagation();
+            if (sidebar.classList.contains('open')) {
+                hideSidebar();
+            } else {
+                showSidebar();
+            }
+        });
+
+        // Close button
+        closeBtn?.addEventListener('click', function(e) {
+            e.stopPropagation();
+            hideSidebar();
+        });
+
+        // Overlay click
+        overlay?.addEventListener('click', function(e) {
+            if (e.target === overlay) {
+                hideSidebar();
+            }
+        });
+
+        // Expose functions globally for inline onclick
+        window.showSidebar = showSidebar;
+        window.hideSidebar = hideSidebar;
+
+        // Close sidebar on ESC key
+        document.addEventListener('keydown', function(e) {
+            if (e.key === 'Escape' && sidebar?.classList.contains('open')) {
+                hideSidebar();
+            }
+        });
+
+        // Close sidebar when clicking outside on mobile
+        document.addEventListener('click', function(e) {
+            if (window.innerWidth < 768) {
+                const isSidebar = sidebar?.contains(e.target);
+                const isToggle = toggleBtn?.contains(e.target);
+                if (!isSidebar && !isToggle && sidebar?.classList.contains('open')) {
+                    hideSidebar();
+                }
+            }
+        });
+
+        // Handle window resize
+        let resizeTimeout;
+        window.addEventListener('resize', function() {
+            clearTimeout(resizeTimeout);
+            resizeTimeout = setTimeout(() => {
+                if (window.innerWidth >= 768) {
+                    hideSidebar();
+                    sidebar?.classList.remove('open');
+                }
+            }, 100);
+        });
+
+        /* =====================================================
            FULLSCREEN FUNCTION
         ===================================================== */
         const fullscreenBtn = document.getElementById('fullscreenBtn');
@@ -45,11 +122,10 @@
 
         timerEl.innerText = formatTime(remaining);
 
-        // ==== MODIFIKASI TIMER - panggil forceSubmitNow ====
         const timerInterval = setInterval(() => {
             if (remaining <= 0) {
                 clearInterval(timerInterval);
-                forceSubmitNow(); // <-- DIPERBAIKI: panggil forceSubmitNow
+                forceSubmitNow();
                 return;
             }
             remaining--;
@@ -72,34 +148,12 @@
                 });
                 if (res.ok) {
                     const data = await res.json();
-                    remaining = data.remaining_seconds; // koreksi ke waktu server
+                    remaining = data.remaining_seconds;
                 }
             } catch (e) { /* biarkan, coba lagi nanti */ }
         }
 
-        setInterval(syncTimeWithServer, 30000); // tiap 30 detik
-
-        /* =====================================================
-           SIDEBAR MANAGEMENT
-        ===================================================== */
-        const sidebar = document.getElementById('sidebar');
-        const overlay = document.getElementById('sidebarOverlay');
-        const toggleBtn = document.getElementById('toggleSidebar');
-        const closeBtn = document.getElementById('closeSidebar');
-
-        function showSidebar() {
-            sidebar.classList.remove('translate-x-full');
-            overlay.classList.remove('hidden');
-        }
-
-        function hideSidebar() {
-            sidebar.classList.add('translate-x-full');
-            overlay.classList.add('hidden');
-        }
-
-        toggleBtn?.addEventListener('click', showSidebar);
-        closeBtn?.addEventListener('click', hideSidebar);
-        overlay?.addEventListener('click', hideSidebar);
+        setInterval(syncTimeWithServer, 30000);
 
         /* =====================================================
            QUESTION NAVIGATION
@@ -109,7 +163,6 @@
         const navButtons = document.querySelectorAll('.nav-btn');
         const totalQuestions = slides.length;
 
-        // Show submit button only on last question
         function updateSubmitButtonVisibility() {
             const submitForm = document.getElementById('auto-submit-form');
             const nextBtn = document.getElementById('nextBtn');
@@ -128,12 +181,15 @@
                 btn.classList.remove('ring-4', 'ring-primary/30', 'scale-110', 'shadow-lg');
             });
 
-            navButtons[index]?.classList.add('ring-4', 'ring-primary/30', 'scale-110', 'shadow-lg');
+            if (navButtons[index]) {
+                navButtons[index].classList.add('ring-4', 'ring-primary/30', 'scale-110', 'shadow-lg');
+            }
         }
 
         function updateQuestionCounters() {
             let answeredCount = 0;
             navButtons.forEach(btn => {
+                // Check if button has answered class
                 if (btn.classList.contains('bg-green-100') || btn.classList.contains('dark:bg-green-900/30')) {
                     answeredCount++;
                 }
@@ -145,26 +201,35 @@
 
         function showQuestion(index) {
             slides.forEach(s => s.classList.add('hidden'));
-            slides[index]?.classList.remove('hidden');
-            currentIndex = index;
-            setActiveNav(index);
-            updateSubmitButtonVisibility();
-            hideSidebar();
+            if (slides[index]) {
+                slides[index].classList.remove('hidden');
+                currentIndex = index;
+                setActiveNav(index);
+                updateSubmitButtonVisibility();
 
-            // Update button states
-            document.getElementById('prevBtn').disabled = index === 0;
+                // Hide sidebar on mobile after navigation
+                if (window.innerWidth < 768) {
+                    hideSidebar();
+                }
+
+                // Update button states
+                document.getElementById('prevBtn').disabled = index === 0;
+            }
         }
 
+        // Initialize
         setActiveNav(0);
         updateSubmitButtonVisibility();
         updateQuestionCounters();
 
+        // Nav button click
         navButtons.forEach(btn => {
             btn.addEventListener('click', () => {
                 showQuestion(parseInt(btn.dataset.index));
             });
         });
 
+        // Previous/Next buttons
         document.getElementById('prevBtn').addEventListener('click', () => {
             if (currentIndex > 0) showQuestion(currentIndex - 1);
         });
@@ -174,21 +239,17 @@
         });
 
         /* =====================================================
-           ANSWER HANDLING - YANG SUDAH DIPERBAIKI
+           ANSWER HANDLING
         ===================================================== */
-        // Simpan pending promises
         let pendingSaves = [];
 
-        // ==== FUNGSI saveAnswer YANG SUDAH DIPERBAIKI ====
         async function saveAnswer(payload) {
-            // Buat promise untuk tracking
             let resolveSave, rejectSave;
             const savePromise = new Promise((resolve, reject) => {
                 resolveSave = resolve;
                 rejectSave = reject;
             });
 
-            // Tambahkan ke pending
             pendingSaves.push(savePromise);
 
             try {
@@ -218,14 +279,11 @@
                 resolveSave(false);
                 return false;
             } finally {
-                // Hapus dari pending
                 pendingSaves = pendingSaves.filter(p => p !== savePromise);
             }
         }
 
-        // ==== FUNGSI BARU forceSubmitNow ====
         async function forceSubmitNow() {
-            // Tunggu semua pending saves selesai (maksimal 3 detik)
             if (pendingSaves.length > 0) {
                 const timeout = new Promise((_, reject) =>
                     setTimeout(() => reject(new Error('Timeout')), 3000)
@@ -241,22 +299,29 @@
                 }
             }
 
-            // Submit form untuk auto-submit
             document.getElementById('auto-submit-form')?.submit();
         }
 
-        // ==== FUNGSI markAnswered (TIDAK DIUBAH) ====
         function markAnswered(questionId, answered = true) {
             const slide = document.querySelector(`.question-slide[data-question-id="${questionId}"]`);
-            const navBtn = document.querySelector(`.nav-btn[data-index="${slide?.dataset.index}"]`);
+            let navBtn = null;
+
+            if (slide) {
+                const index = parseInt(slide.dataset.index);
+                navBtn = document.querySelector(`.nav-btn[data-index="${index}"]`);
+            }
 
             if (navBtn) {
                 if (answered) {
-                    navBtn.classList.remove('bg-gray-100', 'dark:bg-ens-medium/30', 'text-gray-700', 'dark:text-gray-300', 'border-gray-200', 'dark:border-ens-medium');
+                    // Remove un-answered classes
+                    navBtn.classList.remove('bg-gray-100', 'dark:bg-white/10', 'text-gray-700', 'dark:text-gray-300', 'border-gray-200', 'dark:border-white/15');
+                    // Add answered classes
                     navBtn.classList.add('bg-green-100', 'dark:bg-green-900/30', 'text-green-800', 'dark:text-green-300', 'border-green-300', 'dark:border-green-700');
                 } else {
+                    // Remove answered classes
                     navBtn.classList.remove('bg-green-100', 'dark:bg-green-900/30', 'text-green-800', 'dark:text-green-300', 'border-green-300', 'dark:border-green-700');
-                    navBtn.classList.add('bg-gray-100', 'dark:bg-ens-medium/30', 'text-gray-700', 'dark:text-gray-300', 'border-gray-200', 'dark:border-ens-medium');
+                    // Add un-answered classes
+                    navBtn.classList.add('bg-gray-100', 'dark:bg-white/10', 'text-gray-700', 'dark:text-gray-300', 'border-gray-200', 'dark:border-white/15');
                 }
             }
 
@@ -264,7 +329,7 @@
         }
 
         /* =====================================================
-           MCQ / MCMA / TRUEFALSE - BUTTON STYLE (SUDAH DIPERBAIKI)
+           MCQ / MCMA / TRUEFALSE - BUTTON STYLE
         ===================================================== */
         document.querySelectorAll('.option-button').forEach(container => {
             const input = container.querySelector('input[type="radio"], input[type="checkbox"]');
@@ -277,7 +342,6 @@
 
             label.addEventListener('click', async (e) => {
                 if (input.type === 'radio') {
-                    // Deselect all other options in this question
                     questionSlide?.querySelectorAll('.option-button input[type="radio"]').forEach(otherInput => {
                         if (otherInput !== input) {
                             otherInput.checked = false;
@@ -286,22 +350,18 @@
                     });
                 }
 
-                // Toggle current option
                 input.checked = !input.checked;
 
-                // Update visual state
                 if (input.checked) {
                     container.classList.add('selected');
                 } else {
                     container.classList.remove('selected');
                 }
 
-                // Collect selected options
                 const selected = Array.from(
                     questionSlide?.querySelectorAll('.answer-section input:checked') || []
                 ).map(i => parseInt(i.value));
 
-                // Save answer - TUNGGU SAMPAI SELESAI
                 if (selected.length > 0 || input.type === 'radio') {
                     const success = await saveAnswer({
                         question_id: questionId,
@@ -316,15 +376,13 @@
         });
 
         /* =====================================================
-           SHORT ANSWER (SUDAH DIPERBAIKI)
+           SHORT ANSWER
         ===================================================== */
         document.querySelectorAll('.short-answer-input').forEach(textarea => {
             let timeout;
 
-            // Event input dengan debounce
             textarea.addEventListener('input', function () {
                 clearTimeout(timeout);
-
                 timeout = setTimeout(async () => {
                     const slide = this.closest('.question-slide');
                     const questionId = slide?.dataset.questionId;
@@ -343,7 +401,6 @@
                 }, 500);
             });
 
-            // TAMBAHAN: Save on blur
             textarea.addEventListener('blur', async function () {
                 clearTimeout(timeout);
                 const slide = this.closest('.question-slide');
@@ -364,25 +421,21 @@
         });
 
         /* =====================================================
-           COMPOUND QUESTION HANDLING (SUDAH DIPERBAIKI)
+           COMPOUND QUESTION HANDLING
         ===================================================== */
-        // True/False buttons
         document.querySelectorAll('.truefalse-btn').forEach(button => {
             button.addEventListener('click', async function () {
                 const subId = this.dataset.subId;
                 const questionSlide = this.closest('.question-slide');
                 const questionId = questionSlide?.dataset.questionId;
                 const isTrue = this.textContent.includes('Benar');
-                const value = isTrue ? 1 : 0;
 
-                // Deselect other button in same group
                 const otherBtn = questionSlide?.querySelector(`.truefalse-btn[data-sub-id="${subId}"]:not(:disabled)`);
                 if (otherBtn && otherBtn !== this) {
                     otherBtn.classList.remove('border-green-500', 'bg-green-50', 'dark:bg-green-900/20', 'text-green-700', 'dark:text-green-300',
                         'border-red-500', 'bg-red-50', 'dark:bg-red-900/20', 'text-red-700', 'dark:text-red-300');
                 }
 
-                // Toggle current button
                 const isSelected = this.classList.contains('border-green-500') || this.classList.contains('border-red-500');
                 if (isSelected) {
                     this.classList.remove(isTrue ? 'border-green-500' : 'border-red-500',
@@ -402,20 +455,17 @@
             });
         });
 
-        // Short answer in compound
         document.querySelectorAll('.compound-short-answer').forEach(textarea => {
             let timeout;
 
             textarea.addEventListener('input', function () {
                 clearTimeout(timeout);
-
                 timeout = setTimeout(async () => {
                     const slide = this.closest('.question-slide');
                     await collectAndSaveCompoundAnswers(slide);
                 }, 500);
             });
 
-            // TAMBAHAN: Save on blur untuk compound
             textarea.addEventListener('blur', async function () {
                 clearTimeout(timeout);
                 const slide = this.closest('.question-slide');
@@ -423,14 +473,10 @@
             });
         });
 
-        /* =====================================================
-           FUNGSI collectAndSaveCompoundAnswers (SUDAH DIPERBAIKI)
-        ===================================================== */
         async function collectAndSaveCompoundAnswers(slide) {
             const questionId = slide?.dataset.questionId;
             const answers = [];
 
-            // Collect true/false answers
             slide?.querySelectorAll('.truefalse-btn').forEach(btn => {
                 const subId = btn.dataset.subId;
                 const isSelected = btn.classList.contains('border-green-500') || btn.classList.contains('border-red-500');
@@ -444,7 +490,6 @@
                 }
             });
 
-            // Collect short answers
             slide?.querySelectorAll('.compound-short-answer').forEach(textarea => {
                 const subId = textarea.dataset.subId;
                 const value = textarea.value.trim();
@@ -458,7 +503,6 @@
                 }
             });
 
-            // Save if any answers exist
             if (answers.length > 0) {
                 const success = await saveAnswer({
                     question_id: questionId,
@@ -487,14 +531,8 @@
         });
 
         /* =====================================================
-           INITIALIZATION
+           INITIALIZATION - MARK ANSWERED QUESTIONS
         ===================================================== */
-        // Initialize MathJax if available
-        if (typeof MathJax !== 'undefined') {
-            MathJax.typesetPromise();
-        }
-
-        // Mark initial answered questions
         document.querySelectorAll('.question-slide').forEach(slide => {
             const questionId = slide.dataset.questionId;
             const hasAnswer = slide.querySelector('input:checked') ||
@@ -506,6 +544,11 @@
                 markAnswered(questionId, true);
             }
         });
+
+        // Initialize MathJax if available
+        if (typeof MathJax !== 'undefined') {
+            MathJax.typesetPromise();
+        }
     </script>
     <script>
     window.MathJax = {
@@ -519,7 +562,9 @@
 
     <script>
     document.addEventListener('DOMContentLoaded', () => {
-        MathJax.typesetPromise();
+        if (typeof MathJax !== 'undefined') {
+            MathJax.typesetPromise();
+        }
     });
     </script>
 @endpush

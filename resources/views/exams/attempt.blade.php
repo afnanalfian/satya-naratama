@@ -55,7 +55,8 @@
 
                 {{-- Toggle Sidebar (Mobile) --}}
                 <button id="toggleSidebar"
-                        class="md:hidden p-2.5 rounded-xl bg-white/10 hover:bg-white/20 border border-white/15 transition-colors">
+                        class="md:hidden p-2.5 rounded-xl bg-white/10 hover:bg-white/20 border border-white/15 transition-colors"
+                        aria-label="Toggle navigasi soal">
                     <svg class="w-[18px] h-[18px]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                               d="M4 6h16M4 12h16M4 18h16"/>
@@ -66,9 +67,9 @@
     </div>
 
     {{-- ================= MAIN CONTENT ================= --}}
-    <div class="flex flex-1 overflow-hidden">
+    <div class="flex flex-1 overflow-hidden relative">
         {{-- ================= QUESTION AREA ================= --}}
-        <main class="flex-1 overflow-y-auto p-4 md:p-8">
+        <main class="flex-1 overflow-y-auto p-4 md:p-8" id="mainContent">
             <div class="max-w-3xl mx-auto">
             @foreach($questions as $i => $eq)
                 @php
@@ -367,8 +368,9 @@
                       bg-white dark:bg-primary-950
                       border-l border-neutral-200 dark:border-white/10
                       transform translate-x-full md:translate-x-0
-                      transition-transform duration-200
-                      overflow-y-auto p-5 shadow-xl md:shadow-none">
+                      transition-transform duration-300 ease-in-out
+                      overflow-y-auto p-5 shadow-xl md:shadow-none
+                      md:!transform-none">
 
             {{-- Sidebar Header --}}
             <div class="mb-5 pb-4 border-b border-neutral-200 dark:border-white/10">
@@ -392,7 +394,7 @@
             </div>
 
             {{-- Question Navigation Grid --}}
-            <div class="grid grid-cols-5 md:grid-cols-4 gap-2">
+            <div class="grid grid-cols-5 md:grid-cols-4 gap-2" id="navGrid">
                 @foreach($questions as $i => $eq)
                     @php
                         $question = $eq->question;
@@ -408,6 +410,7 @@
                                         : 'bg-gray-100 dark:bg-white/10 text-gray-700 dark:text-gray-300 border-2 border-gray-200 dark:border-white/15' }}
                                    hover:scale-105 hover:shadow-md active:scale-95"
                             data-index="{{ $i }}"
+                            data-question-id="{{ $question->id }}"
                             data-question-type="{{ $question->type }}">
                         {{ $i + 1 }}
                     </button>
@@ -443,7 +446,7 @@
         {{-- Mobile Overlay --}}
         <div id="sidebarOverlay"
              class="fixed inset-0 bg-primary-950/60 backdrop-blur-sm z-30 hidden md:hidden"
-             onclick="hideSidebar()"></div>
+             onclick="window.hideSidebar && window.hideSidebar()"></div>
     </div>
 
     {{-- ================= FOOTER NAVIGATION ================= --}}
@@ -497,5 +500,43 @@
     </div>
 </div>
 @endsection
+
+@push('styles')
+<style>
+    /* Mobile sidebar fix */
+    @media (max-width: 767px) {
+        #sidebar {
+            position: fixed !important;
+            top: 0 !important;
+            right: 0 !important;
+            bottom: 0 !important;
+            z-index: 40 !important;
+            transform: translateX(100%);
+            transition: transform 0.3s ease-in-out;
+            box-shadow: -4px 0 20px rgba(0,0,0,0.2);
+        }
+
+        #sidebar.open {
+            transform: translateX(0) !important;
+        }
+
+        #sidebarOverlay.active {
+            display: block !important;
+        }
+    }
+
+    @media (min-width: 768px) {
+        #sidebar {
+            transform: none !important;
+            position: relative !important;
+            box-shadow: none !important;
+        }
+
+        #sidebarOverlay {
+            display: none !important;
+        }
+    }
+</style>
+@endpush
 
 @include('exams.js.attempt')
