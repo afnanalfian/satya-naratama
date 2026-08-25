@@ -32,32 +32,32 @@ html {
 
 .form-label-required::after {
     content: " *";
-    color: red;
+    color: #A54B19; /* accent-500 */
     font-weight: bold;
 }
 
 .input-primary {
     @apply mt-1 w-full px-4 py-3 rounded-xl
-    bg-white dark:bg-gray-800
-    border border-gray-300 dark:border-gray-700
-    text-gray-800 dark:text-white
-    focus:ring-primary focus:border-primary;
+    bg-white dark:bg-primary-800/30
+    border border-primary-200 dark:border-primary-700/50
+    text-primary-800 dark:text-primary-50
+    focus:ring-primary-500 focus:border-primary-500;
 }
 
 .input-file {
     @apply mt-1 block w-full text-sm
     file:mr-4 file:py-2 file:px-4
     file:rounded-xl file:border-0
-    file:bg-primary file:text-white
-    hover:file:bg-azwara-medium
-    bg-white dark:bg-gray-800
-    border border-gray-300 dark:border-gray-700
+    file:bg-primary-500 file:text-white
+    hover:file:bg-primary-600
+    bg-white dark:bg-primary-800/30
+    border border-primary-200 dark:border-primary-700/50
     rounded-xl cursor-pointer;
 }
 
 .btn-primary {
     @apply py-3 rounded-xl font-bold text-white
-    bg-gradient-to-r from-primary to-azwara-medium
+    bg-gradient-to-r from-primary-500 to-primary-600
     hover:shadow-xl hover:scale-[1.02] transition;
 }
 
@@ -438,6 +438,7 @@ html {
 [data-navigate] .menu-item.active::before {
     @apply bg-gradient-to-b from-primary-500 to-accent-500;
 }
+
 /* ============================================
    SELECT2 — MATCH TAILWIND INPUT STYLE
    ============================================ */
@@ -445,15 +446,15 @@ html {
 /* WRAPPER */
 .select2-container .select2-selection--single {
     @apply w-full px-4 py-3 h-[48px] rounded-xl
-           bg-white dark:bg-gray-800
-           border border-gray-300 dark:border-gray-700
-           text-gray-800 dark:text-white
+           bg-white dark:bg-primary-800/30
+           border border-primary-200 dark:border-primary-700/50
+           text-primary-800 dark:text-primary-50
            flex items-center;
 }
 
 /* TEXT */
 .select2-container--default .select2-selection--single .select2-selection__rendered {
-    @apply text-gray-800 dark:text-white leading-6;
+    @apply text-primary-800 dark:text-primary-50 leading-6;
     padding-left: 0 !important;
 }
 
@@ -464,43 +465,43 @@ html {
 }
 
 .select2-container--default .select2-selection--single .select2-selection__arrow b {
-    @apply border-gray-500 dark:border-gray-300;
+    @apply border-secondary-500 dark:border-secondary-400;
 }
 
 /* ON FOCUS */
 .select2-container--default.select2-container--focus
 .select2-selection--single {
-    @apply border-primary ring-1 ring-primary;
+    @apply border-primary-500 ring-1 ring-primary-500;
 }
 
 /* DROPDOWN */
 .select2-dropdown {
-    @apply bg-white dark:bg-gray-800
-           border border-gray-300 dark:border-gray-700
+    @apply bg-white dark:bg-primary-800
+           border border-primary-200 dark:border-primary-700/50
            rounded-xl shadow-lg;
 }
 
 /* SEARCH BOX */
 .select2-search--dropdown .select2-search__field {
     @apply px-3 py-2 rounded-lg
-           bg-white dark:bg-gray-800
-           border border-gray-300 dark:border-gray-700
-           text-gray-800 dark:text-white;
+           bg-white dark:bg-primary-800/30
+           border border-primary-200 dark:border-primary-700/50
+           text-primary-800 dark:text-primary-50;
 }
 
 /* OPTION NORMAL */
 .select2-results__option {
-    @apply px-3 py-2 text-gray-800 dark:text-white;
+    @apply px-3 py-2 text-primary-800 dark:text-primary-50;
 }
 
 /* OPTION HOVER */
 .select2-results__option--highlighted {
-    @apply bg-primary text-white;
+    @apply bg-primary-500 text-white;
 }
 
 /* OPTION SELECTED */
 .select2-results__option[aria-selected=true] {
-    @apply bg-azwara-medium text-white;
+    @apply bg-primary-600 text-white;
 }
 
 
@@ -607,7 +608,7 @@ LANDING PAGE CSS */
 
 /* Hero decorative background */
 .hero-bg-gradient {
-    background: linear-gradient(135deg, #012A36 0%, #014F56 80%, #027373 100%);
+    background: linear-gradient(135deg, #0D1B0D 0%, #275127 80%, #418741 100%);
     opacity: 0.9;
 }
 
@@ -623,26 +624,26 @@ section {
 
 /* ===== BUTTONS ===== */
 .btn-primary {
-    background-color: var(--color-primary);
+    background-color: #418741;
     color: white;
     transition: all 0.3s ease;
-    box-shadow: 0 4px 6px rgba(2, 115, 115, 0.2);
+    box-shadow: 0 4px 6px rgba(65, 135, 65, 0.2);
 }
 
 .btn-primary:hover {
-    background-color: var(--color-azwara-medium);
+    background-color: #346C34;
     transform: translateY(-2px);
-    box-shadow: 0 6px 12px rgba(2, 115, 115, 0.3);
+    box-shadow: 0 6px 12px rgba(65, 135, 65, 0.3);
 }
 
 .btn-outline {
-    border: 2px solid var(--color-primary);
-    color: var(--color-primary);
+    border: 2px solid #418741;
+    color: #418741;
     transition: all 0.3s ease;
 }
 
 .btn-outline:hover {
-    background-color: rgba(169, 214, 214, 0.2);
+    background-color: rgba(65, 135, 65, 0.1);
 }
 
 /* ===== SCROLL TO TOP ===== */
@@ -697,7 +698,7 @@ section {
     }
 
     .mobile-nav-item:hover {
-        background-color: rgba(242, 239, 231, 0.5);
+        background-color: rgba(235, 229, 221, 0.5);
     }
 }
 
@@ -817,7 +818,7 @@ footer::before {
     height: 1px;
     background: linear-gradient(90deg,
         transparent 0%,
-        rgba(38, 166, 154, 0.3) 50%,
+        rgba(65, 135, 65, 0.3) 50%,
         transparent 100%);
 }
 
@@ -834,7 +835,7 @@ footer a:not(.btn)::after {
     left: 0;
     width: 0;
     height: 1px;
-    background-color: var(--color-primary);
+    background-color: #418741;
     transition: width 0.3s ease;
 }
 
@@ -844,7 +845,7 @@ footer a:not(.btn):hover::after {
 
 /* Newsletter form focus states */
 footer input:focus {
-    box-shadow: 0 0 0 3px rgba(2, 115, 115, 0.2);
+    box-shadow: 0 0 0 3px rgba(65, 135, 65, 0.2);
 }
 
 /* Responsive footer */
@@ -979,15 +980,15 @@ footer .social-icon span::before {
 
 #courses .course-card:hover {
     transform: translateY(-8px);
-    box-shadow: 0 20px 60px rgba(11, 31, 51, 0.15);
+    box-shadow: 0 20px 60px rgba(13, 27, 13, 0.15);
 }
 
 #courses .shadow-xl {
-    box-shadow: 0 10px 40px rgba(11, 31, 51, 0.08);
+    box-shadow: 0 10px 40px rgba(13, 27, 13, 0.08);
 }
 
 #courses .shadow-xl:hover {
-    box-shadow: 0 20px 60px rgba(11, 31, 51, 0.12);
+    box-shadow: 0 20px 60px rgba(13, 27, 13, 0.12);
 }
 
 /* Gradient backgrounds */
@@ -1111,17 +1112,17 @@ footer .social-icon span::before {
 
 /* Modern modal styling */
 #meetingsModal .bg-azwara-darkest\/90 {
-    backdrop-filter: blur(8px);
+    background-color: rgba(13, 27, 13, 0.9);
 }
 
 #meetingsModal .shadow-2xl {
-    box-shadow: 0 25px 50px rgba(11, 31, 51, 0.15);
+    box-shadow: 0 25px 50px rgba(13, 27, 13, 0.15);
 }
 
-/* Custom scrollbar dengan warna Azwara */
+/* Custom scrollbar dengan warna Forest & Stone */
 #meetingsModal .max-h-\[50vh\] {
     scrollbar-width: thin;
-    scrollbar-color: #3A6F8F #F2EFE7;
+    scrollbar-color: #418741 #F1F2F4;
 }
 
 #meetingsModal .max-h-\[50vh\]::-webkit-scrollbar {
@@ -1129,22 +1130,22 @@ footer .social-icon span::before {
 }
 
 #meetingsModal .max-h-\[50vh\]::-webkit-scrollbar-track {
-    background: #F2EFE7;
+    background: #F1F2F4;
     border-radius: 10px;
 }
 
 #meetingsModal .max-h-\[50vh\]::-webkit-scrollbar-thumb {
-    background: linear-gradient(to bottom, #1E4E6D, #102F4A);
+    background: linear-gradient(to bottom, #418741, #275127);
     border-radius: 10px;
 }
 
 #meetingsModal .max-h-\[50vh\]::-webkit-scrollbar-thumb:hover {
-    background: linear-gradient(to bottom, #102F4A, #0B1F33);
+    background: linear-gradient(to bottom, #275127, #1A361A);
 }
 
 /* Status badges */
 .bg-azwara-lighter {
-    background-color: rgba(191, 211, 224, 0.2);
+    background-color: rgba(217, 231, 217, 0.2);
 }
 
 /* Tombol free course */
@@ -1190,7 +1191,7 @@ footer .social-icon span::before {
     transform: translateY(-50%);
     width: 1px;
     height: 40px;
-    background-color: #e5e7eb;
+    background-color: #E3E5E8;
 }
 
 /* Responsive adjustments */
@@ -1294,11 +1295,11 @@ footer .social-icon span::before {
 
 /* Gradient button */
 #tryouts .from-primary.to-azwara-darker {
-    background-image: linear-gradient(to right, #1E4E6D, #102F4A);
+    background-image: linear-gradient(to right, #418741, #1A361A);
 }
 
 #tryouts .from-primary.to-azwara-darker:hover {
-    background-image: linear-gradient(to right, #102F4A, #0B1F33);
+    background-image: linear-gradient(to right, #1A361A, #0D1B0D);
 }
 
 /* ===== PROMO POPUP STYLES ===== */
