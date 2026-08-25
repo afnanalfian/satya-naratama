@@ -346,6 +346,19 @@ html {
 
 /* ========================================
    RESPONSIVE SIDEBAR
+
+   RUANG LINGKUP: seluruh aturan `#sidebar` di file ini KHUSUS untuk
+   sidebar menu layout dashboard (layouts/app), yang state-nya diatur
+   dengan class `-translate-x-full`.
+
+   JANGAN memberi id="sidebar" pada panel off-canvas lain (mis. panel
+   navigasi soal di halaman ujian). Aturan di bagian "Sidebar di mobile"
+   pada akhir file memakai selektor `#sidebar:not(.-translate-x-full)`
+   yang spesifisitasnya (1,1,0) -- lebih tinggi daripada `#sidebar`
+   (1,0,0) di stylesheet halaman mana pun. Panel yang tidak memakai
+   class `-translate-x-full` akan SELALU cocok dengan selektor itu dan
+   terkunci di posisi terbuka; tombol tutupnya jadi tidak berefek.
+   Panel lain wajib memakai id sendiri, mis. #examSidebar.
    ======================================== */
 
 /* Desktop - sidebar selalu terlihat */
@@ -1411,7 +1424,13 @@ header svg {
     opacity: 0;
 }
 
-/* Sidebar di mobile */
+/* Sidebar di mobile (HANYA sidebar menu dashboard - lihat catatan
+   "RESPONSIVE SIDEBAR" di atas sebelum menambah elemen ber-id sidebar).
+
+   Polanya "terbuka secara default, tertutup kalau ada class
+   `-translate-x-full`". Konsekuensinya: setiap elemen #sidebar yang
+   tidak pernah diberi class tersebut otomatis dianggap terbuka.
+   Karena itu id "sidebar" tidak boleh dipakai ulang di halaman lain. */
 @media (max-width: 767px) {
     #sidebar {
         transform: translateX(-100%);
@@ -1421,10 +1440,12 @@ header svg {
         max-width: 85vw;
     }
 
+    /* Tertutup */
     #sidebar.-translate-x-full {
         transform: translateX(-100%);
     }
 
+    /* Terbuka */
     #sidebar:not(.-translate-x-full) {
         transform: translateX(0);
         box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);

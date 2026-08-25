@@ -4,12 +4,11 @@
 <div class="h-full flex flex-col bg-neutral-50 dark:bg-primary-950">
 
     {{-- ================= HEADER / TIMER ================= --}}
-    {{-- FIX: header berada DI LUAR container sidebar/overlay (lihat catatan
-         di elemen <aside> & overlay di bawah). Karena sidebar & overlay
-         sekarang di-posisikan `absolute` relatif ke container konten
-         (bukan `fixed` ke seluruh viewport), keduanya SECARA STRUKTURAL
-         tidak mungkin lagi menutupi header ini, apapun z-index-nya. Tombol
-         toggle & fullscreen jadi selalu bisa di-tap. --}}
+    {{-- Header berada DI LUAR container sidebar/overlay. Karena sidebar &
+         overlay di-posisikan `absolute` relatif ke container konten (bukan
+         `fixed` ke viewport), keduanya secara struktural tidak mungkin
+         menutupi header ini, apapun z-index-nya. Tombol toggle & fullscreen
+         karena itu selalu bisa di-tap. --}}
     <div class="px-4 py-3 bg-hero-gradient text-white shadow-lg shadow-primary-950/20 relative z-20">
         <div class="flex items-center justify-between gap-4">
             {{-- Left: Exam Info --}}
@@ -66,7 +65,7 @@
                         class="md:hidden p-2.5 rounded-xl bg-white/10 hover:bg-white/20 border border-white/15 transition-colors"
                         aria-label="Toggle navigasi soal"
                         aria-expanded="false"
-                        aria-controls="sidebar">
+                        aria-controls="examSidebar">
                     <svg class="w-[18px] h-[18px]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                               d="M4 6h16M4 12h16M4 18h16"/>
@@ -77,8 +76,8 @@
     </div>
 
     {{-- ================= MAIN CONTENT ================= --}}
-    {{-- `relative` di sini jadi anchor posisi untuk <aside id="sidebar">
-         dan #sidebarOverlay (keduanya `absolute` di mobile). Div ini
+    {{-- `relative` di sini jadi anchor posisi untuk <aside id="examSidebar">
+         dan #examSidebarOverlay (keduanya `absolute` di mobile). Div ini
          terletak di BAWAH header, jadi sidebar & overlay tidak akan
          pernah menutupi header di atasnya. --}}
     <div class="flex flex-1 overflow-hidden relative">
@@ -376,20 +375,27 @@
         </main>
 
         {{-- ================= RIGHT SIDEBAR (NAVIGATION) ================= --}}
-        {{-- FIX (2 lapis):
-             1. Hapus utility transform Tailwind (transform translate-x-full
-                md:translate-x-0 transition-transform duration-300
-                ease-in-out md:!transform-none) supaya TIDAK ada dua sistem
-                CSS yang berebut mengatur `transform` di elemen yang sama.
-                Show/hide sekarang 100% dikendalikan oleh SATU sumber: class
-                `.open` di stylesheet bawah (@push('styles')).
-             2. `absolute` (bukan `fixed`) di mobile: parent-nya adalah
-                <div class="flex flex-1 ... relative"> yang terletak di
-                BAWAH header. Karena itu, sidebar (walau `inset-y-0`) hanya
-                akan memenuhi tinggi container tersebut -- TIDAK PERNAH
-                menutupi header di atasnya, apapun z-index-nya. Ini
-                menghilangkan akar masalah "toggle ketutup panel sendiri". --}}
-        <aside id="sidebar"
+        {{-- PENTING - id="examSidebar", JANGAN dikembalikan jadi "sidebar".
+             `resources/css/app.css` punya aturan global untuk sidebar
+             dashboard:
+
+                 @media (max-width: 767px) {
+                     #sidebar:not(.-translate-x-full) { transform: translateX(0); }
+                 }
+
+             Panel ini tidak memakai class `-translate-x-full`, jadi selektor
+             itu SELALU cocok dan -- dengan spesifisitas (1,1,0) -- selalu
+             mengalahkan `#sidebar { transform: translateX(100%) }` (1,0,0)
+             milik halaman ini. Efeknya: sidebar terkunci di posisi terbuka
+             dan tombol tutup tidak pernah terlihat bekerja di HP.
+             Dengan id unik, panel ujian kebal dari semua aturan `#sidebar`
+             global, sekarang maupun yang ditambahkan nanti.
+
+             Catatan posisi: `absolute` (bukan `fixed`) di mobile. Parent-nya
+             adalah <div class="flex flex-1 ... relative"> yang terletak di
+             BAWAH header, jadi sidebar (walau `inset-y-0`) hanya memenuhi
+             tinggi container tersebut dan tidak pernah menutupi header. --}}
+        <aside id="examSidebar"
                class="absolute md:relative inset-y-0 right-0 z-40
                       w-64 md:w-72
                       bg-white dark:bg-primary-950
@@ -475,11 +481,12 @@
         </aside>
 
         {{-- Mobile Overlay --}}
-        {{-- FIX: `absolute` (bukan `fixed`) -- ikut terkurung di container
-             yang sama dengan sidebar, jadi backdrop ini hanya menggelapkan
-             area konten (main + sidebar), tidak pernah menutupi header
-             ataupun footer navigasi. --}}
-        <div id="sidebarOverlay"
+        {{-- `absolute` (bukan `fixed`) -- ikut terkurung di container yang
+             sama dengan sidebar, jadi backdrop ini hanya menggelapkan area
+             konten (main + sidebar), tidak pernah menutupi header ataupun
+             footer navigasi. Id-nya juga dibuat unik agar tidak bentrok
+             dengan #sidebar-backdrop milik layout dashboard. --}}
+        <div id="examSidebarOverlay"
              class="absolute inset-0 bg-primary-950/60 backdrop-blur-sm z-30 hidden md:hidden"
              aria-hidden="true"></div>
     </div>
@@ -541,66 +548,83 @@
 @push('styles')
 <style>
     /* =====================================================
-       SIDEBAR - SATU-SATUNYA SUMBER YANG MENGATUR TRANSFORM
-       (tidak lagi bentrok dengan utility class Tailwind di
-       elemen <aside>, karena class transform sudah dihapus
-       dari markup dan digantikan sepenuhnya oleh block ini)
+       SIDEBAR NAVIGASI SOAL (mobile off-canvas)
 
-       PENTING: `position: absolute` (bukan `fixed`) di mobile.
-       Parent-nya (div.flex.flex-1.relative) ada di BAWAH header,
-       jadi sidebar & overlay ini hanya memenuhi area konten dan
-       TIDAK PERNAH bisa menutupi header/tombol toggle, apapun
-       z-index-nya. Ini yang menghilangkan bug "toggle ketutup
-       panelnya sendiri" di HP.
+       Semua selektor memakai id UNIK (#examSidebar /
+       #examSidebarOverlay) supaya tidak pernah bertabrakan
+       dengan aturan `#sidebar` global di resources/css/app.css
+       yang dipakai layout dashboard. Itulah sebabnya blok ini
+       tidak lagi butuh satu pun `!important`.
+
+       Sumber kebenaran state hanya SATU:
+         - panel terbuka  -> class `.open` pada #examSidebar
+         - backdrop aktif -> class `.active` pada #examSidebarOverlay
+       Tidak ada utility transform Tailwind di elemen tersebut,
+       jadi tidak ada dua sistem yang berebut properti `transform`.
     ===================================================== */
     @media (max-width: 767px) {
-        #sidebar {
-            position: absolute !important;
-            top: 0 !important;
-            right: 0 !important;
-            bottom: 0 !important;
-            z-index: 40 !important;
+        #examSidebar {
+            position: absolute;
+            top: 0;
+            right: 0;
+            bottom: 0;
+            z-index: 40;
             transform: translateX(100%);
             transition: transform 0.3s ease-in-out;
             box-shadow: -4px 0 20px rgba(0, 0, 0, 0.2);
             will-change: transform;
         }
 
-        #sidebar.open {
-            transform: translateX(0) !important;
+        #examSidebar.open {
+            transform: translateX(0);
         }
 
-        #sidebarOverlay {
-            position: absolute !important;
+        /* (1,1,0) -> tetap menang atas `.hidden` Tailwind (0,1,0)
+           tanpa perlu !important. */
+        #examSidebarOverlay {
+            position: absolute;
             transition: opacity 0.2s ease-in-out;
             opacity: 0;
             pointer-events: none;
         }
 
-        #sidebarOverlay.active {
-            display: block !important;
+        #examSidebarOverlay.active {
+            display: block;
             opacity: 1;
             pointer-events: auto;
         }
     }
 
     @media (min-width: 768px) {
-        #sidebar {
-            position: relative !important;
-            transform: none !important;
-            box-shadow: none !important;
+        #examSidebar {
+            position: relative;
+            transform: none;
+            box-shadow: none;
         }
 
-        #sidebarOverlay {
-            display: none !important;
+        #examSidebarOverlay {
+            display: none;
         }
     }
 
-    /* Kunci scroll body saat sidebar mobile terbuka, tanpa mengubah
-       posisi scroll yang sedang berjalan (aman untuk iOS Safari). */
+    /* Kunci scroll body saat sidebar mobile terbuka.
+
+       CATATAN: `touch-action: none` SENGAJA TIDAK dipakai di sini.
+       Properti itu diwariskan ke seluruh keturunan, termasuk
+       #examSidebar sendiri, sehingga grid nomor soal (bisa 30+ soal)
+       tidak bisa di-scroll dengan jari di HP. `overscroll-behavior`
+       sudah cukup untuk mencegah scroll "nembus" ke body. */
     body.sidebar-lock {
         overflow: hidden;
-        touch-action: none;
+        overscroll-behavior: contain;
+    }
+
+    /* Hormati preferensi pengguna yang mematikan animasi. */
+    @media (prefers-reduced-motion: reduce) {
+        #examSidebar,
+        #examSidebarOverlay {
+            transition: none;
+        }
     }
 </style>
 @endpush

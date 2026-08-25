@@ -2,29 +2,46 @@
     <script>
     (function () {
         /* =====================================================
-           SIDEBAR MANAGEMENT - DIPERBAIKI TOTAL UNTUK MOBILE
+           SIDEBAR MANAGEMENT (navigasi soal, off-canvas mobile)
 
-           Perubahan dari versi sebelumnya:
-           1. Show/hide sidebar sekarang HANYA dikendalikan lewat
-              satu class ('open'/'active') + satu block CSS di
-              attempt.blade.php. Tidak ada lagi utility Tailwind
-              (translate-x-full / md:!transform-none) yang bentrok
-              dengan custom CSS di elemen yang sama.
-           2. Header dinaikkan ke z-50 (di atas sidebar z-40) supaya
-              tombol toggle & close SELALU bisa di-tap, walau sidebar
-              sedang terbuka dan overlap dengan header di mobile.
-           3. Pakai matchMedia (bukan resize+innerWidth) supaya
-              perpindahan mobile<->desktop terdeteksi akurat, tidak
-              kena "goyangan" resize dari address bar browser mobile.
-           4. Toggle di-guard dengan flag `isAnimating` sehingga
-              tap super cepat berulang tidak membuat state closed/open
-              bentrok satu sama lain.
+           Catatan penting soal ID:
+           Elemen-nya bernama #examSidebar / #examSidebarOverlay,
+           BUKAN #sidebar / #sidebarOverlay. Nama lama bentrok
+           dengan aturan global di resources/css/app.css:
+
+               @media (max-width: 767px) {
+                   #sidebar:not(.-translate-x-full) {
+                       transform: translateX(0);
+                   }
+               }
+
+           Panel ini tidak memakai class `-translate-x-full`,
+           sehingga selektor itu selalu cocok dan mengunci sidebar
+           di posisi terbuka. Class `.open` tetap dicopot dengan
+           benar oleh hideSidebar(), tapi tampilannya tidak pernah
+           ikut tertutup. Kalau suatu saat id-nya diganti kembali
+           ke "sidebar", bug itu langsung kambuh.
+
+           Prinsip lain yang dipertahankan:
+           1. State disimpan di SATU tempat: class `.open` pada
+              panel dan `.active` pada backdrop. Tidak ada utility
+              transform Tailwind di elemen yang sama, jadi tidak
+              ada dua sistem yang berebut properti `transform`.
+           2. Sidebar & backdrop `absolute` di dalam container
+              konten yang berada di bawah header, sehingga tombol
+              toggle secara struktural tidak mungkin tertutupi.
+           3. matchMedia (bukan resize + innerWidth) supaya
+              perpindahan mobile<->desktop terdeteksi akurat dan
+              tidak ikut "goyang" saat address bar browser mobile
+              muncul/hilang.
         ===================================================== */
-        const sidebar   = document.getElementById('sidebar');
-        const overlay   = document.getElementById('sidebarOverlay');
+        const sidebar   = document.getElementById('examSidebar');
+        const overlay   = document.getElementById('examSidebarOverlay');
         const toggleBtn = document.getElementById('toggleSidebar');
         const closeBtn  = document.getElementById('closeSidebar');
         const mqDesktop = window.matchMedia('(min-width: 768px)');
+
+        let overlayHideTimer = null;
 
         function isSidebarOpen() {
             return sidebar?.classList.contains('open') ?? false;
@@ -32,6 +49,15 @@
 
         function showSidebar() {
             if (!sidebar || mqDesktop.matches) return;
+
+            // Batalkan penyembunyian backdrop yang masih tertunda,
+            // supaya tap buka-tutup-buka cepat tidak bikin backdrop
+            // hilang padahal panelnya sedang terbuka.
+            if (overlayHideTimer !== null) {
+                window.clearTimeout(overlayHideTimer);
+                overlayHideTimer = null;
+            }
+
             sidebar.classList.add('open');
             overlay?.classList.remove('hidden');
             overlay?.classList.add('active');
@@ -42,16 +68,22 @@
 
         function hideSidebar() {
             if (!sidebar) return;
+
             sidebar.classList.remove('open');
             overlay?.classList.remove('active');
             document.body.classList.remove('sidebar-lock');
             toggleBtn?.setAttribute('aria-expanded', 'false');
             sidebar.setAttribute('aria-hidden', 'true');
 
-            // Setelah animasi transisi selesai, sembunyikan overlay dari
-            // accessibility tree & interaksi (biar tidak "invisible tapi
-            // masih menghalangi klik" di beberapa browser mobile).
-            window.setTimeout(() => {
+            // Setelah animasi selesai, sembunyikan backdrop dari
+            // accessibility tree & interaksi supaya tidak jadi lapisan
+            // "tak terlihat tapi masih menghalangi tap" di sebagian
+            // browser mobile.
+            if (overlayHideTimer !== null) {
+                window.clearTimeout(overlayHideTimer);
+            }
+            overlayHideTimer = window.setTimeout(() => {
+                overlayHideTimer = null;
                 if (!isSidebarOpen()) overlay?.classList.add('hidden');
             }, 300);
         }
@@ -76,13 +108,14 @@
             hideSidebar();
         });
 
-        overlay?.addEventListener('click', function () {
+        overlay?.addEventListener('click', function (e) {
+            e.stopPropagation();
             hideSidebar();
         });
 
-        // Expose untuk dipakai fungsi lain di file ini & inline handler lama
-        window.showSidebar = showSidebar;
-        window.hideSidebar = hideSidebar;
+        // Expose untuk dipakai fungsi lain di file ini & handler lama
+        window.showSidebar   = showSidebar;
+        window.hideSidebar   = hideSidebar;
         window.isSidebarOpen = isSidebarOpen;
 
         // Tutup dengan tombol ESC
@@ -95,24 +128,33 @@
         // Tutup saat tap di luar sidebar (mobile)
         document.addEventListener('click', function (e) {
             if (mqDesktop.matches || !isSidebarOpen()) return;
-            const isInsideSidebar = sidebar?.contains(e.target);
-            const isToggleBtn = toggleBtn?.contains(e.target);
-            if (!isInsideSidebar && !isToggleBtn) {
-                hideSidebar();
-            }
+            if (sidebar?.contains(e.target)) return;
+            if (toggleBtn?.contains(e.target)) return;
+            hideSidebar();
         });
 
         // Reset state begitu viewport berpindah ke ukuran desktop
         mqDesktop.addEventListener('change', function (e) {
-            if (e.matches) {
-                sidebar?.classList.remove('open');
-                overlay?.classList.remove('active');
-                overlay?.classList.add('hidden');
-                document.body.classList.remove('sidebar-lock');
-                sidebar?.removeAttribute('aria-hidden');
-                toggleBtn?.setAttribute('aria-expanded', 'false');
+            if (!e.matches) return;
+
+            if (overlayHideTimer !== null) {
+                window.clearTimeout(overlayHideTimer);
+                overlayHideTimer = null;
             }
+            sidebar?.classList.remove('open');
+            overlay?.classList.remove('active');
+            overlay?.classList.add('hidden');
+            document.body.classList.remove('sidebar-lock');
+            sidebar?.removeAttribute('aria-hidden');
+            toggleBtn?.setAttribute('aria-expanded', 'false');
         });
+
+        // Pastikan state awal bersih (mis. saat halaman dipulihkan dari
+        // bfcache setelah tombol "back", di mana class bisa tertinggal).
+        if (mqDesktop.matches) {
+            sidebar?.removeAttribute('aria-hidden');
+        }
+        document.body.classList.remove('sidebar-lock');
 
         /* =====================================================
            FULLSCREEN FUNCTION
