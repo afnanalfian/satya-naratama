@@ -4,12 +4,13 @@
 <div class="h-full flex flex-col bg-neutral-50 dark:bg-primary-950">
 
     {{-- ================= HEADER / TIMER ================= --}}
-    {{-- FIX: z-50 (paling atas) supaya tombol toggle & fullscreen SELALU bisa
-         di-tap, bahkan saat sidebar sedang terbuka. Sebelumnya header cuma
-         z-20 sedangkan sidebar z-40, jadi begitu sidebar terbuka, panel
-         sidebar menutupi tombol toggle-nya sendiri (di mobile) dan tap kedua
-         tidak pernah sampai ke tombol -> sidebar terasa "gak bisa ketutup". --}}
-    <div class="px-4 py-3 bg-hero-gradient text-white shadow-lg shadow-primary-950/20 relative z-50">
+    {{-- FIX: header berada DI LUAR container sidebar/overlay (lihat catatan
+         di elemen <aside> & overlay di bawah). Karena sidebar & overlay
+         sekarang di-posisikan `absolute` relatif ke container konten
+         (bukan `fixed` ke seluruh viewport), keduanya SECARA STRUKTURAL
+         tidak mungkin lagi menutupi header ini, apapun z-index-nya. Tombol
+         toggle & fullscreen jadi selalu bisa di-tap. --}}
+    <div class="px-4 py-3 bg-hero-gradient text-white shadow-lg shadow-primary-950/20 relative z-20">
         <div class="flex items-center justify-between gap-4">
             {{-- Left: Exam Info --}}
             <div class="flex-1 min-w-0">
@@ -76,6 +77,10 @@
     </div>
 
     {{-- ================= MAIN CONTENT ================= --}}
+    {{-- `relative` di sini jadi anchor posisi untuk <aside id="sidebar">
+         dan #sidebarOverlay (keduanya `absolute` di mobile). Div ini
+         terletak di BAWAH header, jadi sidebar & overlay tidak akan
+         pernah menutupi header di atasnya. --}}
     <div class="flex flex-1 overflow-hidden relative">
         {{-- ================= QUESTION AREA ================= --}}
         <main class="flex-1 overflow-y-auto p-4 md:p-8" id="mainContent">
@@ -371,15 +376,21 @@
         </main>
 
         {{-- ================= RIGHT SIDEBAR (NAVIGATION) ================= --}}
-        {{-- FIX: hapus utility transform Tailwind (transform translate-x-full
-             md:translate-x-0 transition-transform duration-300 ease-in-out
-             md:!transform-none) supaya TIDAK ada dua sistem CSS yang
-             berebut mengatur `transform` di elemen yang sama. Show/hide
-             sekarang 100% dikendalikan oleh SATU sumber: class `.open` di
-             stylesheet bawah (@push('styles')). z-40 tetap di bawah header
-             (z-50) supaya toggle/close button header selalu bisa di-tap. --}}
+        {{-- FIX (2 lapis):
+             1. Hapus utility transform Tailwind (transform translate-x-full
+                md:translate-x-0 transition-transform duration-300
+                ease-in-out md:!transform-none) supaya TIDAK ada dua sistem
+                CSS yang berebut mengatur `transform` di elemen yang sama.
+                Show/hide sekarang 100% dikendalikan oleh SATU sumber: class
+                `.open` di stylesheet bawah (@push('styles')).
+             2. `absolute` (bukan `fixed`) di mobile: parent-nya adalah
+                <div class="flex flex-1 ... relative"> yang terletak di
+                BAWAH header. Karena itu, sidebar (walau `inset-y-0`) hanya
+                akan memenuhi tinggi container tersebut -- TIDAK PERNAH
+                menutupi header di atasnya, apapun z-index-nya. Ini
+                menghilangkan akar masalah "toggle ketutup panel sendiri". --}}
         <aside id="sidebar"
-               class="fixed md:relative inset-y-0 right-0 z-40
+               class="absolute md:relative inset-y-0 right-0 z-40
                       w-64 md:w-72
                       bg-white dark:bg-primary-950
                       border-l border-neutral-200 dark:border-white/10
@@ -464,8 +475,12 @@
         </aside>
 
         {{-- Mobile Overlay --}}
+        {{-- FIX: `absolute` (bukan `fixed`) -- ikut terkurung di container
+             yang sama dengan sidebar, jadi backdrop ini hanya menggelapkan
+             area konten (main + sidebar), tidak pernah menutupi header
+             ataupun footer navigasi. --}}
         <div id="sidebarOverlay"
-             class="fixed inset-0 bg-primary-950/60 backdrop-blur-sm z-30 hidden md:hidden"
+             class="absolute inset-0 bg-primary-950/60 backdrop-blur-sm z-30 hidden md:hidden"
              aria-hidden="true"></div>
     </div>
 
@@ -530,10 +545,17 @@
        (tidak lagi bentrok dengan utility class Tailwind di
        elemen <aside>, karena class transform sudah dihapus
        dari markup dan digantikan sepenuhnya oleh block ini)
+
+       PENTING: `position: absolute` (bukan `fixed`) di mobile.
+       Parent-nya (div.flex.flex-1.relative) ada di BAWAH header,
+       jadi sidebar & overlay ini hanya memenuhi area konten dan
+       TIDAK PERNAH bisa menutupi header/tombol toggle, apapun
+       z-index-nya. Ini yang menghilangkan bug "toggle ketutup
+       panelnya sendiri" di HP.
     ===================================================== */
     @media (max-width: 767px) {
         #sidebar {
-            position: fixed !important;
+            position: absolute !important;
             top: 0 !important;
             right: 0 !important;
             bottom: 0 !important;
@@ -549,6 +571,7 @@
         }
 
         #sidebarOverlay {
+            position: absolute !important;
             transition: opacity 0.2s ease-in-out;
             opacity: 0;
             pointer-events: none;

@@ -1345,51 +1345,32 @@ body.popup-open {
     overflow: hidden;
 }
 
-/* Fix untuk dropdown agar tidak terpotong */
-.relative {
-    overflow: visible !important;
+/* ===== FIX: Header Dropdown & Overflow =====
+   PENTING: JANGAN pakai `header, header * { overflow: visible !important; }`
+   Aturan itu memaksa overflow:visible ke SEMUA elemen di header, termasuk
+   elemen yang butuh overflow:hidden untuk berfungsi (mis. `.truncate` pada
+   nama user, `.line-clamp-2` pada notifikasi). Akibatnya nama panjang jadi
+   tidak terpotong dan meluber keluar box.
+   Solusi: hanya buka overflow di header itu sendiri + wrapper dropdown
+   (elemen ber-class x-data / `.relative` yang membungkus tombol+dropdown),
+   bukan ke semua descendant. */
+header {
+    overflow: visible;
 }
 
-/* Fix untuk container header */
-header .relative {
-    overflow: visible !important;
+/* Wrapper langsung dari tombol notifikasi & profil (butuh visible supaya
+   dropdown-nya tidak terpotong oleh header), TANPA menyentuh anak-anaknya */
+header > div > div[x-data] {
+    overflow: visible;
 }
 
-/* Responsive adjustments untuk mobile */
+/* Badge notifikasi lebih kecil di mobile */
 @media (max-width: 640px) {
-    /* Pastikan dropdown tidak terpotong di mobile */
-    .absolute {
-        overflow: visible !important;
-    }
-
-    /* Badge notifikasi lebih kecil di mobile */
     .badge-mobile {
         font-size: 8px !important;
         min-width: 14px !important;
         height: 14px !important;
     }
-}
-
-/* Untuk w-4.5 (custom size) */
-.w-4\.5 {
-    width: 1.125rem;
-}
-.h-4\.5 {
-    height: 1.125rem;
-}
-
-/* Di tailwind.config.js tambahkan di theme.extend */
-
-/* Tambahkan di bagian bawah app.css */
-
-/* ===== FIX: Header Overflow ===== */
-header,
-header * {
-    overflow: visible !important;
-}
-
-header .relative {
-    overflow: visible !important;
 }
 
 /* ===== FIX: Avatar & Icons ===== */
@@ -1399,13 +1380,7 @@ header svg {
     display: block;
 }
 
-/* Pastikan dropdown containers tidak memotong konten */
-header .absolute,
-header .fixed {
-    overflow: visible !important;
-}
-
-/* ===== FIX: w-4.5 & h-4.5 ===== */
+/* ===== FIX: w-4.5 & h-4.5 (custom size, tidak ada di Tailwind default) ===== */
 .w-4\.5 {
     width: 1.125rem;
 }

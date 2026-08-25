@@ -7,7 +7,7 @@
            flex justify-between items-center
            sticky top-0 z-30
            transition-all duration-300
-           overflow-visible"> {{-- Tambahkan overflow-visible --}}
+           overflow-visible">
 
     {{-- Left Section --}}
     <div class="flex items-center gap-1 sm:gap-3 md:gap-4 min-w-0 flex-1 overflow-visible">
@@ -19,8 +19,8 @@
                    hover:bg-primary-100/50 dark:hover:bg-primary-800/50
                    transition-all duration-200
                    md:hidden
-                   relative z-50"> {{-- Tambahkan z-50 --}}
-            <svg width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" class="sm:w-5 sm:h-5">
+                   relative z-50">
+            <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" class="sm:w-5 sm:h-5">
                 <path d="M4 6h16M4 12h16M4 18h16"/>
             </svg>
         </button>
@@ -44,7 +44,7 @@
     </div>
 
     {{-- Right Section --}}
-    <div class="flex items-center gap-0.5 sm:gap-1.5 md:gap-3 flex-shrink-0 overflow-visible relative"> {{-- Tambahkan overflow-visible & relative --}}
+    <div class="flex items-center gap-0.5 sm:gap-1.5 md:gap-3 flex-shrink-0 overflow-visible relative">
 
         {{-- Theme Toggle --}}
         <button onclick="toggleTheme()"
@@ -52,13 +52,13 @@
                        text-primary-700 dark:text-primary-300
                        hover:bg-primary-100/50 dark:hover:bg-primary-800/50
                        transition-all duration-200
-                       relative z-40"> {{-- Tambahkan z-40 --}}
+                       relative z-40">
             <!-- Moon Icon (Light Mode) -->
-            <svg class="block dark:hidden w-4 h-4 sm:w-4.5 sm:h-4.5 md:w-5 md:h-5" fill="none" stroke="currentColor" stroke-width="2">
+            <svg viewBox="0 0 24 24" class="block dark:hidden w-4 h-4 sm:w-4.5 sm:h-4.5 md:w-5 md:h-5" fill="none" stroke="currentColor" stroke-width="2">
                 <path d="M21 12.79A9 9 0 1 1 11.21 3a7 7 0 0 0 9.79 9.79Z"/>
             </svg>
             <!-- Sun Icon (Dark Mode) -->
-            <svg class="hidden dark:block w-4 h-4 sm:w-4.5 sm:h-4.5 md:w-5 md:h-5" fill="none" stroke="currentColor" stroke-width="2">
+            <svg viewBox="0 0 24 24" class="hidden dark:block w-4 h-4 sm:w-4.5 sm:h-4.5 md:w-5 md:h-5" fill="none" stroke="currentColor" stroke-width="2">
                 <circle cx="12" cy="12" r="5"/>
                 <path d="M12 1v2m0 18v2m11-11h-2M3 12H1m16.95 7.95-1.41-1.41M6.46 6.46 5.05 5.05m12.9 0-1.41 1.41M6.46 17.54 5.05 18.95"/>
             </svg>
@@ -76,8 +76,8 @@
                            text-primary-700 dark:text-primary-300
                            hover:bg-primary-100/50 dark:hover:bg-primary-800/50
                            transition-all duration-200
-                           overflow-visible z-40"> {{-- Tambahkan overflow-visible & z-40 --}}
-                <svg class="w-4 h-4 sm:w-4.5 sm:h-4.5 md:w-5 md:h-5" fill="none" stroke="currentColor" stroke-width="2">
+                           overflow-visible z-40">
+                <svg viewBox="0 0 24 24" class="w-4 h-4 sm:w-4.5 sm:h-4.5 md:w-5 md:h-5" fill="none" stroke="currentColor" stroke-width="2">
                     <path d="M12 22c1.1 0 2-.9 2-2H10c0 1.1.9 2 2 2Zm6-6v-5a6 6 0 1 0-12 0v5l-2 2v1h16v-1l-2-2Z"/>
                 </svg>
 
@@ -88,7 +88,7 @@
                                  h-[14px] sm:h-[16px] md:h-[18px]
                                  flex items-center justify-center
                                  shadow-lg shadow-red-500/30
-                                 z-50"> {{-- Tambahkan z-50 --}}
+                                 z-50">
                         {{ $unreadCount > 9 ? '9+' : $unreadCount }}
                     </span>
                 @endif
@@ -100,11 +100,11 @@
                  x-transition:enter-start="opacity-0 scale-95"
                  x-transition:enter-end="opacity-100 scale-100"
                  class="absolute right-0 mt-1 sm:mt-2 md:mt-3
-                        w-screen max-w-[calc(100vw-2rem)] sm:max-w-sm md:max-w-md
+                        w-[calc(100vw-2rem)] max-w-sm sm:max-w-sm md:max-w-md
                         bg-white dark:bg-primary-900
                         rounded-2xl shadow-2xl border
                         dark:border-primary-800/50
-                        overflow-visible z-50"
+                        overflow-hidden z-50"
                  style="right: -8px; left: auto;"
                  @click.outside="open = false">
 
@@ -145,7 +145,7 @@
                         </a>
                     @empty
                         <div class="p-6 sm:p-8 text-center">
-                            <svg class="w-10 h-10 sm:w-12 sm:h-12 mx-auto text-secondary-300 dark:text-secondary-600 mb-3" fill="none" stroke="currentColor" stroke-width="1.5">
+                            <svg viewBox="0 0 24 24" class="w-10 h-10 sm:w-12 sm:h-12 mx-auto text-secondary-300 dark:text-secondary-600 mb-3" fill="none" stroke="currentColor" stroke-width="1.5">
                                 <path d="M12 22c1.1 0 2-.9 2-2H10c0 1.1.9 2 2 2Zm6-6v-5a6 6 0 1 0-12 0v5l-2 2v1h16v-1l-2-2Z"/>
                             </svg>
                             <p class="text-xs sm:text-sm text-secondary-500 dark:text-secondary-400">
@@ -173,16 +173,16 @@
                            hover:bg-primary-100/50 dark:hover:bg-primary-800/50
                            transition-all duration-200
                            border border-transparent hover:border-primary-200/50 dark:hover:border-primary-700/50
-                           relative z-40 overflow-visible"> {{-- Tambahkan overflow-visible & z-40 --}}
+                           relative z-40 overflow-visible">
                 <span class="hidden sm:inline-block text-xs sm:text-sm font-medium text-primary-700 dark:text-primary-300 truncate max-w-[60px] sm:max-w-[80px] md:max-w-[120px]">
                     {{ auth()->user()->name }}
                 </span>
-                <div class="relative flex-shrink-0 overflow-visible"> {{-- Tambahkan wrapper --}}
+                <div class="relative flex-shrink-0 overflow-visible">
                     <img src="{{ auth()->user()->avatar_url ?? asset('img/default-avatar.png') }}"
                          class="w-7 h-7 sm:w-8 sm:h-8 md:w-9 md:h-9 rounded-xl border-2 border-primary-200/50 dark:border-primary-700/50
                                 object-cover shadow-sm
                                 hover:scale-105 transition-transform duration-200
-                                block" /> {{-- Tambahkan block --}}
+                                block" />
                 </div>
             </button>
 
@@ -196,7 +196,7 @@
                         bg-white dark:bg-primary-900
                         rounded-2xl shadow-2xl border
                         dark:border-primary-800/50
-                        overflow-visible z-50 py-1"
+                        overflow-hidden z-50 py-1"
                  style="right: -4px;">
 
                 {{-- Arrow indicator --}}
@@ -219,7 +219,7 @@
                           text-primary-700 dark:text-primary-300
                           hover:bg-primary-50/50 dark:hover:bg-primary-800/30
                           transition-colors duration-150">
-                    <svg class="w-3.5 h-3.5 sm:w-4 sm:h-4 flex-shrink-0" fill="none" stroke="currentColor" stroke-width="2">
+                    <svg viewBox="0 0 24 24" class="w-3.5 h-3.5 sm:w-4 sm:h-4 flex-shrink-0" fill="none" stroke="currentColor" stroke-width="2">
                         <path d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"/>
                     </svg>
                     <span>Profil</span>
@@ -230,7 +230,7 @@
                           text-primary-700 dark:text-primary-300
                           hover:bg-primary-50/50 dark:hover:bg-primary-800/30
                           transition-colors duration-150">
-                    <svg class="w-3.5 h-3.5 sm:w-4 sm:h-4 flex-shrink-0" fill="none" stroke="currentColor" stroke-width="2">
+                    <svg viewBox="0 0 24 24" class="w-3.5 h-3.5 sm:w-4 sm:h-4 flex-shrink-0" fill="none" stroke="currentColor" stroke-width="2">
                         <path d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6"/>
                     </svg>
                     <span>Beranda</span>
@@ -243,7 +243,7 @@
                                    text-red-600 dark:text-red-400
                                    hover:bg-red-50/50 dark:hover:bg-red-900/20
                                    transition-colors duration-150">
-                        <svg class="w-3.5 h-3.5 sm:w-4 sm:h-4 flex-shrink-0" fill="none" stroke="currentColor" stroke-width="2">
+                        <svg viewBox="0 0 24 24" class="w-3.5 h-3.5 sm:w-4 sm:h-4 flex-shrink-0" fill="none" stroke="currentColor" stroke-width="2">
                             <path d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1"/>
                         </svg>
                         <span>Logout</span>
