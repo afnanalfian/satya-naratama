@@ -84,22 +84,6 @@
                         Lihat Course
                     </a>
                 </div>
-
-                {{-- Stats --}}
-                <div class="flex gap-8 pt-6 border-t border-white/10">
-                    <div>
-                        <p class="text-3xl font-bold text-white">500+</p>
-                        <p class="text-sm text-[#94A3B8]">Siswa Terdaftar</p>
-                    </div>
-                    <div>
-                        <p class="text-3xl font-bold text-[#2563EB]">98%</p>
-                        <p class="text-sm text-[#94A3B8]">Tingkat Kelulusan</p>
-                    </div>
-                    <div>
-                        <p class="text-3xl font-bold text-white">50+</p>
-                        <p class="text-sm text-[#94A3B8]">Tentor Profesional</p>
-                    </div>
-                </div>
             </div>
 
             {{-- DESKTOP: Image Right --}}
@@ -112,20 +96,6 @@
                             alt="Satya Naratama Hero"
                             class="w-full max-w-lg xl:max-w-xl drop-shadow-2xl animate-float"
                         >
-                    </div>
-                    {{-- Floating badge --}}
-                    <div class="absolute -bottom-6 -left-6 bg-[#0F172A]/90 backdrop-blur-xl rounded-2xl p-4 border border-[#2563EB]/20 shadow-2xl z-20">
-                        <div class="flex items-center gap-3">
-                            <div class="w-12 h-12 rounded-xl bg-[#2563EB]/20 flex items-center justify-center">
-                                <svg class="w-6 h-6 text-[#2563EB]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path>
-                                </svg>
-                            </div>
-                            <div>
-                                <p class="text-white font-bold">100%</p>
-                                <p class="text-xs text-[#94A3B8]">Garansi Lulus</p>
-                            </div>
-                        </div>
                     </div>
                 </div>
             </div>
