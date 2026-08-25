@@ -4,7 +4,12 @@
 <div class="h-full flex flex-col bg-neutral-50 dark:bg-primary-950">
 
     {{-- ================= HEADER / TIMER ================= --}}
-    <div class="px-4 py-3 bg-hero-gradient text-white shadow-lg shadow-primary-950/20 relative z-20">
+    {{-- FIX: z-50 (paling atas) supaya tombol toggle & fullscreen SELALU bisa
+         di-tap, bahkan saat sidebar sedang terbuka. Sebelumnya header cuma
+         z-20 sedangkan sidebar z-40, jadi begitu sidebar terbuka, panel
+         sidebar menutupi tombol toggle-nya sendiri (di mobile) dan tap kedua
+         tidak pernah sampai ke tombol -> sidebar terasa "gak bisa ketutup". --}}
+    <div class="px-4 py-3 bg-hero-gradient text-white shadow-lg shadow-primary-950/20 relative z-50">
         <div class="flex items-center justify-between gap-4">
             {{-- Left: Exam Info --}}
             <div class="flex-1 min-w-0">
@@ -45,6 +50,7 @@
             <div class="flex-1 flex justify-end items-center gap-2">
                 {{-- Fullscreen Button --}}
                 <button id="fullscreenBtn"
+                        type="button"
                         class="p-2.5 rounded-xl bg-white/10 hover:bg-white/20 border border-white/15 transition-colors"
                         title="Toggle Fullscreen">
                     <svg class="w-[18px] h-[18px]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -55,8 +61,11 @@
 
                 {{-- Toggle Sidebar (Mobile) --}}
                 <button id="toggleSidebar"
+                        type="button"
                         class="md:hidden p-2.5 rounded-xl bg-white/10 hover:bg-white/20 border border-white/15 transition-colors"
-                        aria-label="Toggle navigasi soal">
+                        aria-label="Toggle navigasi soal"
+                        aria-expanded="false"
+                        aria-controls="sidebar">
                     <svg class="w-[18px] h-[18px]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                               d="M4 6h16M4 12h16M4 18h16"/>
@@ -362,15 +371,20 @@
         </main>
 
         {{-- ================= RIGHT SIDEBAR (NAVIGATION) ================= --}}
+        {{-- FIX: hapus utility transform Tailwind (transform translate-x-full
+             md:translate-x-0 transition-transform duration-300 ease-in-out
+             md:!transform-none) supaya TIDAK ada dua sistem CSS yang
+             berebut mengatur `transform` di elemen yang sama. Show/hide
+             sekarang 100% dikendalikan oleh SATU sumber: class `.open` di
+             stylesheet bawah (@push('styles')). z-40 tetap di bawah header
+             (z-50) supaya toggle/close button header selalu bisa di-tap. --}}
         <aside id="sidebar"
                class="fixed md:relative inset-y-0 right-0 z-40
                       w-64 md:w-72
                       bg-white dark:bg-primary-950
                       border-l border-neutral-200 dark:border-white/10
-                      transform translate-x-full md:translate-x-0
-                      transition-transform duration-300 ease-in-out
-                      overflow-y-auto p-5 shadow-xl md:shadow-none
-                      md:!transform-none">
+                      overflow-y-auto p-5 shadow-xl md:shadow-none"
+               aria-hidden="true">
 
             {{-- Sidebar Header --}}
             <div class="mb-5 pb-4 border-b border-neutral-200 dark:border-white/10">
@@ -382,6 +396,8 @@
                         Navigasi Soal
                     </h3>
                     <button id="closeSidebar"
+                            type="button"
+                            aria-label="Tutup navigasi soal"
                             class="md:hidden p-1.5 rounded-lg text-neutral-700 dark:text-neutral-400 hover:bg-neutral-100 dark:hover:bg-white/10 transition">
                         <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
@@ -402,6 +418,9 @@
                         $answered = $answer && !$answer->isEmpty;
                     @endphp
 
+                    {{-- FIX: `data-answered` jadi satu-satunya sumber kebenaran
+                         status terjawab (dipakai juga oleh JS), bukan cuma
+                         nebak dari kombinasi class Tailwind yang panjang. --}}
                     <button type="button"
                             class="nav-btn relative w-full aspect-square rounded-xl flex items-center justify-center
                                    font-semibold text-sm tabular-nums transition-all duration-200
@@ -411,7 +430,8 @@
                                    hover:scale-105 hover:shadow-md active:scale-95"
                             data-index="{{ $i }}"
                             data-question-id="{{ $question->id }}"
-                            data-question-type="{{ $question->type }}">
+                            data-question-type="{{ $question->type }}"
+                            data-answered="{{ $answered ? 'true' : 'false' }}">
                         {{ $i + 1 }}
                     </button>
                 @endforeach
@@ -446,13 +466,14 @@
         {{-- Mobile Overlay --}}
         <div id="sidebarOverlay"
              class="fixed inset-0 bg-primary-950/60 backdrop-blur-sm z-30 hidden md:hidden"
-             onclick="window.hideSidebar && window.hideSidebar()"></div>
+             aria-hidden="true"></div>
     </div>
 
     {{-- ================= FOOTER NAVIGATION ================= --}}
     <div class="px-4 py-3 bg-white dark:bg-primary-950 border-t border-neutral-200 dark:border-white/10">
         <div class="flex justify-between items-center gap-3 max-w-5xl mx-auto">
             <button id="prevBtn"
+                    type="button"
                     class="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl text-sm font-semibold
                            bg-white dark:bg-white/5
                            border border-neutral-300 dark:border-white/15
@@ -486,6 +507,7 @@
                 </form>
 
                 <button id="nextBtn"
+                        type="button"
                         class="inline-flex items-center gap-2 px-6 py-2.5 rounded-xl text-sm font-semibold
                                bg-brand-gradient text-white
                                shadow-sm shadow-primary-900/20 hover:opacity-90 active:opacity-100
@@ -503,7 +525,12 @@
 
 @push('styles')
 <style>
-    /* Mobile sidebar fix */
+    /* =====================================================
+       SIDEBAR - SATU-SATUNYA SUMBER YANG MENGATUR TRANSFORM
+       (tidak lagi bentrok dengan utility class Tailwind di
+       elemen <aside>, karena class transform sudah dihapus
+       dari markup dan digantikan sepenuhnya oleh block ini)
+    ===================================================== */
     @media (max-width: 767px) {
         #sidebar {
             position: fixed !important;
@@ -513,28 +540,44 @@
             z-index: 40 !important;
             transform: translateX(100%);
             transition: transform 0.3s ease-in-out;
-            box-shadow: -4px 0 20px rgba(0,0,0,0.2);
+            box-shadow: -4px 0 20px rgba(0, 0, 0, 0.2);
+            will-change: transform;
         }
 
         #sidebar.open {
             transform: translateX(0) !important;
         }
 
+        #sidebarOverlay {
+            transition: opacity 0.2s ease-in-out;
+            opacity: 0;
+            pointer-events: none;
+        }
+
         #sidebarOverlay.active {
             display: block !important;
+            opacity: 1;
+            pointer-events: auto;
         }
     }
 
     @media (min-width: 768px) {
         #sidebar {
-            transform: none !important;
             position: relative !important;
+            transform: none !important;
             box-shadow: none !important;
         }
 
         #sidebarOverlay {
             display: none !important;
         }
+    }
+
+    /* Kunci scroll body saat sidebar mobile terbuka, tanpa mengubah
+       posisi scroll yang sedang berjalan (aman untuk iOS Safari). */
+    body.sidebar-lock {
+        overflow: hidden;
+        touch-action: none;
     }
 </style>
 @endpush

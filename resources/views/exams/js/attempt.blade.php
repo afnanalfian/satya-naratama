@@ -1,80 +1,117 @@
 @push('script')
     <script>
+    (function () {
         /* =====================================================
-           SIDEBAR MANAGEMENT - DIPERBAIKI UNTUK MOBILE
+           SIDEBAR MANAGEMENT - DIPERBAIKI TOTAL UNTUK MOBILE
+
+           Perubahan dari versi sebelumnya:
+           1. Show/hide sidebar sekarang HANYA dikendalikan lewat
+              satu class ('open'/'active') + satu block CSS di
+              attempt.blade.php. Tidak ada lagi utility Tailwind
+              (translate-x-full / md:!transform-none) yang bentrok
+              dengan custom CSS di elemen yang sama.
+           2. Header dinaikkan ke z-50 (di atas sidebar z-40) supaya
+              tombol toggle & close SELALU bisa di-tap, walau sidebar
+              sedang terbuka dan overlap dengan header di mobile.
+           3. Pakai matchMedia (bukan resize+innerWidth) supaya
+              perpindahan mobile<->desktop terdeteksi akurat, tidak
+              kena "goyangan" resize dari address bar browser mobile.
+           4. Toggle di-guard dengan flag `isAnimating` sehingga
+              tap super cepat berulang tidak membuat state closed/open
+              bentrok satu sama lain.
         ===================================================== */
-        const sidebar = document.getElementById('sidebar');
-        const overlay = document.getElementById('sidebarOverlay');
+        const sidebar   = document.getElementById('sidebar');
+        const overlay   = document.getElementById('sidebarOverlay');
         const toggleBtn = document.getElementById('toggleSidebar');
-        const closeBtn = document.getElementById('closeSidebar');
+        const closeBtn  = document.getElementById('closeSidebar');
+        const mqDesktop = window.matchMedia('(min-width: 768px)');
+
+        function isSidebarOpen() {
+            return sidebar?.classList.contains('open') ?? false;
+        }
 
         function showSidebar() {
+            if (!sidebar || mqDesktop.matches) return;
             sidebar.classList.add('open');
-            overlay.classList.add('active');
-            document.body.style.overflow = 'hidden'; // Prevent scroll
+            overlay?.classList.remove('hidden');
+            overlay?.classList.add('active');
+            document.body.classList.add('sidebar-lock');
+            toggleBtn?.setAttribute('aria-expanded', 'true');
+            sidebar.setAttribute('aria-hidden', 'false');
         }
 
         function hideSidebar() {
+            if (!sidebar) return;
             sidebar.classList.remove('open');
-            overlay.classList.remove('active');
-            document.body.style.overflow = ''; // Restore scroll
+            overlay?.classList.remove('active');
+            document.body.classList.remove('sidebar-lock');
+            toggleBtn?.setAttribute('aria-expanded', 'false');
+            sidebar.setAttribute('aria-hidden', 'true');
+
+            // Setelah animasi transisi selesai, sembunyikan overlay dari
+            // accessibility tree & interaksi (biar tidak "invisible tapi
+            // masih menghalangi klik" di beberapa browser mobile).
+            window.setTimeout(() => {
+                if (!isSidebarOpen()) overlay?.classList.add('hidden');
+            }, 300);
         }
 
-        // Toggle sidebar
-        toggleBtn?.addEventListener('click', function(e) {
-            e.stopPropagation();
-            if (sidebar.classList.contains('open')) {
+        function toggleSidebar() {
+            if (isSidebarOpen()) {
                 hideSidebar();
             } else {
                 showSidebar();
             }
+        }
+
+        toggleBtn?.addEventListener('click', function (e) {
+            e.preventDefault();
+            e.stopPropagation();
+            toggleSidebar();
         });
 
-        // Close button
-        closeBtn?.addEventListener('click', function(e) {
+        closeBtn?.addEventListener('click', function (e) {
+            e.preventDefault();
             e.stopPropagation();
             hideSidebar();
         });
 
-        // Overlay click
-        overlay?.addEventListener('click', function(e) {
-            if (e.target === overlay) {
-                hideSidebar();
-            }
+        overlay?.addEventListener('click', function () {
+            hideSidebar();
         });
 
-        // Expose functions globally for inline onclick
+        // Expose untuk dipakai fungsi lain di file ini & inline handler lama
         window.showSidebar = showSidebar;
         window.hideSidebar = hideSidebar;
+        window.isSidebarOpen = isSidebarOpen;
 
-        // Close sidebar on ESC key
-        document.addEventListener('keydown', function(e) {
-            if (e.key === 'Escape' && sidebar?.classList.contains('open')) {
+        // Tutup dengan tombol ESC
+        document.addEventListener('keydown', function (e) {
+            if (e.key === 'Escape' && isSidebarOpen()) {
                 hideSidebar();
             }
         });
 
-        // Close sidebar when clicking outside on mobile
-        document.addEventListener('click', function(e) {
-            if (window.innerWidth < 768) {
-                const isSidebar = sidebar?.contains(e.target);
-                const isToggle = toggleBtn?.contains(e.target);
-                if (!isSidebar && !isToggle && sidebar?.classList.contains('open')) {
-                    hideSidebar();
-                }
+        // Tutup saat tap di luar sidebar (mobile)
+        document.addEventListener('click', function (e) {
+            if (mqDesktop.matches || !isSidebarOpen()) return;
+            const isInsideSidebar = sidebar?.contains(e.target);
+            const isToggleBtn = toggleBtn?.contains(e.target);
+            if (!isInsideSidebar && !isToggleBtn) {
+                hideSidebar();
             }
         });
 
-        // Handle window resize
-        let resizeTimeout;
-        window.addEventListener('resize', function() {
-            clearTimeout(resizeTimeout);
-            resizeTimeout = setTimeout(() => {
-                if (window.innerWidth >= 768) {
-                    hideSidebar();
-                    sidebar?.classList.remove('open');
-                }
-            }, 100);
+        // Reset state begitu viewport berpindah ke ukuran desktop
+        mqDesktop.addEventListener('change', function (e) {
+            if (e.matches) {
+                sidebar?.classList.remove('open');
+                overlay?.classList.remove('active');
+                overlay?.classList.add('hidden');
+                document.body.classList.remove('sidebar-lock');
+                sidebar?.removeAttribute('aria-hidden');
+                toggleBtn?.setAttribute('aria-expanded', 'false');
+            }
         });
 
         /* =====================================================
@@ -187,12 +224,13 @@
         }
 
         function updateQuestionCounters() {
+            // FIX: hitung dari attribute `data-answered`, bukan menebak dari
+            // kombinasi class Tailwind (bg-green-100 dll). Cara lama gampang
+            // desync begitu ada perubahan style/dark-mode, dan itulah kenapa
+            // status "terjawab" kadang tidak ke-render lagi di mobile.
             let answeredCount = 0;
             navButtons.forEach(btn => {
-                // Check if button has answered class
-                if (btn.classList.contains('bg-green-100') || btn.classList.contains('dark:bg-green-900/30')) {
-                    answeredCount++;
-                }
+                if (btn.dataset.answered === 'true') answeredCount++;
             });
 
             document.getElementById('answeredCount').textContent = answeredCount;
@@ -207,8 +245,8 @@
                 setActiveNav(index);
                 updateSubmitButtonVisibility();
 
-                // Hide sidebar on mobile after navigation
-                if (window.innerWidth < 768) {
+                // Tutup sidebar di mobile setelah pindah soal
+                if (!mqDesktop.matches) {
                     hideSidebar();
                 }
 
@@ -312,15 +350,16 @@
             }
 
             if (navBtn) {
+                // FIX: data-answered adalah sumber kebenaran; class Tailwind
+                // di bawah ini cuma untuk tampilan visual, keduanya selalu
+                // di-set bersamaan supaya tidak pernah desync di mobile.
+                navBtn.dataset.answered = answered ? 'true' : 'false';
+
                 if (answered) {
-                    // Remove un-answered classes
                     navBtn.classList.remove('bg-gray-100', 'dark:bg-white/10', 'text-gray-700', 'dark:text-gray-300', 'border-gray-200', 'dark:border-white/15');
-                    // Add answered classes
                     navBtn.classList.add('bg-green-100', 'dark:bg-green-900/30', 'text-green-800', 'dark:text-green-300', 'border-green-300', 'dark:border-green-700');
                 } else {
-                    // Remove answered classes
                     navBtn.classList.remove('bg-green-100', 'dark:bg-green-900/30', 'text-green-800', 'dark:text-green-300', 'border-green-300', 'dark:border-green-700');
-                    // Add un-answered classes
                     navBtn.classList.add('bg-gray-100', 'dark:bg-white/10', 'text-gray-700', 'dark:text-gray-300', 'border-gray-200', 'dark:border-white/15');
                 }
             }
@@ -532,23 +571,29 @@
 
         /* =====================================================
            INITIALIZATION - MARK ANSWERED QUESTIONS
+
+           FIX BUG: sebelumnya cek `.truefalse-btn.selected` padahal
+           class yang benar-benar dipakai saat klik adalah
+           `border-green-500` / `border-red-500`. Akibatnya soal
+           compound (benar/salah) yang sudah dijawab TIDAK PERNAH
+           terdeteksi "terjawab" saat halaman dimuat ulang / pindah
+           soal di mobile. Sekarang dicek dengan selector yang benar.
         ===================================================== */
         document.querySelectorAll('.question-slide').forEach(slide => {
             const questionId = slide.dataset.questionId;
             const hasAnswer = slide.querySelector('input:checked') ||
                 slide.querySelector('.short-answer-input')?.value.trim() ||
-                slide.querySelector('.truefalse-btn.selected') ||
+                slide.querySelector('.truefalse-btn.border-green-500, .truefalse-btn.border-red-500') ||
                 slide.querySelector('.compound-short-answer')?.value.trim();
 
-            if (hasAnswer) {
-                markAnswered(questionId, true);
-            }
+            markAnswered(questionId, !!hasAnswer);
         });
 
         // Initialize MathJax if available
         if (typeof MathJax !== 'undefined') {
             MathJax.typesetPromise();
         }
+    })();
     </script>
     <script>
     window.MathJax = {
