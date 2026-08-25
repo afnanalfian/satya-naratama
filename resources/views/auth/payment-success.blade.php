@@ -3,55 +3,565 @@
 @section('title', 'Pendaftaran Berhasil – Satya Naratama')
 @section('content')
 
-<div class="w-full py-12 sm:py-20 px-4 flex items-center justify-center">
+<style>
+    .success-container {
+        width: 100%;
+        padding: 3rem 1rem;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        background: linear-gradient(135deg, #F8FAFC 0%, #EFF6FF 50%, #F8FAFC 100%);
+        position: relative;
+        overflow: hidden;
+        min-height: 100vh;
+    }
 
-    <div
-        class="w-full max-w-2xl mx-auto
-            p-6 sm:p-8
-            rounded-3xl shadow-xl
-            bg-azwara-lightest dark:bg-azwara-darker
-            border border-azwara-light/30
-            transition-colors text-center">
+    .success-container::before {
+        content: '';
+        position: absolute;
+        top: -50%;
+        right: -20%;
+        width: 500px;
+        height: 500px;
+        background: radial-gradient(circle, rgba(37, 99, 235, 0.06) 0%, transparent 70%);
+        border-radius: 50%;
+        pointer-events: none;
+    }
 
-        {{-- Icon --}}
-        <div class="inline-flex items-center justify-center w-20 h-20 rounded-full bg-green-100 dark:bg-green-900/30 mb-6">
-            <svg class="w-10 h-10 text-green-600 dark:text-green-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/>
+    .success-container::after {
+        content: '';
+        position: absolute;
+        bottom: -30%;
+        left: -10%;
+        width: 400px;
+        height: 400px;
+        background: radial-gradient(circle, rgba(139, 92, 246, 0.05) 0%, transparent 70%);
+        border-radius: 50%;
+        pointer-events: none;
+    }
+
+    .success-card {
+        position: relative;
+        z-index: 1;
+        width: 100%;
+        max-width: 640px;
+        margin: 0 auto;
+        padding: 2rem 1.5rem;
+        background: rgba(255, 255, 255, 0.95);
+        backdrop-filter: blur(20px);
+        border-radius: 1.5rem;
+        box-shadow: 0 4px 24px rgba(37, 99, 235, 0.08), 0 1px 4px rgba(0, 0, 0, 0.04);
+        border: 1px solid rgba(37, 99, 235, 0.08);
+        transition: all 0.3s ease;
+        text-align: center;
+    }
+
+    @media (min-width: 640px) {
+        .success-card {
+            padding: 2.5rem 2.5rem;
+        }
+    }
+
+    .success-card:hover {
+        box-shadow: 0 8px 48px rgba(37, 99, 235, 0.12), 0 2px 8px rgba(0, 0, 0, 0.04);
+    }
+
+    /* Decorative top accent */
+    .success-card::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        height: 4px;
+        background: linear-gradient(90deg, #2563EB, #8B5CF6, #2563EB);
+        border-radius: 1.5rem 1.5rem 0 0;
+    }
+
+    /* Success Icon */
+    .success-icon {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        width: 5rem;
+        height: 5rem;
+        border-radius: 9999px;
+        background: linear-gradient(135deg, #F0FDF4, #DCFCE7);
+        border: 4px solid #BBF7D0;
+        margin-bottom: 1.5rem;
+        position: relative;
+    }
+
+    .success-icon::after {
+        content: '';
+        position: absolute;
+        inset: -8px;
+        border-radius: 9999px;
+        border: 2px solid rgba(34, 197, 94, 0.15);
+        animation: pulse-ring 2s ease-in-out infinite;
+    }
+
+    @keyframes pulse-ring {
+        0% { transform: scale(1); opacity: 1; }
+        50% { transform: scale(1.1); opacity: 0.5; }
+        100% { transform: scale(1); opacity: 1; }
+    }
+
+    .success-icon svg {
+        width: 2.5rem;
+        height: 2.5rem;
+        color: #22C55E;
+        animation: check-bounce 0.6s ease-out;
+    }
+
+    @keyframes check-bounce {
+        0% { transform: scale(0); }
+        50% { transform: scale(1.2); }
+        70% { transform: scale(0.9); }
+        100% { transform: scale(1); }
+    }
+
+    .success-title {
+        font-size: 1.75rem;
+        font-weight: 800;
+        color: #0F172A;
+        letter-spacing: -0.02em;
+        margin-bottom: 0.25rem;
+    }
+
+    .success-subtitle {
+        font-size: 0.875rem;
+        color: #64748B;
+        margin-bottom: 1.5rem;
+    }
+
+    .info-box {
+        background: rgba(37, 99, 235, 0.05);
+        border: 1px solid rgba(37, 99, 235, 0.12);
+        border-radius: 0.75rem;
+        padding: 1rem 1.25rem;
+        margin-bottom: 1.5rem;
+        text-align: left;
+    }
+
+    .info-box .info-row {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding: 0.5rem 0;
+    }
+
+    .info-box .info-row:not(:last-child) {
+        border-bottom: 1px solid rgba(37, 99, 235, 0.06);
+    }
+
+    .info-box .info-label {
+        font-size: 0.875rem;
+        color: #64748B;
+    }
+
+    .info-box .info-value {
+        font-size: 0.875rem;
+        font-weight: 600;
+        color: #0F172A;
+    }
+
+    .info-box .info-value.status {
+        color: #D97706;
+        display: flex;
+        align-items: center;
+        gap: 0.375rem;
+    }
+
+    .info-box .info-value.status .dot {
+        width: 0.5rem;
+        height: 0.5rem;
+        border-radius: 9999px;
+        background: #F59E0B;
+        animation: pulse-dot 1.5s ease-in-out infinite;
+    }
+
+    @keyframes pulse-dot {
+        0%, 100% { opacity: 1; transform: scale(1); }
+        50% { opacity: 0.5; transform: scale(0.8); }
+    }
+
+    .alert-info {
+        background: #EFF6FF;
+        border: 1px solid #BFDBFE;
+        border-radius: 0.75rem;
+        padding: 0.75rem 1rem;
+        margin-bottom: 1.5rem;
+        text-align: left;
+    }
+
+    .alert-info .alert-title {
+        font-size: 0.875rem;
+        font-weight: 600;
+        color: #1E40AF;
+        margin-bottom: 0.25rem;
+        display: flex;
+        align-items: center;
+        gap: 0.375rem;
+    }
+
+    .alert-info ul {
+        margin: 0;
+        padding-left: 1.25rem;
+        list-style: disc;
+        font-size: 0.875rem;
+        color: #1E40AF;
+    }
+
+    .alert-info ul li {
+        margin: 0.125rem 0;
+        line-height: 1.6;
+    }
+
+    .btn-primary {
+        flex: 1;
+        padding: 0.875rem 1.5rem;
+        border-radius: 0.75rem;
+        font-weight: 700;
+        font-size: 1rem;
+        color: white;
+        background: linear-gradient(135deg, #2563EB, #1D4ED8);
+        border: none;
+        cursor: pointer;
+        transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        box-shadow: 0 4px 16px rgba(37, 99, 235, 0.25);
+        text-decoration: none;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        gap: 0.5rem;
+        position: relative;
+        overflow: hidden;
+        text-align: center;
+    }
+
+    .btn-primary::after {
+        content: '';
+        position: absolute;
+        inset: 0;
+        background: linear-gradient(135deg, #1D4ED8, #1E40AF);
+        opacity: 0;
+        transition: opacity 0.3s ease;
+    }
+
+    .btn-primary:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 8px 32px rgba(37, 99, 235, 0.35);
+    }
+
+    .btn-primary:hover::after {
+        opacity: 1;
+    }
+
+    .btn-primary span {
+        position: relative;
+        z-index: 1;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 0.5rem;
+    }
+
+    .btn-primary:active {
+        transform: scale(0.98);
+    }
+
+    .btn-outline {
+        flex: 1;
+        padding: 0.875rem 1.5rem;
+        border-radius: 0.75rem;
+        font-weight: 600;
+        font-size: 1rem;
+        color: #2563EB;
+        background: transparent;
+        border: 2px solid rgba(37, 99, 235, 0.2);
+        cursor: pointer;
+        transition: all 0.3s ease;
+        text-decoration: none;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        gap: 0.5rem;
+        text-align: center;
+    }
+
+    .btn-outline:hover {
+        border-color: #2563EB;
+        background: rgba(37, 99, 235, 0.04);
+        transform: translateY(-2px);
+    }
+
+    .btn-outline:active {
+        transform: scale(0.98);
+    }
+
+    .btn-outline svg {
+        width: 1.25rem;
+        height: 1.25rem;
+    }
+
+    .link-back {
+        color: #64748B;
+        font-size: 0.875rem;
+        text-decoration: none;
+        transition: all 0.2s ease;
+        display: inline-flex;
+        align-items: center;
+        gap: 0.375rem;
+        margin-top: 0.5rem;
+    }
+
+    .link-back:hover {
+        color: #2563EB;
+    }
+
+    .link-back svg {
+        transition: transform 0.2s ease;
+    }
+
+    .link-back:hover svg {
+        transform: translateX(-3px);
+    }
+
+    .divider {
+        display: flex;
+        align-items: center;
+        gap: 1rem;
+        margin: 0.5rem 0;
+    }
+
+    .divider::before,
+    .divider::after {
+        content: '';
+        flex: 1;
+        height: 1px;
+        background: #E2E8F0;
+    }
+
+    .divider-text {
+        font-size: 0.75rem;
+        color: #94A3B8;
+        text-transform: uppercase;
+        letter-spacing: 0.05em;
+        font-weight: 600;
+        white-space: nowrap;
+    }
+
+    .action-group {
+        display: flex;
+        flex-direction: column;
+        gap: 0.75rem;
+    }
+
+    @media (min-width: 640px) {
+        .action-group {
+            flex-direction: row;
+        }
+    }
+
+    /* Confetti effect (subtle) */
+    .confetti-container {
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        pointer-events: none;
+        overflow: hidden;
+        border-radius: 1.5rem;
+        z-index: 0;
+    }
+
+    .confetti {
+        position: absolute;
+        width: 8px;
+        height: 8px;
+        border-radius: 2px;
+        opacity: 0;
+        animation: confetti-fall 4s ease-in-out infinite;
+    }
+
+    .confetti:nth-child(1) { left: 10%; background: #2563EB; animation-delay: 0s; }
+    .confetti:nth-child(2) { left: 25%; background: #8B5CF6; animation-delay: 0.5s; }
+    .confetti:nth-child(3) { left: 40%; background: #22C55E; animation-delay: 1s; }
+    .confetti:nth-child(4) { left: 55%; background: #F59E0B; animation-delay: 1.5s; }
+    .confetti:nth-child(5) { left: 70%; background: #EF4444; animation-delay: 2s; }
+    .confetti:nth-child(6) { left: 85%; background: #2563EB; animation-delay: 2.5s; }
+
+    @keyframes confetti-fall {
+        0% { opacity: 0; transform: translateY(-20px) rotate(0deg); }
+        10% { opacity: 1; }
+        90% { opacity: 1; }
+        100% { opacity: 0; transform: translateY(200px) rotate(720deg); }
+    }
+
+    /* Dark mode support */
+    @media (prefers-color-scheme: dark) {
+        .success-container {
+            background: linear-gradient(135deg, #0F172A 0%, #1E293B 50%, #0F172A 100%);
+        }
+
+        .success-container::before {
+            background: radial-gradient(circle, rgba(37, 99, 235, 0.12) 0%, transparent 70%);
+        }
+
+        .success-container::after {
+            background: radial-gradient(circle, rgba(139, 92, 246, 0.08) 0%, transparent 70%);
+        }
+
+        .success-card {
+            background: rgba(30, 41, 59, 0.95);
+            backdrop-filter: blur(20px);
+            border-color: rgba(37, 99, 235, 0.15);
+        }
+
+        .success-title {
+            color: #F8FAFC;
+        }
+
+        .success-subtitle {
+            color: #94A3B8;
+        }
+
+        .success-icon {
+            background: linear-gradient(135deg, #052E16, #064E3B);
+            border-color: #065F46;
+        }
+
+        .success-icon svg {
+            color: #4ADE80;
+        }
+
+        .info-box {
+            background: rgba(37, 99, 235, 0.08);
+            border-color: rgba(37, 99, 235, 0.15);
+        }
+
+        .info-box .info-row:not(:last-child) {
+            border-color: rgba(37, 99, 235, 0.08);
+        }
+
+        .info-box .info-label {
+            color: #94A3B8;
+        }
+
+        .info-box .info-value {
+            color: #F8FAFC;
+        }
+
+        .info-box .info-value.status {
+            color: #FBBF24;
+        }
+
+        .info-box .info-value.status .dot {
+            background: #FBBF24;
+        }
+
+        .alert-info {
+            background: rgba(37, 99, 235, 0.1);
+            border-color: rgba(37, 99, 235, 0.2);
+        }
+
+        .alert-info .alert-title {
+            color: #60A5FA;
+        }
+
+        .alert-info ul {
+            color: #93BBFC;
+        }
+
+        .btn-outline {
+            color: #60A5FA;
+            border-color: rgba(37, 99, 235, 0.2);
+        }
+
+        .btn-outline:hover {
+            border-color: #60A5FA;
+            background: rgba(37, 99, 235, 0.08);
+        }
+
+        .link-back {
+            color: #94A3B8;
+        }
+
+        .link-back:hover {
+            color: #60A5FA;
+        }
+
+        .divider::before,
+        .divider::after {
+            background: #334155;
+        }
+
+        .divider-text {
+            color: #64748B;
+        }
+    }
+</style>
+
+<div class="success-container">
+
+    <div class="success-card">
+
+        {{-- Confetti Decoration --}}
+        <div class="confetti-container">
+            <div class="confetti"></div>
+            <div class="confetti"></div>
+            <div class="confetti"></div>
+            <div class="confetti"></div>
+            <div class="confetti"></div>
+            <div class="confetti"></div>
+        </div>
+
+        {{-- Success Icon --}}
+        <div class="success-icon">
+            <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/>
             </svg>
         </div>
 
         {{-- Title --}}
-        <h2 class="text-2xl font-extrabold text-azwara-darker dark:text-white mb-2">
+        <h2 class="success-title">
             Pendaftaran Berhasil! 🎉
         </h2>
-        <p class="text-gray-600 dark:text-gray-400 mb-6">
+        <p class="success-subtitle">
             Pembayaran Anda sedang direview oleh admin
         </p>
 
-        {{-- Info --}}
-        <div class="bg-primary/5 dark:bg-primary/10 rounded-xl p-4 mb-6 border border-primary/20 text-left">
-            <div class="flex justify-between items-center py-2 border-b border-gray-200 dark:border-gray-700">
-                <span class="text-sm text-gray-600 dark:text-gray-400">Nama</span>
-                <span class="text-sm font-medium text-azwara-darker dark:text-white">{{ $registration->full_name }}</span>
+        {{-- Info Pendaftaran --}}
+        <div class="info-box">
+            <div class="info-row">
+                <span class="info-label">Nama</span>
+                <span class="info-value">{{ $registration->full_name }}</span>
             </div>
-            <div class="flex justify-between items-center py-2 border-b border-gray-200 dark:border-gray-700">
-                <span class="text-sm text-gray-600 dark:text-gray-400">Email</span>
-                <span class="text-sm font-medium text-azwara-darker dark:text-white">{{ $registration->email }}</span>
+            <div class="info-row">
+                <span class="info-label">Email</span>
+                <span class="info-value">{{ $registration->email }}</span>
             </div>
-            <div class="flex justify-between items-center py-2">
-                <span class="text-sm text-gray-600 dark:text-gray-400">Status</span>
-                <span class="text-sm font-medium text-yellow-600 dark:text-yellow-400">
-                    ⏳ Menunggu Verifikasi
+            <div class="info-row">
+                <span class="info-label">Kode Pendaftaran</span>
+                <span class="info-value">#{{ str_pad($registration->id, 6, '0', STR_PAD_LEFT) }}</span>
+            </div>
+            <div class="info-row">
+                <span class="info-label">Status</span>
+                <span class="info-value status">
+                    <span class="dot"></span>
+                    Menunggu Verifikasi
                 </span>
             </div>
         </div>
 
         {{-- Info Proses --}}
-        <div class="bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800 rounded-xl p-4 mb-6 text-left">
-            <p class="text-sm text-blue-800 dark:text-blue-200 font-medium mb-1">
-                📋 Yang Perlu Dilakukan Selanjutnya:
-            </p>
-            <ul class="text-sm text-blue-700 dark:text-blue-300 space-y-1 list-disc list-inside">
+        <div class="alert-info">
+            <div class="alert-title">
+                <span>📋</span> Yang Perlu Dilakukan Selanjutnya:
+            </div>
+            <ul>
                 <li>Admin akan memverifikasi pembayaran Anda</li>
                 <li>Proses verifikasi membutuhkan waktu 1x24 jam</li>
                 <li>Anda akan mendapat notifikasi via email</li>
@@ -60,36 +570,62 @@
         </div>
 
         {{-- Actions --}}
-        <div class="flex flex-col sm:flex-row gap-3">
-            <a href="{{ route('daftar.status.form') }}"
-               class="flex-1 py-3 rounded-xl font-bold text-center
-                    bg-gradient-to-r from-primary to-azwara-medium
-                    text-white
-                    hover:shadow-xl hover:scale-[1.01] transition-all duration-300">
-                Cek Status Pendaftaran
+        <div class="action-group">
+            <a href="{{ route('daftar.status.form') }}" class="btn-primary">
+                <span>
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"/>
+                    </svg>
+                    Cek Status Pendaftaran
+                </span>
             </a>
-            
-            <a href="https://wa.me/6282154734819?text=Halo%20Admin%2C%20saya%20{{ $registration->full_name }}%20ingin%20konfirmasi%20pembayaran%20pendaftaran"
+
+            <a href="https://wa.me/6282154734819?text=Halo%20Admin%2C%20saya%20{{ urlencode($registration->full_name) }}%20ingin%20konfirmasi%20pembayaran%20pendaftaran"
                target="_blank"
-               class="flex-1 py-3 rounded-xl font-medium text-center
-                    border-2 border-primary/30
-                    text-primary
-                    hover:bg-primary/5
-                    transition-all duration-300">
-                <svg class="inline-block w-4 h-4 mr-2" fill="currentColor" viewBox="0 0 24 24">
+               class="btn-outline">
+                <svg fill="currentColor" viewBox="0 0 24 24">
                     <path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413z"/>
                 </svg>
                 Chat Admin
             </a>
         </div>
 
-        <p class="text-sm text-gray-500 dark:text-gray-400 mt-6">
-            <a href="{{ route('home') }}" class="hover:underline">
-                ← Kembali ke Beranda
-            </a>
-        </p>
+        {{-- Divider --}}
+        <div class="divider">
+            <span class="divider-text">Navigasi</span>
+        </div>
+
+        {{-- Back to Home --}}
+        <a href="{{ route('home') }}" class="link-back">
+            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18"/>
+            </svg>
+            Kembali ke Beranda
+        </a>
 
     </div>
 </div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // Add a small delay before showing the card for a nice entrance effect
+    const card = document.querySelector('.success-card');
+    if (card) {
+        card.style.opacity = '0';
+        card.style.transform = 'translateY(20px)';
+        card.style.transition = 'all 0.6s cubic-bezier(0.4, 0, 0.2, 1)';
+
+        setTimeout(() => {
+            card.style.opacity = '1';
+            card.style.transform = 'translateY(0)';
+        }, 100);
+    }
+
+    // Auto-redirect after 60 seconds (optional, comment out if not needed)
+    // setTimeout(() => {
+    //     window.location.href = "{{ route('home') }}";
+    // }, 60000);
+});
+</script>
 
 @endsection
