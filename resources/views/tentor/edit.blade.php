@@ -1,76 +1,55 @@
 @extends('layouts.app')
 
 @section('content')
+<div class="py-6 md:py-8">
+    <div class="max-w-2xl mx-auto px-4 sm:px-6 lg:px-8">
 
-<div class="min-h-screen">
+        {{-- Navigation --}}
+        <nav class="flex items-center gap-2 text-sm mb-6">
+            <a href="{{ route('tentor.index') }}" class="text-secondary-500 hover:text-primary-600 dark:text-secondary-400 dark:hover:text-primary-300 transition-colors">Tentor</a>
+            <span class="text-secondary-300 dark:text-secondary-600">/</span>
+            <a href="{{ route('tentor.show', $teacher->id) }}" class="text-secondary-500 hover:text-primary-600 dark:text-secondary-400 dark:hover:text-primary-300 transition-colors">{{ $teacher->user->name }}</a>
+            <span class="text-secondary-300 dark:text-secondary-600">/</span>
+            <span class="text-primary-600 dark:text-primary-300 font-medium">Edit</span>
+        </nav>
 
-    <div class="max-w-2xl mx-auto">
-
-        {{-- Back --}}
-        <div class="mb-5">
-            <a href="{{ route('tentor.show', $teacher->id) }}"
-               class="inline-flex items-center gap-2 text-sm font-medium
-                      text-azwara-darker dark:text-azwara-lighter hover:text-primary">
-
-                <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4"
-                     fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                          d="M15 19l-7-7 7-7" />
-                </svg>
-                Kembali
-            </a>
-        </div>
-
-        <div class="bg-azwara-lightest dark:bg-azwara-darker/80 border border-gray-200 dark:border-azwara-darkest/50
-                    rounded-2xl shadow-lg p-5 sm:p-6 backdrop-blur">
+        {{-- Form Card --}}
+        <div class="bg-white dark:bg-primary-900/30 rounded-2xl border border-primary-100 dark:border-primary-800/30 overflow-hidden shadow-sm">
 
             {{-- Header --}}
-            <div class="flex items-center gap-4">
-                <img src="{{ $teacher->user->avatar_url }}"
-                     class="w-14 h-14 sm:w-16 sm:h-16 rounded-full object-cover shadow"/>
-
-                <div class="min-w-0">
-                    <h2 class="text-lg font-bold text-azwara-darkest dark:text-azwara-lighter">
-                        Edit Tentor
-                    </h2>
-
-                    <p class="text-sm text-gray-600 dark:text-gray-300 truncate">
-                        {{ $teacher->user->name }}
-                    </p>
-
-                    <p class="text-xs text-gray-500 dark:text-gray-400">
-                        {{ $teacher->user->email }} · {{ $teacher->user->phone }}
-                    </p>
+            <div class="px-6 py-5 border-b border-primary-100 dark:border-primary-800/30">
+                <div class="flex items-center gap-4">
+                    <img src="{{ $teacher->user->avatar_url }}"
+                         class="w-12 h-12 rounded-full object-cover ring-2 ring-primary-200 dark:ring-primary-700/50">
+                    <div>
+                        <h2 class="text-lg font-bold text-primary-800 dark:text-primary-100">Edit Tentor</h2>
+                        <p class="text-sm text-secondary-500 dark:text-secondary-400">{{ $teacher->user->name }}</p>
+                    </div>
                 </div>
             </div>
 
-            <div class="my-5 border-t border-gray-200 dark:border-gray-700"></div>
-
             {{-- Form --}}
-            <form method="POST" action="{{ route('tentor.update', $teacher->id) }}" class="space-y-5">
+            <form method="POST" action="{{ route('tentor.update', $teacher->id) }}" class="p-6 space-y-6">
                 @csrf
                 @method('PUT')
 
                 {{-- Bio --}}
                 <div>
-                    <label class="font-semibold text-sm dark:text-azwara-lighter">Bio Tentor</label>
-                    <textarea name="bio" rows="4"
-                        class="w-full mt-1 p-3 rounded-xl border bg-gray-50 dark:bg-azwara-darkest/60
-                            text-gray-800 dark:text-gray-200 border-gray-300 dark:border-gray-700
-                            focus:ring-2 focus:ring-primary/40 focus:border-primary">
-                            {{ trim(old('bio', $teacher->bio)) }}
-                    </textarea>
+                    <label class="block text-sm font-medium text-primary-700 dark:text-primary-300 mb-1.5">
+                        Bio Tentor
+                    </label>
+                    <textarea name="bio" rows="5"
+                        class="w-full px-4 py-3 rounded-xl border border-primary-200 dark:border-primary-700/50 bg-primary-50/50 dark:bg-primary-800/20 text-primary-800 dark:text-primary-100 placeholder-secondary-400 focus:ring-2 focus:ring-primary-500/30 focus:border-primary-500 transition-all duration-200">{{ trim(old('bio', $teacher->bio)) }}</textarea>
+                    <p class="mt-1 text-xs text-secondary-400 dark:text-secondary-500">Deskripsi singkat tentang tentor</p>
                 </div>
 
                 {{-- Courses --}}
                 <div>
-                    <label class="font-semibold text-sm  dark:text-azwara-lighter">Mengajar Course</label>
-
-                    <select name="course_id[]" multiple id="course-select"
-                        class="w-full mt-1 p-2 rounded-xl border
-                            bg-gray-50 dark:bg-azwara-darkest/60
-                            text-gray-800 dark:text-gray-200
-                            border-gray-300 dark:border-gray-700">
+                    <label class="block text-sm font-medium text-primary-700 dark:text-primary-300 mb-1.5">
+                        Course yang Diajarkan
+                    </label>
+                    <select name="course_id[]" id="course-select" multiple
+                        class="w-full px-4 py-3 rounded-xl border border-primary-200 dark:border-primary-700/50 bg-primary-50/50 dark:bg-primary-800/20 text-primary-800 dark:text-primary-100 focus:ring-2 focus:ring-primary-500/30 focus:border-primary-500 transition-all duration-200">
                         @foreach ($courses as $c)
                             <option value="{{ $c->id }}"
                                 {{ in_array($c->id, $teacher->courses->pluck('id')->toArray()) ? 'selected' : '' }}>
@@ -78,25 +57,28 @@
                             </option>
                         @endforeach
                     </select>
+                    <p class="mt-1 text-xs text-secondary-400 dark:text-secondary-500">Pilih satu atau lebih course</p>
                 </div>
 
-                {{-- Save --}}
-                <div class="pt-3">
-                    <button class="w-full sm:w-auto px-5 py-2.5 bg-primary text-white rounded-xl
-                                   font-medium text-sm hover:bg-primary/90 transition">
+                {{-- Submit --}}
+                <div class="border-t border-primary-100 dark:border-primary-800/30 pt-6 flex flex-col sm:flex-row gap-3">
+                    <button type="submit"
+                            class="flex-1 inline-flex items-center justify-center gap-2 px-6 py-3 rounded-xl bg-primary-600 hover:bg-primary-700 text-white font-medium transition-all duration-200 hover:shadow-lg hover:shadow-primary-500/25 active:scale-[0.98]">
+                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/>
+                        </svg>
                         Simpan Perubahan
                     </button>
+                    <a href="{{ route('tentor.show', $teacher->id) }}"
+                       class="flex-1 sm:flex-none inline-flex items-center justify-center gap-2 px-6 py-3 rounded-xl border border-primary-200 dark:border-primary-700/50 text-secondary-600 dark:text-secondary-400 hover:bg-primary-50 dark:hover:bg-primary-800/20 transition-all duration-200">
+                        Batal
+                    </a>
                 </div>
-
             </form>
-
         </div>
-
     </div>
 </div>
 
-
-{{-- TOMSELECT --}}
 @push('scripts')
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/tom-select/dist/css/tom-select.css">
 <script src="https://cdn.jsdelivr.net/npm/tom-select/dist/js/tom-select.complete.min.js"></script>
@@ -104,90 +86,83 @@
 <script>
     new TomSelect('#course-select', {
         plugins: ['remove_button'],
-        placeholder: "Pilih course",
+        placeholder: "Pilih course...",
+        create: false,
     });
 </script>
 @endpush
+
 @push('styles')
 <style>
-    /* ----- TOM SELECT LIGHT MODE ----- */
     .ts-control {
-        background-color: #f9fafb !important; /* gray-50 */
-        border-radius: 0.75rem !important; /* rounded-xl */
-        border-color: #d1d5db !important; /* gray-300 */
+        background-color: #f9fafb !important;
+        border-radius: 0.75rem !important;
+        border-color: #D7CBBC !important;
         padding: 0.5rem 0.75rem !important;
-        min-height: 42px !important;
-        color: #111827 !important; /* gray-900 */
+        min-height: 48px !important;
+        color: #0D1B0D !important;
+        box-shadow: none !important;
     }
-
+    .ts-control:focus {
+        border-color: #418741 !important;
+        box-shadow: 0 0 0 2px rgba(65, 135, 65, 0.25) !important;
+    }
     .ts-dropdown {
-        background-color: white !important;
-        border-color: #d1d5db !important;
+        background-color: #ffffff !important;
+        border-color: #D7CBBC !important;
         border-radius: 0.75rem !important;
     }
-
     .ts-dropdown .ts-option {
         padding: 8px 12px;
         border-radius: 6px;
+        color: #0D1B0D !important;
     }
-
     .ts-dropdown .ts-option:hover {
-        background-color: #eff6ff !important; /* blue-50 */
+        background-color: #ECF3EC !important;
     }
-
-    /* tags (selected item) */
+    .ts-dropdown .ts-option.active {
+        background-color: #418741 !important;
+        color: #ffffff !important;
+    }
     .ts-control .item {
-        background-color: #5483B3 !important;
-        color: white !important;
+        background-color: #418741 !important;
+        color: #ffffff !important;
         border-radius: 0.5rem !important;
         padding: 2px 8px !important;
+        font-weight: 500 !important;
     }
-
-    /* remove button on tag */
     .ts-control .item .remove {
-        color: white !important;
+        color: #ffffff !important;
         margin-left: 4px;
+        opacity: 0.7;
+    }
+    .ts-control .item .remove:hover {
+        opacity: 1;
     }
 
-    /* ----- DARK MODE ----- */
     html.dark .ts-control {
-        background-color: rgba(2, 16, 36, 0.5) !important; /* dark glassy */
-        border-color: #1e293b !important; /* slate-800 */
-        color: #e5e7eb !important; /* gray-200 */
+        background-color: rgba(26, 54, 26, 0.3) !important;
+        border-color: rgba(65, 135, 65, 0.4) !important;
+        color: #F1F2F4 !important;
     }
-
     html.dark .ts-dropdown {
-        background-color: #021024 !important;
-        border-color: #1e293b !important;
+        background-color: #1A361A !important;
+        border-color: rgba(65, 135, 65, 0.3) !important;
     }
-
     html.dark .ts-dropdown .ts-option {
-        color: #e5e7eb !important;
+        color: #F1F2F4 !important;
     }
-
     html.dark .ts-dropdown .ts-option:hover {
-        background-color: rgba(84, 131, 179, 0.25) !important; /* primary 25% */
+        background-color: rgba(65, 135, 65, 0.2) !important;
     }
-
-    html.dark .ts-control .item {
-        background-color: #5483B3 !important;
-        color: white !important;
+    html.dark .ts-dropdown .ts-option.active {
+        background-color: #418741 !important;
     }
-    /* ----- FIX: SEARCH INPUT IN DARK MODE ----- */
-    html.dark .ts-dropdown .ts-input input,
     html.dark .ts-control input {
-        color: #e5e7eb !important;        /* text-gray-200 */
+        color: #F1F2F4 !important;
     }
-
-    html.dark .ts-dropdown .ts-input input::placeholder,
     html.dark .ts-control input::placeholder {
-        color: #9ca3af !important;        /* gray-400 */
-    }
-
-    /* Light mode placeholder (biar rapi juga) */
-    .ts-dropdown .ts-input input::placeholder,
-    .ts-control input::placeholder {
-        color: #6b7280 !important;        /* gray-500 */
+        color: #6F7276 !important;
     }
 </style>
 @endpush
