@@ -13,6 +13,9 @@ export default {
 
     theme: {
         extend: {
+            spacing: {
+                '4.5': '1.125rem',
+            },
             fontFamily: {
                 sans: ["Inter", "ui-sans-serif", "system-ui"],
             },

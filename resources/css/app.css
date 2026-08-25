@@ -1344,3 +1344,38 @@ footer .social-icon span::before {
 body.popup-open {
     overflow: hidden;
 }
+
+/* Fix untuk dropdown agar tidak terpotong */
+.relative {
+    overflow: visible !important;
+}
+
+/* Fix untuk container header */
+header .relative {
+    overflow: visible !important;
+}
+
+/* Responsive adjustments untuk mobile */
+@media (max-width: 640px) {
+    /* Pastikan dropdown tidak terpotong di mobile */
+    .absolute {
+        overflow: visible !important;
+    }
+
+    /* Badge notifikasi lebih kecil di mobile */
+    .badge-mobile {
+        font-size: 8px !important;
+        min-width: 14px !important;
+        height: 14px !important;
+    }
+}
+
+/* Untuk w-4.5 (custom size) */
+.w-4\.5 {
+    width: 1.125rem;
+}
+.h-4\.5 {
+    height: 1.125rem;
+}
+
+/* Di tailwind.config.js tambahkan di theme.extend */

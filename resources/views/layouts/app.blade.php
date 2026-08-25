@@ -23,7 +23,7 @@
 </head>
 
 <body
-    class="flex h-screen overflow-hidden
+    class="flex h-screen
            bg-gradient-to-br from-neutral-50 via-primary-50/30 to-neutral-100
            dark:bg-gradient-to-br dark:from-primary-900 dark:via-primary-800/80 dark:to-primary-950
            bg-fixed bg-no-repeat bg-[length:200%_200%]
