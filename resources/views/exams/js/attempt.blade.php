@@ -80,73 +80,26 @@
         setInterval(syncTimeWithServer, 30000); // tiap 30 detik
 
         /* =====================================================
-           SIDEBAR MANAGEMENT - DIPERBAIKI
+           SIDEBAR MANAGEMENT
         ===================================================== */
         const sidebar = document.getElementById('sidebar');
         const overlay = document.getElementById('sidebarOverlay');
         const toggleBtn = document.getElementById('toggleSidebar');
         const closeBtn = document.getElementById('closeSidebar');
 
-        // PASTIKAN SIDEBAR TERTUTUP DI AWAL (mobile)
-        function initSidebarState() {
-            if (window.innerWidth < 768) { // md breakpoint
-                sidebar?.classList.add('translate-x-full');
-                overlay?.classList.add('hidden');
-            } else {
-                // Di desktop, sidebar tetap terbuka
-                sidebar?.classList.remove('translate-x-full');
-                overlay?.classList.add('hidden');
-            }
-        }
-
         function showSidebar() {
-            sidebar?.classList.remove('translate-x-full');
-            overlay?.classList.remove('hidden');
-            // Cegah scroll di body saat sidebar terbuka
-            document.body.style.overflow = 'hidden';
+            sidebar.classList.remove('translate-x-full');
+            overlay.classList.remove('hidden');
         }
 
         function hideSidebar() {
-            sidebar?.classList.add('translate-x-full');
-            overlay?.classList.add('hidden');
-            // Kembalikan scroll
-            document.body.style.overflow = '';
+            sidebar.classList.add('translate-x-full');
+            overlay.classList.add('hidden');
         }
 
-        // Event listeners
-        toggleBtn?.addEventListener('click', (e) => {
-            e.stopPropagation();
-            // Toggle sidebar
-            if (sidebar?.classList.contains('translate-x-full')) {
-                showSidebar();
-            } else {
-                hideSidebar();
-            }
-        });
-
+        toggleBtn?.addEventListener('click', showSidebar);
         closeBtn?.addEventListener('click', hideSidebar);
         overlay?.addEventListener('click', hideSidebar);
-
-        // Handle resize: jika di desktop, pastikan sidebar terbuka
-        let resizeTimeout;
-        window.addEventListener('resize', () => {
-            clearTimeout(resizeTimeout);
-            resizeTimeout = setTimeout(() => {
-                if (window.innerWidth >= 768) {
-                    sidebar?.classList.remove('translate-x-full');
-                    overlay?.classList.add('hidden');
-                    document.body.style.overflow = '';
-                } else {
-                    // Di mobile, pastikan sidebar tertutup
-                    sidebar?.classList.add('translate-x-full');
-                    overlay?.classList.add('hidden');
-                    document.body.style.overflow = '';
-                }
-            }, 200);
-        });
-
-        // Inisialisasi
-        initSidebarState();
 
         /* =====================================================
            QUESTION NAVIGATION
@@ -181,16 +134,13 @@
         function updateQuestionCounters() {
             let answeredCount = 0;
             navButtons.forEach(btn => {
-                // Cek apakah tombol memiliki class hijau (terjawab)
                 if (btn.classList.contains('bg-green-100') || btn.classList.contains('dark:bg-green-900/30')) {
                     answeredCount++;
                 }
             });
 
-            const answeredEl = document.getElementById('answeredCount');
-            const unansweredEl = document.getElementById('unansweredCount');
-            if (answeredEl) answeredEl.textContent = answeredCount;
-            if (unansweredEl) unansweredEl.textContent = totalQuestions - answeredCount;
+            document.getElementById('answeredCount').textContent = answeredCount;
+            document.getElementById('unansweredCount').textContent = totalQuestions - answeredCount;
         }
 
         function showQuestion(index) {
@@ -199,14 +149,10 @@
             currentIndex = index;
             setActiveNav(index);
             updateSubmitButtonVisibility();
-            // Tutup sidebar saat pindah soal (mobile)
-            if (window.innerWidth < 768) {
-                hideSidebar();
-            }
+            hideSidebar();
 
             // Update button states
-            const prevBtn = document.getElementById('prevBtn');
-            if (prevBtn) prevBtn.disabled = index === 0;
+            document.getElementById('prevBtn').disabled = index === 0;
         }
 
         setActiveNav(0);
@@ -299,40 +245,18 @@
             document.getElementById('auto-submit-form')?.submit();
         }
 
-        // ==== FUNGSI markAnswered - DIPERBAIKI ====
+        // ==== FUNGSI markAnswered (TIDAK DIUBAH) ====
         function markAnswered(questionId, answered = true) {
-            // Cari slide berdasarkan question ID
             const slide = document.querySelector(`.question-slide[data-question-id="${questionId}"]`);
-            if (!slide) return;
-
-            const index = slide.dataset.index;
-            const navBtn = document.querySelector(`.nav-btn[data-index="${index}"]`);
+            const navBtn = document.querySelector(`.nav-btn[data-index="${slide?.dataset.index}"]`);
 
             if (navBtn) {
                 if (answered) {
-                    // Tandai sebagai terjawab (hijau)
-                    navBtn.classList.remove(
-                        'bg-gray-100', 'dark:bg-azwara-medium/30',
-                        'text-gray-700', 'dark:text-gray-300',
-                        'border-gray-200', 'dark:border-azwara-medium'
-                    );
-                    navBtn.classList.add(
-                        'bg-green-100', 'dark:bg-green-900/30',
-                        'text-green-800', 'dark:text-green-300',
-                        'border-green-300', 'dark:border-green-700'
-                    );
+                    navBtn.classList.remove('bg-gray-100', 'dark:bg-ens-medium/30', 'text-gray-700', 'dark:text-gray-300', 'border-gray-200', 'dark:border-ens-medium');
+                    navBtn.classList.add('bg-green-100', 'dark:bg-green-900/30', 'text-green-800', 'dark:text-green-300', 'border-green-300', 'dark:border-green-700');
                 } else {
-                    // Tandai sebagai belum terjawab (abu-abu)
-                    navBtn.classList.remove(
-                        'bg-green-100', 'dark:bg-green-900/30',
-                        'text-green-800', 'dark:text-green-300',
-                        'border-green-300', 'dark:border-green-700'
-                    );
-                    navBtn.classList.add(
-                        'bg-gray-100', 'dark:bg-azwara-medium/30',
-                        'text-gray-700', 'dark:text-gray-300',
-                        'border-gray-200', 'dark:border-azwara-medium'
-                    );
+                    navBtn.classList.remove('bg-green-100', 'dark:bg-green-900/30', 'text-green-800', 'dark:text-green-300', 'border-green-300', 'dark:border-green-700');
+                    navBtn.classList.add('bg-gray-100', 'dark:bg-ens-medium/30', 'text-gray-700', 'dark:text-gray-300', 'border-gray-200', 'dark:border-ens-medium');
                 }
             }
 
@@ -454,32 +378,24 @@
                 // Deselect other button in same group
                 const otherBtn = questionSlide?.querySelector(`.truefalse-btn[data-sub-id="${subId}"]:not(:disabled)`);
                 if (otherBtn && otherBtn !== this) {
-                    otherBtn.classList.remove(
-                        'border-green-500', 'bg-green-50', 'dark:bg-green-900/20',
-                        'text-green-700', 'dark:text-green-300',
-                        'border-red-500', 'bg-red-50', 'dark:bg-red-900/20',
-                        'text-red-700', 'dark:text-red-300'
-                    );
+                    otherBtn.classList.remove('border-green-500', 'bg-green-50', 'dark:bg-green-900/20', 'text-green-700', 'dark:text-green-300',
+                        'border-red-500', 'bg-red-50', 'dark:bg-red-900/20', 'text-red-700', 'dark:text-red-300');
                 }
 
                 // Toggle current button
                 const isSelected = this.classList.contains('border-green-500') || this.classList.contains('border-red-500');
                 if (isSelected) {
-                    this.classList.remove(
-                        isTrue ? 'border-green-500' : 'border-red-500',
+                    this.classList.remove(isTrue ? 'border-green-500' : 'border-red-500',
                         isTrue ? 'bg-green-50' : 'bg-red-50',
                         isTrue ? 'dark:bg-green-900/20' : 'dark:bg-red-900/20',
                         isTrue ? 'text-green-700' : 'text-red-700',
-                        isTrue ? 'dark:text-green-300' : 'dark:text-red-300'
-                    );
+                        isTrue ? 'dark:text-green-300' : 'dark:text-red-300');
                 } else {
-                    this.classList.add(
-                        isTrue ? 'border-green-500' : 'border-red-500',
+                    this.classList.add(isTrue ? 'border-green-500' : 'border-red-500',
                         isTrue ? 'bg-green-50' : 'bg-red-50',
                         isTrue ? 'dark:bg-green-900/20' : 'dark:bg-red-900/20',
                         isTrue ? 'text-green-700' : 'text-red-700',
-                        isTrue ? 'dark:text-green-300' : 'dark:text-red-300'
-                    );
+                        isTrue ? 'dark:text-green-300' : 'dark:text-red-300');
                 }
 
                 await collectAndSaveCompoundAnswers(questionSlide);
@@ -571,49 +487,25 @@
         });
 
         /* =====================================================
-           INITIALIZATION - DIPERBAIKI
+           INITIALIZATION
         ===================================================== */
         // Initialize MathJax if available
         if (typeof MathJax !== 'undefined') {
             MathJax.typesetPromise();
         }
 
-        // MARK INITIAL ANSWERED QUESTIONS - DIPERBAIKI
-        setTimeout(() => {
-            document.querySelectorAll('.question-slide').forEach(slide => {
-                const questionId = slide.dataset.questionId;
-                const questionType = slide.dataset.questionType;
+        // Mark initial answered questions
+        document.querySelectorAll('.question-slide').forEach(slide => {
+            const questionId = slide.dataset.questionId;
+            const hasAnswer = slide.querySelector('input:checked') ||
+                slide.querySelector('.short-answer-input')?.value.trim() ||
+                slide.querySelector('.truefalse-btn.selected') ||
+                slide.querySelector('.compound-short-answer')?.value.trim();
 
-                let hasAnswer = false;
-
-                // Cek berdasarkan tipe pertanyaan
-                if (questionType === 'mcq' || questionType === 'mcma' || questionType === 'truefalse') {
-                    // Cek apakah ada input yang dicentang
-                    const checkedInput = slide.querySelector('input:checked');
-                    if (checkedInput) {
-                        hasAnswer = true;
-                    }
-                } else if (questionType === 'short_answer') {
-                    // Cek apakah ada teks di textarea
-                    const textarea = slide.querySelector('.short-answer-input');
-                    if (textarea && textarea.value.trim()) {
-                        hasAnswer = true;
-                    }
-                } else if (questionType === 'compound') {
-                    // Cek compound: truefalse buttons atau short answers
-                    const hasTrueFalse = slide.querySelector('.truefalse-btn.border-green-500, .truefalse-btn.border-red-500');
-                    const hasShortAnswer = slide.querySelector('.compound-short-answer[value]:not([value=""])') ||
-                                          Array.from(slide.querySelectorAll('.compound-short-answer')).some(el => el.value.trim());
-                    if (hasTrueFalse || hasShortAnswer) {
-                        hasAnswer = true;
-                    }
-                }
-
-                if (hasAnswer) {
-                    markAnswered(questionId, true);
-                }
-            });
-        }, 100);
+            if (hasAnswer) {
+                markAnswered(questionId, true);
+            }
+        });
     </script>
     <script>
     window.MathJax = {
