@@ -1,38 +1,29 @@
 @extends('layouts.app')
 
 @section('content')
-<div class="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+<div class="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
 
     {{-- ================= HEADER ================= --}}
-    <div class="mb-8 pb-6 border-b border-neutral-200 dark:border-white/10">
+    <div class="mb-8">
         <a href="{{ $backUrl }}"
-           class="group inline-flex items-center gap-2 text-sm font-medium
-                  text-neutral-700 hover:text-primary-700
-                  dark:text-neutral-500 dark:hover:text-primary-200 transition-colors mb-5">
-            <svg class="w-4 h-4 group-hover:-translate-x-0.5 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.8" d="M10 19l-7-7m0 0l7-7m-7 7h18"/>
+           class="inline-flex items-center gap-2 text-sm font-medium text-azwara-medium hover:text-azwara-light dark:text-azwara-lighter dark:hover:text-white transition-colors mb-4">
+            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18"/>
             </svg>
             Kembali
         </a>
 
         <div>
-            <div class="flex items-center gap-2.5 mb-2">
-                <span class="h-5 w-1 rounded-full bg-brand-gradient"></span>
-                <span class="text-[11px] font-semibold uppercase tracking-[0.14em] text-primary-600 dark:text-primary-300">
-                    Rapor Ujian
-                </span>
-            </div>
-
-            <h1 class="text-2xl md:text-3xl font-bold tracking-tight text-primary-900 dark:text-primary-50">
+            <h1 class="text-2xl md:text-3xl font-bold text-azwara-darkest dark:text-white">
                 Hasil Ujian Anda
             </h1>
             <div class="mt-2 flex flex-col sm:flex-row sm:items-center gap-1 sm:gap-2">
-                <p class="text-neutral-900 dark:text-neutral-200 font-medium">
+                <p class="text-gray-700 dark:text-gray-300 font-medium">
                     {{ $displayTitle }}
                 </p>
                 @if ($displaySubtitle)
-                    <span class="hidden sm:inline text-neutral-500 dark:text-neutral-700">•</span>
-                    <p class="text-neutral-700 dark:text-neutral-500">
+                    <span class="hidden sm:inline text-gray-500 dark:text-gray-400">•</span>
+                    <p class="text-gray-600 dark:text-gray-400">
                         {{ $displaySubtitle }}
                     </p>
                 @endif
@@ -41,7 +32,7 @@
     </div>
 
     {{-- ================= STATISTIK UTAMA ================= --}}
-    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-6 gap-4 mb-10">
+    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-6 gap-4 mb-8">
         @php
             $stats = [
                 [
@@ -49,14 +40,14 @@
                     'value' => $summary['correct'],
                     'icon' => 'check',
                     'color' => 'text-green-600 dark:text-green-400',
-                    'bg' => 'bg-green-50 dark:bg-green-500/15 border border-green-200 dark:border-green-400/20'
+                    'bg' => 'bg-green-100 dark:bg-green-900/20'
                 ],
                 [
                     'label' => 'Salah',
                     'value' => $summary['wrong'],
                     'icon' => 'x',
                     'color' => 'text-red-600 dark:text-red-400',
-                    'bg' => 'bg-red-50 dark:bg-red-500/15 border border-red-200 dark:border-red-400/20'
+                    'bg' => 'bg-red-100 dark:bg-red-900/20'
                 ],
             ];
 
@@ -65,8 +56,8 @@
                     'label' => 'Kosong',
                     'value' => $summary['empty'],
                     'icon' => 'dash',
-                    'color' => 'text-neutral-800 dark:text-neutral-400',
-                    'bg' => 'bg-neutral-100 dark:bg-white/10 border border-neutral-200 dark:border-white/10'
+                    'color' => 'text-gray-600 dark:text-gray-400',
+                    'bg' => 'bg-gray-100 dark:bg-gray-800'
                 ];
             }
 
@@ -75,15 +66,15 @@
                     'label' => 'Skor Total',
                     'value' => $attempt->score,
                     'icon' => 'star',
-                    'color' => 'text-primary-700 dark:text-primary-200',
-                    'bg' => 'bg-primary-50 dark:bg-primary-500/15 border border-primary-100 dark:border-primary-400/20'
+                    'color' => 'text-azwara-medium dark:text-white',
+                    'bg' => 'bg-azwara-lightest dark:bg-azwara-medium'
                 ],
                 [
                     'label' => 'Durasi',
                     'value' => gmdate('H:i:s', $attempt->work_duration_seconds),
                     'icon' => 'clock',
-                    'color' => 'text-secondary-700 dark:text-secondary-200',
-                    'bg' => 'bg-secondary-50 dark:bg-secondary-500/15 border border-secondary-200 dark:border-secondary-400/20'
+                    'color' => 'text-azwara-medium dark:text-white',
+                    'bg' => 'bg-azwara-lightest dark:bg-azwara-medium'
                 ],
             ]);
 
@@ -93,30 +84,27 @@
                     'value' => $attempt->is_passed ? 'Lulus' : 'Belum Lulus',
                     'icon' => $attempt->is_passed ? 'trophy' : 'alert',
                     'color' => $attempt->is_passed ? 'text-green-600 dark:text-green-400' : 'text-red-600 dark:text-red-400',
-                    'bg' => $attempt->is_passed
-                        ? 'bg-green-50 dark:bg-green-500/15 border border-green-200 dark:border-green-400/20'
-                        : 'bg-red-50 dark:bg-red-500/15 border border-red-200 dark:border-red-400/20'
+                    'bg' => $attempt->is_passed ? 'bg-green-100 dark:bg-green-900/20' : 'bg-red-100 dark:bg-red-900/20'
                 ];
             }
         @endphp
 
         @foreach ($stats as $stat)
-            <div class="rounded-2xl border border-neutral-200 dark:border-white/10
-                        bg-white dark:bg-primary-950 p-4 shadow-sm
-                        hover:shadow-md hover:shadow-primary-900/5 transition-shadow">
+            <div class="rounded-xl border border-azwara-lighter dark:border-azwara-darker
+                        bg-white dark:bg-azwara-darker p-4 shadow-sm">
                 <div class="flex items-center gap-3">
-                    <div class="flex-shrink-0 w-10 h-10 rounded-xl flex items-center justify-center {{ $stat['bg'] }}">
+                    <div class="p-2 rounded-lg {{ $stat['bg'] }}">
                         @if($stat['icon'] === 'check')
                             <svg class="w-5 h-5 {{ $stat['color'] }}" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.8" d="M5 13l4 4L19 7"/>
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M5 13l4 4L19 7"/>
                             </svg>
                         @elseif($stat['icon'] === 'x')
                             <svg class="w-5 h-5 {{ $stat['color'] }}" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.8" d="M6 18L18 6M6 6l12 12"/>
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M6 18L18 6M6 6l12 12"/>
                             </svg>
                         @elseif($stat['icon'] === 'dash')
                             <svg class="w-5 h-5 {{ $stat['color'] }}" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.8" d="M20 12H4"/>
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M20 12H4"/>
                             </svg>
                         @elseif($stat['icon'] === 'star')
                             <svg class="w-5 h-5 {{ $stat['color'] }}" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -124,7 +112,7 @@
                             </svg>
                         @elseif($stat['icon'] === 'clock')
                             <svg class="w-5 h-5 {{ $stat['color'] }}" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.8" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/>
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/>
                             </svg>
                         @elseif($stat['icon'] === 'trophy')
                             <svg class="w-5 h-5 {{ $stat['color'] }}" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -132,15 +120,15 @@
                             </svg>
                         @elseif($stat['icon'] === 'alert')
                             <svg class="w-5 h-5 {{ $stat['color'] }}" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.8" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.964-.833-2.732 0L4.732 16.5c-.77.833.192 2.5 1.732 2.5z"/>
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.964-.833-2.732 0L4.732 16.5c-.77.833.192 2.5 1.732 2.5z"/>
                             </svg>
                         @endif
                     </div>
-                    <div class="min-w-0">
-                        <div class="text-[11px] font-semibold uppercase tracking-[0.1em] text-neutral-700 dark:text-neutral-600">
+                    <div>
+                        <div class="text-xs text-gray-500 dark:text-gray-400">
                             {{ $stat['label'] }}
                         </div>
-                        <div class="text-lg font-bold tabular-nums truncate {{ $stat['color'] }}">
+                        <div class="text-lg font-bold {{ $stat['color'] }}">
                             {{ $stat['value'] }}
                         </div>
                     </div>
@@ -151,129 +139,133 @@
 
     {{-- ================= RINGKASAN SKD ================= --}}
     @if ($skdSummary)
-    <div class="mb-10">
-        <div class="flex items-center gap-3 mb-5">
-            <h2 class="flex items-center gap-2.5 text-lg font-bold tracking-tight text-primary-900 dark:text-primary-50">
-                <span class="h-5 w-1 rounded-full bg-brand-gradient"></span>
+    <div class="mb-8">
+        <div class="flex items-center gap-3 mb-4">
+            <div class="p-2 bg-azwara-lightest dark:bg-azwara-medium rounded-lg">
+                <svg class="w-5 h-5 text-azwara-medium dark:text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"/>
+                </svg>
+            </div>
+            <h2 class="text-xl font-bold text-azwara-darkest dark:text-white">
                 Ringkasan SKD
             </h2>
         </div>
 
-        <div class="rounded-2xl border border-neutral-200 dark:border-white/10 overflow-hidden shadow-sm">
+        <div class="rounded-xl border border-azwara-lighter dark:border-azwara-darker overflow-hidden">
             <div class="overflow-x-auto">
-                <table class="min-w-full divide-y divide-neutral-200 dark:divide-white/10">
-                    <thead class="bg-neutral-50 dark:bg-white/[0.03]">
+                <table class="min-w-full divide-y divide-azwara-lighter dark:divide-azwara-medium">
+                    <thead class="bg-azwara-lightest dark:bg-azwara-darkest">
                         <tr>
-                            <th class="px-6 py-3.5 text-left text-[11px] font-semibold text-neutral-700 dark:text-neutral-500 uppercase tracking-[0.12em]">
+                            <th class="px-6 py-4 text-left text-sm font-semibold text-gray-700 dark:text-gray-300">
                                 Komponen
                             </th>
-                            <th class="px-6 py-3.5 text-center text-[11px] font-semibold text-neutral-700 dark:text-neutral-500 uppercase tracking-[0.12em]">
+                            <th class="px-6 py-4 text-center text-sm font-semibold text-gray-700 dark:text-gray-300">
                                 TIU
                             </th>
-                            <th class="px-6 py-3.5 text-center text-[11px] font-semibold text-neutral-700 dark:text-neutral-500 uppercase tracking-[0.12em]">
+                            <th class="px-6 py-4 text-center text-sm font-semibold text-gray-700 dark:text-gray-300">
                                 TWK
                             </th>
-                            <th class="px-6 py-3.5 text-center text-[11px] font-semibold text-neutral-700 dark:text-neutral-500 uppercase tracking-[0.12em]">
+                            <th class="px-6 py-4 text-center text-sm font-semibold text-gray-700 dark:text-gray-300">
                                 TKP
                             </th>
                         </tr>
                     </thead>
-                    <tbody class="bg-white dark:bg-primary-950 divide-y divide-neutral-200 dark:divide-white/10">
+                    <tbody class="bg-white dark:bg-azwara-darker divide-y divide-azwara-lighter dark:divide-azwara-medium">
                         {{-- BENAR --}}
-                        <tr class="hover:bg-neutral-50 dark:hover:bg-white/[0.04] transition-colors">
+                        <tr class="hover:bg-azwara-lightest/50 dark:hover:bg-azwara-medium/20">
                             <td class="px-6 py-4">
-                                <div class="flex items-center gap-2.5">
+                                <div class="flex items-center gap-2">
                                     <div class="w-2 h-2 rounded-full bg-green-500"></div>
-                                    <span class="text-sm text-neutral-800 dark:text-neutral-300">Benar</span>
+                                    <span class="text-sm text-gray-600 dark:text-gray-400">Benar</span>
                                 </div>
                             </td>
                             <td class="px-6 py-4 text-center">
-                                <span class="text-sm font-semibold tabular-nums text-green-600 dark:text-green-400">
+                                <span class="text-sm font-semibold text-green-600 dark:text-green-400">
                                     {{ $skdSummary['tiu']['correct'] }}
                                 </span>
                             </td>
                             <td class="px-6 py-4 text-center">
-                                <span class="text-sm font-semibold tabular-nums text-green-600 dark:text-green-400">
+                                <span class="text-sm font-semibold text-green-600 dark:text-green-400">
                                     {{ $skdSummary['twk']['correct'] }}
                                 </span>
                             </td>
                             <td class="px-6 py-4 text-center">
-                                <span class="text-sm font-semibold tabular-nums text-green-600 dark:text-green-400">
+                                <span class="text-sm font-semibold text-green-600 dark:text-green-400">
                                     {{ $skdSummary['tkp']['correct'] }}
                                 </span>
                             </td>
                         </tr>
 
                         {{-- SALAH --}}
-                        <tr class="hover:bg-neutral-50 dark:hover:bg-white/[0.04] transition-colors">
+                        <tr class="hover:bg-azwara-lightest/50 dark:hover:bg-azwara-medium/20">
                             <td class="px-6 py-4">
-                                <div class="flex items-center gap-2.5">
+                                <div class="flex items-center gap-2">
                                     <div class="w-2 h-2 rounded-full bg-red-500"></div>
-                                    <span class="text-sm text-neutral-800 dark:text-neutral-300">Salah</span>
+                                    <span class="text-sm text-gray-600 dark:text-gray-400">Salah</span>
                                 </div>
                             </td>
                             <td class="px-6 py-4 text-center">
-                                <span class="text-sm font-semibold tabular-nums text-red-600 dark:text-red-400">
+                                <span class="text-sm font-semibold text-red-600 dark:text-red-400">
                                     {{ $skdSummary['tiu']['wrong'] }}
                                 </span>
                             </td>
                             <td class="px-6 py-4 text-center">
-                                <span class="text-sm font-semibold tabular-nums text-red-600 dark:text-red-400">
+                                <span class="text-sm font-semibold text-red-600 dark:text-red-400">
                                     {{ $skdSummary['twk']['wrong'] }}
                                 </span>
                             </td>
                             <td class="px-6 py-4 text-center">
-                                <span class="text-sm font-semibold tabular-nums text-red-600 dark:text-red-400">
+                                <span class="text-sm font-semibold text-red-600 dark:text-red-400">
                                     {{ $skdSummary['tkp']['wrong'] }}
                                 </span>
                             </td>
                         </tr>
 
                         {{-- KOSONG (TAMBAHAN) --}}
-                        <tr class="hover:bg-neutral-50 dark:hover:bg-white/[0.04] transition-colors">
+                        <tr class="hover:bg-azwara-lightest/50 dark:hover:bg-azwara-medium/20">
                             <td class="px-6 py-4">
-                                <div class="flex items-center gap-2.5">
-                                    <div class="w-2 h-2 rounded-full bg-neutral-500"></div>
-                                    <span class="text-sm text-neutral-800 dark:text-neutral-300">Kosong</span>
+                                <div class="flex items-center gap-2">
+                                    <div class="w-2 h-2 rounded-full bg-gray-400"></div>
+                                    <span class="text-sm text-gray-600 dark:text-gray-400">Kosong</span>
                                 </div>
                             </td>
                             <td class="px-6 py-4 text-center">
-                                <span class="text-sm font-semibold tabular-nums text-neutral-700 dark:text-neutral-500">
+                                <span class="text-sm font-semibold text-gray-500 dark:text-gray-400">
                                     {{ $skdSummary['tiu']['empty'] ?? 0 }}
                                 </span>
                             </td>
                             <td class="px-6 py-4 text-center">
-                                <span class="text-sm font-semibold tabular-nums text-neutral-700 dark:text-neutral-500">
+                                <span class="text-sm font-semibold text-gray-500 dark:text-gray-400">
                                     {{ $skdSummary['twk']['empty'] ?? 0 }}
                                 </span>
                             </td>
                             <td class="px-6 py-4 text-center">
-                                <span class="text-sm font-semibold tabular-nums text-neutral-700 dark:text-neutral-500">
+                                <span class="text-sm font-semibold text-gray-500 dark:text-gray-400">
                                     {{ $skdSummary['tkp']['empty'] ?? 0 }}
                                 </span>
                             </td>
                         </tr>
 
                         {{-- SKOR --}}
-                        <tr class="bg-primary-50/50 dark:bg-primary-500/10">
+                        <tr class="bg-azwara-lightest/30 dark:bg-azwara-medium/10 hover:bg-azwara-lightest/50 dark:hover:bg-azwara-medium/20">
                             <td class="px-6 py-4">
-                                <div class="flex items-center gap-2.5">
-                                    <div class="w-2 h-2 rounded-full bg-primary-500"></div>
-                                    <span class="text-sm font-semibold text-primary-900 dark:text-primary-100">Skor</span>
+                                <div class="flex items-center gap-2">
+                                    <div class="w-2 h-2 rounded-full bg-azwara-medium dark:bg-white"></div>
+                                    <span class="text-sm font-medium text-gray-700 dark:text-gray-300">Skor</span>
                                 </div>
                             </td>
                             <td class="px-6 py-4 text-center">
-                                <span class="text-lg font-bold tabular-nums text-primary-900 dark:text-primary-50">
+                                <span class="text-lg font-bold text-azwara-darkest dark:text-white">
                                     {{ $skdSummary['tiu']['score'] }}
                                 </span>
                             </td>
                             <td class="px-6 py-4 text-center">
-                                <span class="text-lg font-bold tabular-nums text-primary-900 dark:text-primary-50">
+                                <span class="text-lg font-bold text-azwara-darkest dark:text-white">
                                     {{ $skdSummary['twk']['score'] }}
                                 </span>
                             </td>
                             <td class="px-6 py-4 text-center">
-                                <span class="text-lg font-bold tabular-nums text-primary-900 dark:text-primary-50">
+                                <span class="text-lg font-bold text-azwara-darkest dark:text-white">
                                     {{ $skdSummary['tkp']['score'] }}
                                 </span>
                             </td>
@@ -286,29 +278,26 @@
     @endif
 
     {{-- ================= ACTION & FILTER ================= --}}
-    <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-8
-                pb-6 border-b border-neutral-200 dark:border-white/10">
+    <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-8">
         <a href="{{ route('exams.ranking.student', $exam) }}"
            class="inline-flex items-center justify-center gap-2
-                  px-5 py-2.5 rounded-xl text-sm font-semibold
-                  bg-primary-600 text-white
-                  shadow-sm hover:bg-primary-700 active:bg-primary-800
-                  focus:outline-none focus:ring-2 focus:ring-primary-500/40
-                  transition-colors">
+                  px-5 py-2.5 rounded-lg text-sm font-semibold
+                  bg-gradient-to-r from-azwara-medium to-azwara-light text-white
+                  hover:from-azwara-light hover:to-azwara-medium
+                  transition-all duration-200 shadow-sm hover:shadow">
             <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.8" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"/>
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"/>
             </svg>
             Lihat Peringkat
         </a>
 
-        <form method="GET" class="flex items-center gap-2.5">
-            <label class="text-sm text-neutral-700 dark:text-neutral-500 whitespace-nowrap">Tampilkan:</label>
+        <form method="GET" class="flex items-center gap-3">
+            <label class="text-sm text-gray-600 dark:text-gray-400">Tampilkan:</label>
             <select name="per_page"
                     onchange="this.form.submit()"
-                    class="text-sm rounded-xl border border-neutral-300 dark:border-white/10
-                           bg-white dark:bg-white/5 text-neutral-900 dark:text-neutral-100
-                           px-3.5 py-2 shadow-sm
-                           focus:outline-none focus:ring-2 focus:ring-primary-500/20 focus:border-primary-500 transition">
+                    class="text-sm rounded-lg border border-azwara-lighter dark:border-azwara-medium
+                           bg-white dark:bg-azwara-darker text-gray-700 dark:text-gray-200
+                           px-3 py-2 focus:outline-none focus:ring-2 focus:ring-azwara-light focus:border-transparent">
                 @foreach ([10,20,30,50,100] as $n)
                     <option value="{{ $n }}" @selected($perPage == $n)>
                         {{ $n }} per halaman
@@ -319,19 +308,19 @@
     </div>
 
     {{-- ================= SOAL & PEMBAHASAN ================= --}}
-    <div class="space-y-5">
+    <div class="space-y-6">
         @foreach ($questions as $examQuestion)
             @php
                 $question = $examQuestion->question;
                 $answer   = $attempt->answers->firstWhere('question_id', $question->id);
                 $selected = $answer?->selected_ids ?? [];
                 $questionNumber = $loop->iteration + ($questions->firstItem() - 1);
-
+                
                 // Variabel untuk TKP
                 $isTkp = ($question->test_type === 'tkp');
                 $selectedWeight = 0;
                 $maxWeight = 0;
-
+                
                 if ($isTkp) {
                     $maxWeight = $question->options->max('weight') ?? 0;
                     if ($answer && !empty($selected)) {
@@ -342,55 +331,48 @@
                 }
             @endphp
 
-            <div class="rounded-2xl border border-neutral-200 dark:border-white/10
-                        bg-white dark:bg-primary-950 p-6 shadow-sm
-                        hover:border-neutral-300 dark:hover:border-white/20 transition-colors">
+            <div class="rounded-xl border border-azwara-lighter dark:border-azwara-darker
+                        bg-white dark:bg-azwara-darker p-6 hover:shadow-sm transition-shadow">
 
                 {{-- HEADER SOAL --}}
-                <div class="flex flex-wrap items-center justify-between gap-3 mb-5
-                            pb-4 border-b border-neutral-200 dark:border-white/10">
+                <div class="flex flex-wrap items-center justify-between gap-3 mb-5">
 
                     {{-- KIRI: NOMOR SOAL --}}
                     <div class="flex items-center gap-3">
-                        <div class="w-9 h-9 rounded-xl
-                                    bg-primary-50 dark:bg-primary-500/15
-                                    ring-1 ring-inset ring-primary-600/15 dark:ring-primary-400/20
+                        <div class="w-10 h-10 rounded-lg bg-azwara-lightest dark:bg-azwara-medium
                                     flex items-center justify-center">
-                            <span class="font-bold text-sm tabular-nums text-primary-700 dark:text-primary-200">
+                            <span class="font-bold text-azwara-medium dark:text-white">
                                 {{ $questionNumber }}
                             </span>
                         </div>
 
-                        <span class="text-base font-bold tracking-tight text-primary-900 dark:text-primary-50">
+                        <span class="text-base font-semibold text-azwara-darkest dark:text-white">
                             Soal {{ $questionNumber }}
                         </span>
-
+                        
                         @if($isTkp)
-                            <span class="text-[11px] font-semibold px-2.5 py-0.5 rounded-full
-                                         bg-secondary-50 text-secondary-700 ring-1 ring-inset ring-secondary-600/20
-                                         dark:bg-secondary-500/15 dark:text-secondary-200 dark:ring-secondary-400/20">
+                            <span class="text-xs font-medium px-2 py-0.5 rounded-full bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-400">
                                 TKP
                             </span>
                         @endif
                     </div>
 
                     {{-- KANAN: STATUS SOAL --}}
-                    <div class="text-sm">
+                    <div class="text-sm text-gray-500 dark:text-gray-400">
                         @if($isTkp)
                             {{-- TKP: Tampilkan bobot --}}
                             @if (!$answer || $answer->isEmpty)
                                 <span class="inline-flex px-3 py-1 rounded-full text-xs font-semibold
-                                            bg-neutral-100 text-neutral-800
-                                            dark:bg-white/10 dark:text-neutral-300">
+                                            bg-gray-100 dark:bg-gray-800 text-gray-700 dark:text-gray-300">
                                     Kosong
                                 </span>
                             @else
-                                <span class="inline-flex px-3 py-1 rounded-full text-xs font-semibold tabular-nums
+                                <span class="inline-flex px-3 py-1 rounded-full text-xs font-semibold
                                     {{ $selectedWeight === $maxWeight && $maxWeight > 0
-                                        ? 'bg-green-50 text-green-700 ring-1 ring-inset ring-green-600/20 dark:bg-green-500/15 dark:text-green-300'
+                                        ? 'bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-300'
                                         : ($selectedWeight > 0
-                                            ? 'bg-gold-50 text-gold-700 ring-1 ring-inset ring-gold-600/20 dark:bg-gold-500/15 dark:text-gold-200'
-                                            : 'bg-red-50 text-red-700 ring-1 ring-inset ring-red-600/15 dark:bg-red-500/15 dark:text-red-300'
+                                            ? 'bg-yellow-100 text-yellow-800 dark:bg-yellow-900/30 dark:text-yellow-300'
+                                            : 'bg-red-100 text-red-800 dark:bg-red-900/30 dark:text-red-300'
                                         )
                                     }}">
                                     Bobot {{ $selectedWeight }} / {{ $maxWeight }}
@@ -400,28 +382,19 @@
                             {{-- Non-TKP: Tampilkan benar/salah --}}
                             @if ($answer && !$answer->isEmpty)
                                 @if (in_array($question->options->where('is_correct', true)->first()->id ?? null, $selected))
-                                    <span class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-semibold
-                                                bg-green-50 text-green-700 ring-1 ring-inset ring-green-600/20
-                                                dark:bg-green-500/15 dark:text-green-300 dark:ring-green-400/20">
-                                        <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M5 13l4 4L19 7"/>
-                                        </svg>
-                                        Benar
+                                    <span class="inline-flex items-center gap-1 px-3 py-1 rounded-full text-xs font-semibold
+                                                bg-green-100 dark:bg-green-900/30 text-green-800 dark:text-green-300">
+                                        ✔ Benar
                                     </span>
                                 @else
-                                    <span class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-semibold
-                                                bg-red-50 text-red-700 ring-1 ring-inset ring-red-600/15
-                                                dark:bg-red-500/15 dark:text-red-300 dark:ring-red-400/20">
-                                        <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M6 18L18 6M6 6l12 12"/>
-                                        </svg>
-                                        Salah
+                                    <span class="inline-flex items-center gap-1 px-3 py-1 rounded-full text-xs font-semibold
+                                                bg-red-100 dark:bg-red-900/30 text-red-800 dark:text-red-300">
+                                        ✖ Salah
                                     </span>
                                 @endif
                             @else
                                 <span class="inline-flex items-center gap-1 px-3 py-1 rounded-full text-xs font-semibold
-                                            bg-neutral-100 text-neutral-800
-                                            dark:bg-white/10 dark:text-neutral-300">
+                                            bg-gray-100 dark:bg-gray-800 text-gray-700 dark:text-gray-300">
                                     Kosong
                                 </span>
                             @endif
@@ -432,7 +405,7 @@
                 {{-- KONTEN SOAL --}}
                 <div class="mb-6 space-y-4">
                     @if ($question->image)
-                        <div class="border border-neutral-200 dark:border-white/10 rounded-xl overflow-hidden bg-white">
+                        <div class="border border-azwara-lighter dark:border-azwara-medium rounded-lg overflow-hidden">
                             <img src="{{ asset('storage/'.$question->image) }}"
                                  class="w-full h-auto max-w-2xl mx-auto"
                                  alt="Gambar soal {{ $questionNumber }}">
@@ -440,69 +413,69 @@
                     @endif
 
                     @if ($question->question_text)
-                        <div class="prose prose-sm dark:prose-invert max-w-none text-neutral-800 dark:text-neutral-200">
+                        <div class="prose prose-sm dark:prose-invert max-w-none dark:text-white">
                             {!! $question->question_text !!}
                         </div>
                     @endif
-
+                    
                     {{-- Informasi tambahan untuk TKP --}}
                     {{-- @if($isTkp)
-                        <div class="text-xs text-neutral-700 dark:text-neutral-500 italic bg-secondary-50 dark:bg-secondary-500/10 p-3 rounded-xl">
-                            Pilih jawaban yang paling sesuai. Setiap pilihan memiliki bobot nilai berbeda.
+                        <div class="text-xs text-gray-500 dark:text-gray-400 italic bg-blue-50 dark:bg-blue-900/10 p-3 rounded-lg">
+                            💡 Pilih jawaban yang paling sesuai. Setiap pilihan memiliki bobot nilai berbeda.
                         </div>
                     @endif --}}
                 </div>
 
                 {{-- PILIHAN JAWABAN --}}
-                <div class="space-y-2.5 mb-6">
+                <div class="space-y-3 mb-6">
                     @foreach ($question->options as $option)
                         @php
                             $isChosen = in_array($option->id, $selected ?? []);
                             $hasImage = !empty($option->image);
                             $optionWeight = $option->weight ?? 0;
-
+                            
                             // Untuk TKP
                             $isBestTkp = $isTkp && $optionWeight === $maxWeight && $maxWeight > 0;
-
+                            
                             // Untuk non-TKP
                             $isCorrect = !$isTkp && $option->is_correct;
-
+                            
                             // Tentukan warna border dan background
                             if ($isTkp) {
                                 if ($isChosen && $optionWeight === $maxWeight && $maxWeight > 0) {
-                                    $borderClass = 'border-green-400 dark:border-green-500/40 bg-green-50 dark:bg-green-500/10 ring-1 ring-green-500/20';
-                                    $labelClass = 'bg-green-100 text-green-700 dark:bg-green-500/25 dark:text-green-300 border border-green-300 dark:border-green-500/30';
+                                    $borderClass = 'border-green-500 bg-green-50 dark:bg-green-900/30';
+                                    $labelClass = 'bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-300 border border-green-300 dark:border-green-700';
                                 } elseif ($isChosen && $optionWeight > 0) {
-                                    $borderClass = 'border-gold-400 dark:border-gold-500/40 bg-gold-50 dark:bg-gold-500/10 ring-1 ring-gold-500/20';
-                                    $labelClass = 'bg-gold-100 text-gold-700 dark:bg-gold-500/25 dark:text-gold-200 border border-gold-300 dark:border-gold-500/30';
+                                    $borderClass = 'border-yellow-500 bg-yellow-50 dark:bg-yellow-900/30';
+                                    $labelClass = 'bg-yellow-100 text-yellow-800 dark:bg-yellow-900 dark:text-yellow-300 border border-yellow-300 dark:border-yellow-700';
                                 } elseif ($isChosen) {
-                                    $borderClass = 'border-red-400 dark:border-red-500/40 bg-red-50 dark:bg-red-500/10 ring-1 ring-red-500/20';
-                                    $labelClass = 'bg-red-100 text-red-700 dark:bg-red-500/25 dark:text-red-300 border border-red-300 dark:border-red-500/30';
+                                    $borderClass = 'border-red-500 bg-red-50 dark:bg-red-900/30';
+                                    $labelClass = 'bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-300 border border-red-300 dark:border-red-700';
                                 } elseif ($optionWeight === $maxWeight && $maxWeight > 0) {
-                                    $borderClass = 'border-green-200 dark:border-green-500/25 bg-green-50/50 dark:bg-green-500/[0.06]';
-                                    $labelClass = 'bg-green-50 text-green-700 dark:bg-green-500/15 dark:text-green-400 border border-green-200 dark:border-green-500/25';
+                                    $borderClass = 'border-green-300 bg-green-50/50 dark:bg-green-900/10';
+                                    $labelClass = 'bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400 border border-green-300 dark:border-green-700';
                                 } else {
-                                    $borderClass = 'border-neutral-200 dark:border-white/10 bg-white dark:bg-white/[0.03]';
-                                    $labelClass = 'bg-neutral-100 text-neutral-800 dark:bg-white/10 dark:text-neutral-300 border border-neutral-200 dark:border-white/10';
+                                    $borderClass = 'border-azwara-lighter dark:border-azwara-darker bg-white dark:bg-azwara-darker';
+                                    $labelClass = 'bg-azwara-lightest dark:bg-azwara-medium text-azwara-medium dark:text-white border border-azwara-lighter dark:border-azwara-medium';
                                 }
                             } else {
                                 if ($isCorrect && $isChosen) {
-                                    $borderClass = 'border-green-400 dark:border-green-500/40 bg-green-50 dark:bg-green-500/10 ring-1 ring-green-500/20';
-                                    $labelClass = 'bg-green-100 text-green-700 dark:bg-green-500/25 dark:text-green-300 border border-green-300 dark:border-green-500/30';
+                                    $borderClass = 'border-green-500 bg-green-50 dark:bg-green-900/30';
+                                    $labelClass = 'bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-300 border border-green-300 dark:border-green-700';
                                 } elseif ($isCorrect) {
-                                    $borderClass = 'border-green-200 dark:border-green-500/25 bg-green-50/50 dark:bg-green-500/[0.06]';
-                                    $labelClass = 'bg-green-50 text-green-700 dark:bg-green-500/15 dark:text-green-400 border border-green-200 dark:border-green-500/25';
+                                    $borderClass = 'border-green-300 bg-green-50/50 dark:bg-green-900/10';
+                                    $labelClass = 'bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400 border border-green-300 dark:border-green-700';
                                 } elseif ($isChosen) {
-                                    $borderClass = 'border-red-400 dark:border-red-500/40 bg-red-50 dark:bg-red-500/10 ring-1 ring-red-500/20';
-                                    $labelClass = 'bg-red-100 text-red-700 dark:bg-red-500/25 dark:text-red-300 border border-red-300 dark:border-red-500/30';
+                                    $borderClass = 'border-red-500 bg-red-50 dark:bg-red-900/30';
+                                    $labelClass = 'bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-300 border border-red-300 dark:border-red-700';
                                 } else {
-                                    $borderClass = 'border-neutral-200 dark:border-white/10 bg-white dark:bg-white/[0.03]';
-                                    $labelClass = 'bg-neutral-100 text-neutral-800 dark:bg-white/10 dark:text-neutral-300 border border-neutral-200 dark:border-white/10';
+                                    $borderClass = 'border-azwara-lighter dark:border-azwara-darker bg-white dark:bg-azwara-darker';
+                                    $labelClass = 'bg-azwara-lightest dark:bg-azwara-medium text-azwara-medium dark:text-white border border-azwara-lighter dark:border-azwara-medium';
                                 }
                             }
                         @endphp
 
-                        <div class="rounded-xl border p-4 transition-all duration-200 {{ $borderClass }}">
+                        <div class="rounded-lg border p-4 transition-all duration-200 {{ $borderClass }}">
                             <div class="flex flex-col md:flex-row md:items-start gap-4">
 
                                 {{-- LABEL OPSI --}}
@@ -513,10 +486,10 @@
                                 </div>
 
                                 {{-- KONTEN OPSI --}}
-                                <div class="flex-1 min-w-0">
+                                <div class="flex-1">
 
                                     @if ($hasImage)
-                                        <div class="mb-3 border border-neutral-200 dark:border-white/10 rounded-xl overflow-hidden max-w-xs bg-white">
+                                        <div class="mb-3 border border-azwara-lighter dark:border-azwara-medium rounded-lg overflow-hidden max-w-xs">
                                             <img src="{{ asset('storage/'.$option->image) }}"
                                                 class="w-full h-auto"
                                                 alt="Gambar opsi {{ $option->label }}">
@@ -524,58 +497,43 @@
                                     @endif
 
                                     @if ($option->option_text)
-                                        <div class="text-sm text-neutral-800 dark:text-neutral-200 mb-2">
+                                        <div class="text-gray-800 dark:text-gray-200 mb-2">
                                             {!! $option->option_text !!}
                                         </div>
                                     @endif
 
                                     {{-- STATUS OPSI --}}
-                                    <div class="flex flex-wrap items-center gap-2 mt-3">
+                                    <div class="flex flex-wrap items-center gap-3 mt-3">
 
                                         @if($isTkp)
                                             {{-- TKP: Tampilkan bobot --}}
-                                            <span class="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-[11px] font-semibold tabular-nums
+                                            <span class="inline-flex items-center gap-1 px-3 py-1 rounded-full text-xs font-semibold
                                                 {{ $optionWeight === $maxWeight && $maxWeight > 0
-                                                    ? 'bg-green-50 text-green-700 ring-1 ring-inset ring-green-600/20 dark:bg-green-500/15 dark:text-green-300'
-                                                    : 'bg-neutral-100 text-neutral-800 dark:bg-white/10 dark:text-neutral-300'
+                                                    ? 'bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-300'
+                                                    : 'bg-gray-100 text-gray-800 dark:bg-gray-800 dark:text-gray-300'
                                                 }}">
                                                 Bobot: {{ $optionWeight }}
                                                 @if($optionWeight === $maxWeight && $maxWeight > 0)
-                                                    <span class="text-gold-600 dark:text-gold-400">★</span> Maksimal
+                                                    ⭐ Maksimal
                                                 @endif
                                             </span>
 
                                             @if ($isChosen)
-                                                <span class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[11px] font-semibold
-                                                             bg-secondary-50 text-secondary-700 ring-1 ring-inset ring-secondary-600/20
-                                                             dark:bg-secondary-500/15 dark:text-secondary-200">
-                                                    <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"/>
-                                                    </svg>
-                                                    Pilihan Anda
+                                                <span class="inline-flex items-center gap-1 px-3 py-1 rounded-full text-xs font-semibold bg-yellow-100 dark:bg-yellow-900 text-yellow-800 dark:text-yellow-300">
+                                                    👤 Pilihan Anda
                                                 </span>
                                             @endif
                                         @else
                                             {{-- Non-TKP --}}
                                             @if ($isCorrect)
-                                                <span class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[11px] font-semibold
-                                                             bg-green-50 text-green-700 ring-1 ring-inset ring-green-600/20
-                                                             dark:bg-green-500/15 dark:text-green-300">
-                                                    <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M5 13l4 4L19 7"/>
-                                                    </svg>
-                                                    Jawaban Benar
+                                                <span class="inline-flex items-center gap-1 px-3 py-1 rounded-full text-xs font-semibold bg-green-100 dark:bg-green-900 text-green-800 dark:text-green-300">
+                                                    ✔ Jawaban Benar
                                                 </span>
                                             @endif
 
                                             @if ($isChosen)
-                                                <span class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[11px] font-semibold
-                                                             bg-secondary-50 text-secondary-700 ring-1 ring-inset ring-secondary-600/20
-                                                             dark:bg-secondary-500/15 dark:text-secondary-200">
-                                                    <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"/>
-                                                    </svg>
-                                                    Jawaban Anda
+                                                <span class="inline-flex items-center gap-1 px-3 py-1 rounded-full text-xs font-semibold bg-blue-100 dark:bg-blue-900 text-blue-800 dark:text-blue-300">
+                                                    👤 Jawaban Anda
                                                 </span>
                                             @endif
                                         @endif
@@ -589,22 +547,20 @@
 
                 {{-- PEMBAHASAN --}}
                 @if ($question->explanation)
-                    <div x-data="{ open: false }" class="border-t border-neutral-200 dark:border-white/10 pt-5">
+                    <div x-data="{ open: false }" class="border-t border-azwara-lighter dark:border-azwara-medium pt-5">
                         <button @click="open = !open"
-                                class="w-full flex items-center justify-between text-left focus:outline-none group">
+                                class="w-full flex items-center justify-between text-left focus:outline-none">
                             <div class="flex items-center gap-3">
-                                <div class="w-9 h-9 rounded-xl flex items-center justify-center
-                                            bg-gold-50 dark:bg-gold-500/10
-                                            border border-gold-200 dark:border-gold-400/20">
-                                    <svg class="w-4 h-4 text-gold-600 dark:text-gold-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <div class="p-2 bg-azwara-lightest dark:bg-azwara-medium rounded-lg">
+                                    <svg class="w-5 h-5 text-azwara-medium dark:text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
                                     </svg>
                                 </div>
-                                <span class="font-semibold text-primary-900 dark:text-primary-50 group-hover:text-primary-700 dark:group-hover:text-primary-200 transition-colors">
+                                <span class="font-medium text-azwara-darkest dark:text-white">
                                     Pembahasan Soal
                                 </span>
                             </div>
-                            <svg class="w-5 h-5 text-neutral-600 dark:text-neutral-500 transform transition-transform duration-200"
+                            <svg class="w-5 h-5 text-gray-500 dark:text-gray-400 transform transition-transform duration-200"
                                  :class="{ 'rotate-180': open }"
                                  fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/>
@@ -612,7 +568,7 @@
                         </button>
 
                         <div x-show="open" x-collapse
-                             class="mt-4 prose prose-sm dark:prose-invert max-w-none text-neutral-800 dark:text-neutral-200">
+                             class="mt-4 prose prose-sm dark:prose-invert max-w-none dark:text-white">
                             {!! $question->explanation !!}
                         </div>
                     </div>
