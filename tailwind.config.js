@@ -26,10 +26,8 @@ export default {
                 lightest: "#F2EFE7", // Krem lembut (TETAP)
             },
 
-            // primary:   "#1E4E6D",   // Navy medium
-            // secondary: "#102F4A",   // Navy tua (BUKAN gold)
-            primary: "#C41E24",    // Merah profesional (seperti merah khas TNI/POLRI)
-            secondary: "#8B0000",  // Merah tua / Dark Red
+            primary:   "#1E4E6D",   // Navy medium
+            secondary: "#102F4A",   // Navy tua (BUKAN gold)
         },
         backgroundImage: {
             "brand-gradient":
