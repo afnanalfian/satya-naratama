@@ -1,6 +1,5 @@
 @push('styles')
-<link rel="stylesheet"
-      href="https://cdnjs.cloudflare.com/ajax/libs/mathquill/0.10.1/mathquill.min.css">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/mathquill/0.10.1/mathquill.min.css">
 @endpush
 
 @push('scripts')
@@ -31,6 +30,15 @@ document.addEventListener('DOMContentLoaded', () => {
     let activeTextarea = null;
 
     /* =====================
+       CLOSE MODAL FUNCTION
+    ====================== */
+    function closeMathModal() {
+        mathModal.classList.add('hidden');
+        mathField.latex('');
+        activeTextarea = null;
+    }
+
+    /* =====================
        QUESTION PREVIEW
     ====================== */
     const questionInput  = document.getElementById('question-text');
@@ -41,7 +49,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
         if (!questionInput.value.trim()) {
             previewBox.innerHTML =
-                '<span class="opacity-50">Belum ada isi...</span>';
+                '<span class="text-secondary-400 dark:text-secondary-500">Belum ada isi...</span>';
             return;
         }
 
@@ -54,7 +62,7 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     /* =====================
-    EXPLANATION PREVIEW
+       EXPLANATION PREVIEW
     ===================== */
     const explanationInput  = document.getElementById('explanation-text');
     const explanationPreview = document.getElementById('explanation-preview');
@@ -64,7 +72,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
         if (!explanationInput.value.trim()) {
             explanationPreview.innerHTML =
-                '<span class="opacity-50">Belum ada isi...</span>';
+                '<span class="text-secondary-400 dark:text-secondary-500">Belum ada isi...</span>';
             return;
         }
 
@@ -81,12 +89,9 @@ document.addEventListener('DOMContentLoaded', () => {
     ====================== */
     document.addEventListener('click', e => {
         if (e.target.classList.contains('btn-open-math')) {
-            // Target dari soal
             if (e.target.dataset.target) {
                 activeTextarea = document.getElementById(e.target.dataset.target);
-            }
-            // Target dari opsi
-            else {
+            } else {
                 activeTextarea = e.target
                     .closest('.option-item, .short-answer-item, .compound-item')
                     ?.querySelector('textarea, input[type="text"]');
@@ -112,20 +117,23 @@ document.addEventListener('DOMContentLoaded', () => {
         }
         mathField.latex('');
         closeMathModal();
-        renderPreview();
+
+        if (activeTextarea.id === 'question-text') {
+            renderPreview();
+        } else if (activeTextarea.id === 'explanation-text') {
+            renderExplanationPreview();
+        }
     };
 
     /* =====================
-       CLOSE MODAL
+       CLOSE MODAL HANDLERS
     ====================== */
-    function closeMathModal() {
-        mathModal.classList.add('hidden');
-        mathField.latex('');
-        activeTextarea = null;
-    }
-
     document.getElementById('btn-cancel-math').onclick = closeMathModal;
     document.getElementById('close-math-modal').onclick = closeMathModal;
+
+    mathModal.addEventListener('click', function(e) {
+        if (e.target === this) closeMathModal();
+    });
 
     /* =====================
        QUESTION TYPE & SECTIONS
@@ -138,12 +146,10 @@ document.addEventListener('DOMContentLoaded', () => {
     function toggleSections() {
         const type = typeSelect.value;
 
-        // Hide all sections
         optionsSection.classList.add('hidden');
         shortAnswerSection.classList.add('hidden');
         compoundSection.classList.add('hidden');
 
-        // Show relevant section
         if (['mcq','mcma','truefalse'].includes(type)) {
             optionsSection.classList.remove('hidden');
             initOptions(type);
@@ -174,17 +180,17 @@ document.addEventListener('DOMContentLoaded', () => {
             addBtn.classList.add('hidden');
         } else {
             addBtn.classList.remove('hidden');
-            // Load existing options if editing
             if (QUESTION && ['mcq', 'mcma'].includes(QUESTION.type)) {
                 QUESTION.options.forEach((option, index) => {
                     addOption({
                         id: option.id,
                         text: option.option_text,
-                        is_correct: option.is_correct
+                        is_correct: option.is_correct,
+                        image: option.image,
+                        weight: option.weight
                     }, index);
                 });
             } else {
-                // Add 2 default options for new question
                 addOption();
                 addOption();
             }
@@ -192,77 +198,73 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     function addOption(option = null, customIndex = null) {
-
         const testType = document.getElementById('test-type').value;
-        const type     = typeSelect.value;
+        const type = typeSelect.value;
 
         const isTkp  = testType === 'tkp';
         const isMcq  = type === 'mcq';
         const isMcma = type === 'mcma';
-
-        const index   = customIndex !== null ? customIndex : optionIndex;
+        const index  = customIndex !== null ? customIndex : optionIndex;
         const optionId = option?.id ?? '';
 
-        optionsWrapper.insertAdjacentHTML('beforeend', `
-            <div class="option-item flex gap-3 items-start">
-
+        const html = `
+            <div class="option-item flex gap-3 items-start p-4 rounded-xl border border-primary-200 dark:border-primary-700/30 bg-primary-50/30 dark:bg-primary-800/20 hover:bg-primary-50/50 dark:hover:bg-primary-800/30 transition-colors">
                 <input type="hidden" name="options[${index}][id]" value="${optionId}">
 
                 ${!isTkp ? `
                     <input type="${isMcq ? 'radio' : 'checkbox'}"
                         name="${isMcq ? 'correct' : 'correct[]'}"
                         value="${index}"
-                        class="mt-3"
+                        class="mt-3 w-4 h-4 rounded border-primary-300 dark:border-primary-600 text-primary-600 focus:ring-primary-500 focus:ring-offset-2 dark:focus:ring-offset-primary-900"
                         ${option?.is_correct ? 'checked' : ''}>
                 ` : ''}
 
-                <div class="flex-1 space-y-2">
-
+                <div class="flex-1 space-y-3">
                     <textarea name="options[${index}][text]"
-                        class="option-text w-full rounded-lg border p-2
-                            bg-azwara-lightest dark:bg-secondary/30
-                            text-slate-800 dark:text-white"
-                        placeholder="Teks opsi...">${option?.text ?? ''}</textarea>
+                        class="option-text w-full px-4 py-2.5 rounded-xl border border-primary-200 dark:border-primary-700/50 bg-white dark:bg-primary-800/30 text-primary-800 dark:text-primary-50 placeholder-secondary-400 focus:ring-2 focus:ring-primary-500/30 focus:border-primary-500 transition-all duration-200"
+                        placeholder="Teks opsi..." rows="2">${option?.text ?? ''}</textarea>
 
                     ${!isTkp ? `
-                        <input type="file"
-                            name="options[${index}][image]"
-                            accept="image/*"
-                            class="block text-xs text-gray-600 dark:text-gray-300">
-                    ` : ''}
-
-                    ${option?.image && !isTkp ? `
-                        <div class="text-xs opacity-70">
-                            Gambar saat ini: ${option.image.split('/').pop()}
+                        <div>
+                            <input type="file"
+                                name="options[${index}][image]"
+                                accept="image/*"
+                                class="text-sm text-secondary-500 dark:text-secondary-400 file:mr-3 file:py-1.5 file:px-3 file:rounded-lg file:border-0 file:text-sm file:font-medium file:bg-primary-50 file:text-primary-700 dark:file:bg-primary-800/50 dark:file:text-primary-300 hover:file:bg-primary-100 dark:hover:file:bg-primary-700/50 transition-all duration-200">
+                            ${option?.image ? `
+                                <p class="mt-1 text-xs text-secondary-500 dark:text-secondary-400">Gambar saat ini: ${option.image.split('/').pop()}</p>
+                            ` : ''}
                         </div>
                     ` : ''}
 
                     ${isTkp ? `
-                        <input type="number"
-                            name="options[${index}][weight]"
-                            value="${option?.weight ?? ''}"
-                            class="input-weight w-32 rounded border p-1 text-sm"
-                            placeholder="Bobot">
+                        <div>
+                            <label class="text-xs text-secondary-500 dark:text-secondary-400">Bobot</label>
+                            <input type="number"
+                                name="options[${index}][weight]"
+                                value="${option?.weight ?? ''}"
+                                class="w-32 px-3 py-1.5 rounded-lg border border-primary-200 dark:border-primary-700/50 bg-white dark:bg-primary-800/30 text-primary-800 dark:text-primary-50 focus:ring-2 focus:ring-primary-500/30 focus:border-primary-500 transition-all duration-200"
+                                placeholder="Bobot">
+                        </div>
                     ` : ''}
 
                     <div class="flex gap-3 text-xs">
-                        <button type="button" class="btn-open-math underline">
-                            + Rumus
+                        <button type="button"
+                                class="btn-open-math text-primary-600 hover:text-primary-700 dark:text-primary-400 dark:hover:text-primary-300 transition-colors font-medium">
+                            + Sisipkan Rumus
                         </button>
 
                         <button type="button"
-                                class="btn-remove-option text-red-500 ${index < 2 ? 'hidden' : ''}">
-                            Hapus
+                                class="btn-remove-option text-red-500 hover:text-red-600 transition-colors font-medium ${index < 2 ? 'hidden' : ''}">
+                            Hapus Opsi
                         </button>
                     </div>
                 </div>
             </div>
-        `);
+        `;
 
-        if (customIndex === null) {
-            optionIndex++;
-        }
+        optionsWrapper.insertAdjacentHTML('beforeend', html);
 
+        if (customIndex === null) optionIndex++;
         updateRemoveButtons();
     }
 
@@ -282,20 +284,21 @@ document.addEventListener('DOMContentLoaded', () => {
 
     function renderTrueFalse() {
         optionsWrapper.innerHTML = `
-        <div class="space-y-2">
-            <label class="flex gap-2 items-center">
-                <input type="radio" name="truefalse_correct" value="1"
-                    ${(QUESTION && QUESTION.options.find(o => o.option_text === 'Benar' && o.is_correct)) ? 'checked' : ''}
-                    class="mt-1">
-                <span class="text-lg">Benar</span>
-            </label>
-            <label class="flex gap-2 items-center">
-                <input type="radio" name="truefalse_correct" value="0"
-                    ${(QUESTION && QUESTION.options.find(o => o.option_text === 'Salah' && o.is_correct)) ? 'checked' : ''}
-                    class="mt-1">
-                <span class="text-lg">Salah</span>
-            </label>
-        </div>
+            <div class="space-y-3 p-4 rounded-xl bg-primary-50/30 dark:bg-primary-800/20 border border-primary-200 dark:border-primary-700/30">
+                <p class="text-sm font-medium text-primary-700 dark:text-primary-300 mb-2">Pilih jawaban yang benar:</p>
+                <label class="flex items-center gap-3 p-3 rounded-lg hover:bg-primary-50/50 dark:hover:bg-primary-800/30 cursor-pointer transition-colors">
+                    <input type="radio" name="truefalse_correct" value="1"
+                        ${(QUESTION && QUESTION.options.find(o => o.option_text === 'Benar' && o.is_correct)) ? 'checked' : ''}
+                        class="w-4 h-4 text-emerald-600 focus:ring-emerald-500">
+                    <span class="text-base font-medium text-primary-800 dark:text-primary-100">Benar</span>
+                </label>
+                <label class="flex items-center gap-3 p-3 rounded-lg hover:bg-primary-50/50 dark:hover:bg-primary-800/30 cursor-pointer transition-colors">
+                    <input type="radio" name="truefalse_correct" value="0"
+                        ${(QUESTION && QUESTION.options.find(o => o.option_text === 'Salah' && o.is_correct)) ? 'checked' : ''}
+                        class="w-4 h-4 text-red-600 focus:ring-red-500">
+                    <span class="text-base font-medium text-primary-800 dark:text-primary-100">Salah</span>
+                </label>
+            </div>
         `;
     }
 
@@ -308,7 +311,6 @@ document.addEventListener('DOMContentLoaded', () => {
     function initShortAnswer() {
         shortAnswersWrapper.innerHTML = '';
 
-        // Load existing short answers if editing
         if (QUESTION && QUESTION.type === 'short_answer') {
             const correctOptions = QUESTION.options.filter(opt => opt.is_correct);
             if (correctOptions.length > 0) {
@@ -318,33 +320,31 @@ document.addEventListener('DOMContentLoaded', () => {
                         text: option.option_text
                     }, index);
                 });
-            } else {
-                addShortAnswer();
+                return;
             }
-        } else {
-            addShortAnswer();
         }
+        addShortAnswer();
     }
 
     function addShortAnswer(option = null, customIndex = null) {
         const index = customIndex !== null ? customIndex : shortAnswersWrapper.children.length;
         const optionId = option ? option.id : '';
 
-        shortAnswersWrapper.insertAdjacentHTML('beforeend', `
-        <div class="short-answer-item flex items-center gap-3 p-3 border rounded-lg">
-            <input type="hidden" name="short_answers[${index}][id]" value="${optionId}">
-            <input type="text" name="short_answers[${index}][text]"
-                   value="${option ? option.text : ''}"
-                   class="flex-1 rounded-lg border p-2
-                          bg-azwara-lightest dark:bg-secondary/30
-                          text-slate-800 dark:text-white"
-                   placeholder="Masukkan jawaban...">
-            <button type="button" class="remove-short-answer text-red-500 ${index === 0 ? 'hidden' : ''}">
-                Hapus
-            </button>
-        </div>
-        `);
+        const html = `
+            <div class="short-answer-item flex items-center gap-3 p-3 rounded-xl border border-primary-200 dark:border-primary-700/30 bg-primary-50/30 dark:bg-primary-800/20">
+                <input type="hidden" name="short_answers[${index}][id]" value="${optionId}">
+                <span class="text-sm font-medium text-secondary-500 dark:text-secondary-400 w-6">${String.fromCharCode(65 + index)}.</span>
+                <input type="text" name="short_answers[${index}][text]"
+                       value="${option ? option.text : ''}"
+                       class="flex-1 px-4 py-2.5 rounded-xl border border-primary-200 dark:border-primary-700/50 bg-white dark:bg-primary-800/30 text-primary-800 dark:text-primary-50 placeholder-secondary-400 focus:ring-2 focus:ring-primary-500/30 focus:border-primary-500 transition-all duration-200"
+                       placeholder="Masukkan jawaban...">
+                <button type="button" class="remove-short-answer text-red-500 hover:text-red-600 transition-colors font-medium ${index === 0 ? 'hidden' : ''}">
+                    Hapus
+                </button>
+            </div>
+        `;
 
+        shortAnswersWrapper.insertAdjacentHTML('beforeend', html);
         updateShortAnswerButtons();
     }
 
@@ -365,7 +365,6 @@ document.addEventListener('DOMContentLoaded', () => {
     document.addEventListener('click', e => {
         if (e.target.classList.contains('remove-short-answer')) {
             e.target.closest('.short-answer-item')?.remove();
-            // Re-index inputs
             const items = shortAnswersWrapper.querySelectorAll('.short-answer-item');
             items.forEach((item, index) => {
                 const inputs = item.querySelectorAll('input[name]');
@@ -374,6 +373,8 @@ document.addEventListener('DOMContentLoaded', () => {
                     const newName = name.replace(/short_answers\[\d+\]/, `short_answers[${index}]`);
                     input.setAttribute('name', newName);
                 });
+                const label = item.querySelector('span:first-child');
+                if (label) label.textContent = `${String.fromCharCode(65 + index)}.`;
             });
             updateShortAnswerButtons();
         }
@@ -390,7 +391,6 @@ document.addEventListener('DOMContentLoaded', () => {
         compoundItemsWrapper.innerHTML = '';
         compoundIndex = 0;
 
-        // Load existing sub items if editing
         if (QUESTION && QUESTION.type === 'compound' && QUESTION.subItems) {
             QUESTION.subItems.forEach((subItem, index) => {
                 addCompoundItem(subItem, index);
@@ -404,61 +404,56 @@ document.addEventListener('DOMContentLoaded', () => {
         const index = customIndex !== null ? customIndex : compoundIndex;
         const label = subItem ? subItem.label : String.fromCharCode(65 + index);
 
-        compoundItemsWrapper.insertAdjacentHTML('beforeend', `
-        <div class="compound-item border rounded-lg p-4 bg-white/50 dark:bg-secondary/20" data-index="${index}">
-            <div class="flex justify-between items-center mb-3">
-                <h3 class="font-semibold">Sub Pertanyaan ${label}</h3>
-                <button type="button" class="remove-compound-item text-red-500 ${index === 0 ? 'hidden' : ''}">
-                    Hapus
-                </button>
-            </div>
-
-            <input type="hidden" name="sub_items[${index}][id]" value="${subItem ? subItem.id : ''}">
-            <input type="hidden" name="sub_items[${index}][label]" value="${label}">
-
-            <div class="space-y-3">
-                <div>
-                    <label class="block text-sm font-medium mb-1">Jenis Sub</label>
-                    <select name="sub_items[${index}][type]"
-                            class="sub-type-select w-full rounded-lg border p-2
-                                   bg-azwara-lightest dark:bg-secondary/30
-                                   text-slate-800 dark:text-white">
-                        <option value="truefalse" ${subItem && subItem.type === 'truefalse' ? 'selected' : ''}>Benar/Salah</option>
-                        <option value="short_answer" ${subItem && subItem.type === 'short_answer' ? 'selected' : ''}>Isian Singkat</option>
-                    </select>
-                </div>
-
-                <div>
-                    <label class="block text-sm font-medium mb-1">Pertanyaan</label>
-                    <textarea name="sub_items[${index}][prompt]"
-                              rows="2"
-                              class="prompt-text w-full rounded-lg border p-2
-                                     bg-azwara-lightest dark:bg-secondary/30
-                                     text-slate-800 dark:text-white"
-                              placeholder="Tulis pertanyaan sub...">${subItem ? subItem.prompt : ''}</textarea>
-                    <button type="button" class="btn-open-math mt-1 text-sm underline">
-                        + Sisipkan Rumus
+        const html = `
+            <div class="compound-item rounded-xl border border-primary-200 dark:border-primary-700/30 bg-primary-50/30 dark:bg-primary-800/20 p-5" data-index="${index}">
+                <div class="flex justify-between items-center mb-4">
+                    <h3 class="text-base font-bold text-primary-800 dark:text-primary-100">
+                        Sub Pertanyaan ${label}
+                    </h3>
+                    <button type="button" class="remove-compound-item text-red-500 hover:text-red-600 transition-colors font-medium ${index === 0 ? 'hidden' : ''}">
+                        Hapus
                     </button>
                 </div>
 
-                <div class="sub-answer-section" data-index="${index}">
-                    <!-- Answer fields will be rendered here based on type -->
+                <input type="hidden" name="sub_items[${index}][id]" value="${subItem ? subItem.id : ''}">
+                <input type="hidden" name="sub_items[${index}][label]" value="${label}">
+
+                <div class="space-y-4">
+                    <div>
+                        <label class="block text-sm font-medium text-primary-700 dark:text-primary-300 mb-1.5">Jenis Sub</label>
+                        <select name="sub_items[${index}][type]"
+                                class="sub-type-select w-full px-4 py-2.5 rounded-xl border border-primary-200 dark:border-primary-700/50 bg-white dark:bg-primary-800/30 text-primary-800 dark:text-primary-50 focus:ring-2 focus:ring-primary-500/30 focus:border-primary-500 transition-all duration-200 appearance-none">
+                            <option value="truefalse" ${subItem && subItem.type === 'truefalse' ? 'selected' : ''}>Benar/Salah</option>
+                            <option value="short_answer" ${subItem && subItem.type === 'short_answer' ? 'selected' : ''}>Isian Singkat</option>
+                        </select>
+                    </div>
+
+                    <div>
+                        <label class="block text-sm font-medium text-primary-700 dark:text-primary-300 mb-1.5">Pertanyaan</label>
+                        <textarea name="sub_items[${index}][prompt]"
+                                  rows="2"
+                                  class="prompt-text w-full px-4 py-2.5 rounded-xl border border-primary-200 dark:border-primary-700/50 bg-white dark:bg-primary-800/30 text-primary-800 dark:text-primary-50 placeholder-secondary-400 focus:ring-2 focus:ring-primary-500/30 focus:border-primary-500 transition-all duration-200"
+                                  placeholder="Tulis pertanyaan sub...">${subItem ? subItem.prompt : ''}</textarea>
+                        <button type="button" class="btn-open-math mt-1.5 text-sm text-primary-600 hover:text-primary-700 dark:text-primary-400 dark:hover:text-primary-300 transition-colors font-medium">
+                            + Sisipkan Rumus
+                        </button>
+                    </div>
+
+                    <div class="sub-answer-section" data-index="${index}"></div>
                 </div>
             </div>
-        </div>
-        `);
+        `;
 
-        // Initialize answer section
+        compoundItemsWrapper.insertAdjacentHTML('beforeend', html);
+
+        const newItem = compoundItemsWrapper.lastElementChild;
         renderCompoundAnswerSection(index, subItem ? subItem.type : 'truefalse', subItem);
 
         compoundIndex++;
         updateCompoundButtons();
 
-        // Add event listener for type change
-        const item = compoundItemsWrapper.lastElementChild;
-        const typeSelect = item.querySelector('.sub-type-select');
-
-        typeSelect.addEventListener('change', function() {
+        const typeSelectSub = newItem.querySelector('.sub-type-select');
+        typeSelectSub.addEventListener('change', function() {
             const parent = this.closest('.compound-item');
             const idx = parseInt(parent.dataset.index);
             renderCompoundAnswerSection(idx, this.value);
@@ -470,83 +465,73 @@ document.addEventListener('DOMContentLoaded', () => {
         const section = item.querySelector('.sub-answer-section');
 
         if (type === 'truefalse') {
-            let booleanAnswer = 1; // default to true
+            let booleanAnswer = 1;
             if (subItem && subItem.answers && subItem.answers.length > 0) {
                 booleanAnswer = subItem.answers[0].boolean_answer ? 1 : 0;
             }
 
             section.innerHTML = `
-            <div class="space-y-2">
-                <label class="block text-sm font-medium mb-1">Jawaban Benar</label>
-                <div class="flex gap-4">
-                    <label class="flex gap-2 items-center">
-                        <input type="radio" name="sub_items[${index}][boolean_answer]" value="1" ${booleanAnswer == 1 ? 'checked' : ''}>
-                        <span>Benar</span>
-                    </label>
-                    <label class="flex gap-2 items-center">
-                        <input type="radio" name="sub_items[${index}][boolean_answer]" value="0" ${booleanAnswer == 0 ? 'checked' : ''}>
-                        <span>Salah</span>
-                    </label>
+                <div class="space-y-3 p-4 rounded-xl bg-primary-50/30 dark:bg-primary-800/20 border border-primary-200 dark:border-primary-700/30">
+                    <label class="block text-sm font-medium text-primary-700 dark:text-primary-300">Jawaban Benar</label>
+                    <div class="flex gap-6">
+                        <label class="flex items-center gap-2 cursor-pointer">
+                            <input type="radio" name="sub_items[${index}][boolean_answer]" value="1" ${booleanAnswer == 1 ? 'checked' : ''} class="w-4 h-4 text-emerald-600 focus:ring-emerald-500">
+                            <span class="text-sm font-medium text-primary-800 dark:text-primary-100">Benar</span>
+                        </label>
+                        <label class="flex items-center gap-2 cursor-pointer">
+                            <input type="radio" name="sub_items[${index}][boolean_answer]" value="0" ${booleanAnswer == 0 ? 'checked' : ''} class="w-4 h-4 text-red-600 focus:ring-red-500">
+                            <span class="text-sm font-medium text-primary-800 dark:text-primary-100">Salah</span>
+                        </label>
+                    </div>
                 </div>
-            </div>
             `;
         } else if (type === 'short_answer') {
             const answers = subItem && subItem.answers ? subItem.answers : [];
             const primaryIndex = answers.findIndex(a => a.is_primary);
 
-            section.innerHTML = `
-            <div class="space-y-3">
-                <label class="block text-sm font-medium mb-1">Jawaban Isian Singkat</label>
-                <p class="text-xs text-gray-600 dark:text-gray-300">
-                    Tambahkan semua kemungkinan jawaban yang benar
-                </p>
-
-                <div class="compound-short-answers space-y-2" data-index="${index}">
-                    ${answers.length > 0 ? '' : `
-                    <div class="flex items-center gap-2">
-                        <input type="radio" name="sub_items[${index}][primary_index]" value="0" checked>
+            let answersHtml = '';
+            if (answers.length === 0) {
+                answersHtml = `
+                    <div class="flex items-center gap-3">
+                        <input type="radio" name="sub_items[${index}][primary_index]" value="0" checked class="w-4 h-4 text-primary-600 focus:ring-primary-500">
                         <input type="text" name="sub_items[${index}][answers][0][text]"
-                               class="flex-1 rounded-lg border p-2
-                                      bg-azwara-lightest dark:bg-secondary/30
-                                      text-slate-800 dark:text-white"
+                               class="flex-1 px-4 py-2.5 rounded-xl border border-primary-200 dark:border-primary-700/50 bg-white dark:bg-primary-800/30 text-primary-800 dark:text-primary-50 placeholder-secondary-400 focus:ring-2 focus:ring-primary-500/30 focus:border-primary-500 transition-all duration-200"
                                placeholder="Jawaban...">
-                        <button type="button" class="remove-compound-answer text-red-500 text-sm hidden">
-                            Hapus
-                        </button>
+                        <button type="button" class="remove-compound-answer text-red-500 hover:text-red-600 transition-colors font-medium hidden">Hapus</button>
                     </div>
-                    `}
-                </div>
-
-                <button type="button" class="add-compound-answer-btn text-sm text-primary" data-index="${index}">
-                    + Tambah Jawaban Lain
-                </button>
-            </div>
-            `;
-
-            // Populate existing answers
-            const container = section.querySelector('.compound-short-answers');
-            if (answers.length > 0) {
+                `;
+            } else {
                 answers.forEach((answer, i) => {
                     const answerId = answer.id ? answer.id : '';
-                    container.insertAdjacentHTML('beforeend', `
-                    <div class="flex items-center gap-2">
-                        <input type="hidden" name="sub_items[${index}][answers][${i}][id]" value="${answerId}">
-                        <input type="radio" name="sub_items[${index}][primary_index]" value="${i}" ${i === primaryIndex ? 'checked' : ''}>
-                        <input type="text" name="sub_items[${index}][answers][${i}][text]"
-                               value="${answer.answer_text || ''}"
-                               class="flex-1 rounded-lg border p-2
-                                      bg-azwara-lightest dark:bg-secondary/30
-                                      text-slate-800 dark:text-white"
-                               placeholder="Jawaban...">
-                        <button type="button" class="remove-compound-answer text-red-500 text-sm ${i === 0 ? 'hidden' : ''}">
-                            Hapus
-                        </button>
-                    </div>
-                    `);
+                    answersHtml += `
+                        <div class="flex items-center gap-3">
+                            <input type="hidden" name="sub_items[${index}][answers][${i}][id]" value="${answerId}">
+                            <input type="radio" name="sub_items[${index}][primary_index]" value="${i}" ${i === primaryIndex ? 'checked' : ''} class="w-4 h-4 text-primary-600 focus:ring-primary-500">
+                            <input type="text" name="sub_items[${index}][answers][${i}][text]"
+                                   value="${answer.answer_text || ''}"
+                                   class="flex-1 px-4 py-2.5 rounded-xl border border-primary-200 dark:border-primary-700/50 bg-white dark:bg-primary-800/30 text-primary-800 dark:text-primary-50 placeholder-secondary-400 focus:ring-2 focus:ring-primary-500/30 focus:border-primary-500 transition-all duration-200"
+                                   placeholder="Jawaban...">
+                            <button type="button" class="remove-compound-answer text-red-500 hover:text-red-600 transition-colors font-medium ${i === 0 ? 'hidden' : ''}">Hapus</button>
+                        </div>
+                    `;
                 });
             }
 
-            // Add event listener for adding more answers
+            section.innerHTML = `
+                <div class="space-y-3 p-4 rounded-xl bg-primary-50/30 dark:bg-primary-800/20 border border-primary-200 dark:border-primary-700/30">
+                    <label class="block text-sm font-medium text-primary-700 dark:text-primary-300">Jawaban Isian Singkat</label>
+                    <p class="text-xs text-secondary-500 dark:text-secondary-400">Tambahkan semua kemungkinan jawaban yang benar</p>
+
+                    <div class="compound-short-answers space-y-3" data-index="${index}">
+                        ${answersHtml}
+                    </div>
+
+                    <button type="button" class="add-compound-answer-btn text-sm text-primary-600 hover:text-primary-700 dark:text-primary-400 dark:hover:text-primary-300 transition-colors font-medium" data-index="${index}">
+                        + Tambah Jawaban Lain
+                    </button>
+                </div>
+            `;
+
             const addBtn = section.querySelector('.add-compound-answer-btn');
             addBtn.addEventListener('click', function() {
                 const idx = this.dataset.index;
@@ -561,29 +546,26 @@ document.addEventListener('DOMContentLoaded', () => {
         const answerCount = container.children.length;
         const answerId = answer ? answer.id : '';
 
-        container.insertAdjacentHTML('beforeend', `
-        <div class="flex items-center gap-2">
-            <input type="hidden" name="sub_items[${index}][answers][${answerCount}][id]" value="${answerId}">
-            <input type="radio" name="sub_items[${index}][primary_index]" value="${answerCount}">
-            <input type="text" name="sub_items[${index}][answers][${answerCount}][text]"
-                   value="${answer ? answer.answer_text : ''}"
-                   class="flex-1 rounded-lg border p-2
-                          bg-azwara-lightest dark:bg-secondary/30
-                          text-slate-800 dark:text-white"
-                   placeholder="Jawaban...">
-            <button type="button" class="remove-compound-answer text-red-500 text-sm">
-                Hapus
-            </button>
-        </div>
-        `);
+        const html = `
+            <div class="flex items-center gap-3">
+                <input type="hidden" name="sub_items[${index}][answers][${answerCount}][id]" value="${answerId}">
+                <input type="radio" name="sub_items[${index}][primary_index]" value="${answerCount}" class="w-4 h-4 text-primary-600 focus:ring-primary-500">
+                <input type="text" name="sub_items[${index}][answers][${answerCount}][text]"
+                       value="${answer ? answer.answer_text : ''}"
+                       class="flex-1 px-4 py-2.5 rounded-xl border border-primary-200 dark:border-primary-700/50 bg-white dark:bg-primary-800/30 text-primary-800 dark:text-primary-50 placeholder-secondary-400 focus:ring-2 focus:ring-primary-500/30 focus:border-primary-500 transition-all duration-200"
+                       placeholder="Jawaban...">
+                <button type="button" class="remove-compound-answer text-red-500 hover:text-red-600 transition-colors font-medium">Hapus</button>
+            </div>
+        `;
 
+        container.insertAdjacentHTML('beforeend', html);
         updateCompoundAnswerButtons(index);
     }
 
     function updateCompoundAnswerButtons(index) {
         const item = compoundItemsWrapper.querySelector(`.compound-item[data-index="${index}"]`);
         const container = item.querySelector('.compound-short-answers');
-        const items = container.querySelectorAll('.flex.items-center.gap-2');
+        const items = container.querySelectorAll('.flex.items-center.gap-3');
 
         items.forEach((item, i) => {
             const removeBtn = item.querySelector('.remove-compound-answer');
@@ -609,9 +591,8 @@ document.addEventListener('DOMContentLoaded', () => {
 
     addCompoundItemBtn?.addEventListener('click', () => addCompoundItem());
 
-    // Event delegation for compound section
+    // Event delegation
     compoundItemsWrapper.addEventListener('click', e => {
-        // Remove compound item
         if (e.target.classList.contains('remove-compound-item')) {
             const item = e.target.closest('.compound-item');
             const removedIndex = parseInt(item.dataset.index);
@@ -619,7 +600,6 @@ document.addEventListener('DOMContentLoaded', () => {
             item.remove();
             compoundIndex--;
 
-            // Re-index remaining items
             const items = compoundItemsWrapper.querySelectorAll('.compound-item');
             items.forEach((item, newIndex) => {
                 item.dataset.index = newIndex;
@@ -627,10 +607,9 @@ document.addEventListener('DOMContentLoaded', () => {
                 const title = item.querySelector('h3');
                 const hiddenInput = item.querySelector('input[name*="[label]"]');
 
-                title.textContent = `Sub Pertanyaan ${label}`;
-                hiddenInput.value = label;
+                if (title) title.textContent = `Sub Pertanyaan ${label}`;
+                if (hiddenInput) hiddenInput.value = label;
 
-                // Update all name attributes
                 const inputs = item.querySelectorAll('[name]');
                 inputs.forEach(input => {
                     const name = input.getAttribute('name');
@@ -642,33 +621,33 @@ document.addEventListener('DOMContentLoaded', () => {
             updateCompoundButtons();
         }
 
-        // Remove compound short answer
         if (e.target.classList.contains('remove-compound-answer')) {
-            const answerItem = e.target.closest('.flex.items-center.gap-2');
+            const answerItem = e.target.closest('.flex.items-center.gap-3');
             const container = answerItem.closest('.compound-short-answers');
             const compoundItem = container.closest('.compound-item');
             const index = compoundItem.dataset.index;
 
             answerItem.remove();
 
-            // Re-index answers
-            const answers = container.querySelectorAll('.flex.items-center.gap-2');
+            const answers = container.querySelectorAll('.flex.items-center.gap-3');
             answers.forEach((itm, i) => {
                 const radio = itm.querySelector('input[type="radio"]');
                 const textInput = itm.querySelector('input[type="text"]');
 
-                radio.value = i;
-                radio.name = `sub_items[${index}][primary_index]`;
-                textInput.name = `sub_items[${index}][answers][${i}][text]`;
-
-                if (i === 0) radio.checked = true;
+                if (radio) {
+                    radio.value = i;
+                    radio.name = `sub_items[${index}][primary_index]`;
+                    if (i === 0) radio.checked = true;
+                }
+                if (textInput) {
+                    textInput.name = `sub_items[${index}][answers][${i}][text]`;
+                }
             });
 
             updateCompoundAnswerButtons(index);
         }
     });
 
-    // Add compound short answer
     compoundItemsWrapper.addEventListener('click', e => {
         if (e.target.classList.contains('add-compound-answer-btn')) {
             const index = e.target.dataset.index;
@@ -677,24 +656,21 @@ document.addEventListener('DOMContentLoaded', () => {
     });
 
     /* =====================
-       EVENT DELEGATION FOR OPTIONS
+       OPTIONS REMOVE DELEGATION
     ====================== */
     optionsWrapper.addEventListener('click', e => {
-        // Remove options
         if (e.target.classList.contains('btn-remove-option')) {
             const item = e.target.closest('.option-item');
             item.remove();
 
-            // Re-index options
             const items = optionsWrapper.querySelectorAll('.option-item');
             items.forEach((item, index) => {
                 const textarea = item.querySelector('textarea');
                 const radio = item.querySelector('input[type="radio"], input[type="checkbox"]');
-
-                textarea.name = `options[${index}][text]`;
                 const hiddenId = item.querySelector('input[type="hidden"]');
-                if (hiddenId) hiddenId.name = `options[${index}][id]`;
 
+                if (textarea) textarea.name = `options[${index}][text]`;
+                if (hiddenId) hiddenId.name = `options[${index}][id]`;
                 if (radio) {
                     radio.name = typeSelect.value === 'mcq' ? 'correct' : 'correct[]';
                     radio.value = index;
@@ -707,24 +683,54 @@ document.addEventListener('DOMContentLoaded', () => {
     });
 
     /* =====================
+       ALLOWED TYPES FILTER
+    ====================== */
+    const testTypeSelect = document.getElementById('test-type');
+    if (testTypeSelect && typeSelect) {
+        const allowed = {
+            general: ['mcq','mcma','truefalse','short_answer','compound'],
+            tiu: ['mcq'],
+            twk: ['mcq'],
+            mtk_stis: ['mcq'],
+            tkp: ['mcq'],
+            mtk_tka: ['mcq','mcma','truefalse','compound'],
+        };
+
+        function filterQuestionTypes() {
+            const testType = testTypeSelect.value;
+            [...typeSelect.options].forEach(opt => {
+                if (!opt.value) return;
+                opt.hidden = !allowed[testType]?.includes(opt.value);
+            });
+
+            if (!allowed[testType]?.includes(typeSelect.value)) {
+                typeSelect.value = '';
+            }
+        }
+
+        // Initially applied via inline script
+    }
+
+    /* =====================
        INITIALIZE
     ====================== */
-    // Set initial type and load data
     if (QUESTION) {
         typeSelect.value = QUESTION.type;
     }
     toggleSections();
-
-    // Render initial previews
     renderPreview();
     renderExplanationPreview();
 
-    // sidebar docs
     const docs = document.getElementById('math-docs');
-    document.getElementById('btn-open-docs').onclick =
-        () => docs.classList.remove('translate-x-full');
-    document.getElementById('close-docs').onclick =
-        () => docs.classList.add('translate-x-full');
+    const docsBtn = document.getElementById('btn-open-docs');
+    const closeDocsBtn = document.getElementById('close-docs');
+
+    if (docsBtn) {
+        docsBtn.onclick = () => { if (docs) docs.classList.remove('translate-x-full'); };
+    }
+    if (closeDocsBtn) {
+        closeDocsBtn.onclick = () => { if (docs) docs.classList.add('translate-x-full'); };
+    }
 });
 </script>
 @endpush

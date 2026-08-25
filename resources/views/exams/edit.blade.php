@@ -82,7 +82,7 @@
                     Tipe tes tidak dapat diubah setelah ujian dibuat.
                 </p>
             </div>
-            
+
             {{-- ================= TANGGAL & JAM (QUIZ / TRYOUT) ================= --}}
             @if(in_array($exam->type, ['quiz', 'tryout']))
                 <div>
