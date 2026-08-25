@@ -1379,3 +1379,92 @@ header .relative {
 }
 
 /* Di tailwind.config.js tambahkan di theme.extend */
+
+/* Tambahkan di bagian bawah app.css */
+
+/* ===== FIX: Header Overflow ===== */
+header,
+header * {
+    overflow: visible !important;
+}
+
+header .relative {
+    overflow: visible !important;
+}
+
+/* ===== FIX: Avatar & Icons ===== */
+header img,
+header svg {
+    flex-shrink: 0;
+    display: block;
+}
+
+/* Pastikan dropdown containers tidak memotong konten */
+header .absolute,
+header .fixed {
+    overflow: visible !important;
+}
+
+/* ===== FIX: w-4.5 & h-4.5 ===== */
+.w-4\.5 {
+    width: 1.125rem;
+}
+
+.h-4\.5 {
+    height: 1.125rem;
+}
+
+/* ===== FIX: Mobile Sidebar ===== */
+#sidebar-backdrop {
+    position: fixed;
+    inset: 0;
+    background-color: rgba(13, 27, 13, 0.4);
+    backdrop-filter: blur(4px);
+    -webkit-backdrop-filter: blur(4px);
+    z-index: 40;
+    display: none;
+    transition: opacity 0.3s ease;
+}
+
+#sidebar-backdrop.active {
+    display: block;
+    opacity: 1;
+}
+
+#sidebar-backdrop.hidden {
+    display: none;
+    opacity: 0;
+}
+
+/* Sidebar di mobile */
+@media (max-width: 767px) {
+    #sidebar {
+        transform: translateX(-100%);
+        transition: transform 0.3s ease-in-out;
+        z-index: 50;
+        width: 280px;
+        max-width: 85vw;
+    }
+
+    #sidebar.-translate-x-full {
+        transform: translateX(-100%);
+    }
+
+    #sidebar:not(.-translate-x-full) {
+        transform: translateX(0);
+        box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+    }
+}
+
+/* Desktop - sidebar selalu terlihat */
+@media (min-width: 768px) {
+    #sidebar {
+        transform: translateX(0) !important;
+        box-shadow: none !important;
+        width: 288px;
+    }
+
+    #sidebar-backdrop {
+        display: none !important;
+    }
+}

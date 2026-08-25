@@ -6,10 +6,11 @@
            px-2 sm:px-4 md:px-6
            flex justify-between items-center
            sticky top-0 z-30
-           transition-all duration-300">
+           transition-all duration-300
+           overflow-visible"> {{-- Tambahkan overflow-visible --}}
 
     {{-- Left Section --}}
-    <div class="flex items-center gap-1 sm:gap-3 md:gap-4 min-w-0 flex-1">
+    <div class="flex items-center gap-1 sm:gap-3 md:gap-4 min-w-0 flex-1 overflow-visible">
         {{-- Hamburger Button --}}
         <button
             onclick="toggleSidebar()"
@@ -17,7 +18,8 @@
                    text-primary-700 dark:text-primary-300
                    hover:bg-primary-100/50 dark:hover:bg-primary-800/50
                    transition-all duration-200
-                   md:hidden">
+                   md:hidden
+                   relative z-50"> {{-- Tambahkan z-50 --}}
             <svg width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" class="sm:w-5 sm:h-5">
                 <path d="M4 6h16M4 12h16M4 18h16"/>
             </svg>
@@ -42,14 +44,15 @@
     </div>
 
     {{-- Right Section --}}
-    <div class="flex items-center gap-0.5 sm:gap-1.5 md:gap-3 flex-shrink-0">
+    <div class="flex items-center gap-0.5 sm:gap-1.5 md:gap-3 flex-shrink-0 overflow-visible relative"> {{-- Tambahkan overflow-visible & relative --}}
 
         {{-- Theme Toggle --}}
         <button onclick="toggleTheme()"
                 class="p-1.5 sm:p-2 rounded-xl flex-shrink-0
                        text-primary-700 dark:text-primary-300
                        hover:bg-primary-100/50 dark:hover:bg-primary-800/50
-                       transition-all duration-200">
+                       transition-all duration-200
+                       relative z-40"> {{-- Tambahkan z-40 --}}
             <!-- Moon Icon (Light Mode) -->
             <svg class="block dark:hidden w-4 h-4 sm:w-4.5 sm:h-4.5 md:w-5 md:h-5" fill="none" stroke="currentColor" stroke-width="2">
                 <path d="M21 12.79A9 9 0 1 1 11.21 3a7 7 0 0 0 9.79 9.79Z"/>
@@ -67,12 +70,13 @@
             $unreadCount  = auth()->user()?->unreadNotifications()->count() ?? 0;
         @endphp
 
-        <div x-data="{ open: false }" class="relative" @click.outside="open = false">
+        <div x-data="{ open: false }" class="relative overflow-visible" @click.outside="open = false">
             <button @click="open = !open"
                     class="relative p-1.5 sm:p-2 rounded-xl flex-shrink-0
                            text-primary-700 dark:text-primary-300
                            hover:bg-primary-100/50 dark:hover:bg-primary-800/50
-                           transition-all duration-200">
+                           transition-all duration-200
+                           overflow-visible z-40"> {{-- Tambahkan overflow-visible & z-40 --}}
                 <svg class="w-4 h-4 sm:w-4.5 sm:h-4.5 md:w-5 md:h-5" fill="none" stroke="currentColor" stroke-width="2">
                     <path d="M12 22c1.1 0 2-.9 2-2H10c0 1.1.9 2 2 2Zm6-6v-5a6 6 0 1 0-12 0v5l-2 2v1h16v-1l-2-2Z"/>
                 </svg>
@@ -83,13 +87,14 @@
                                  rounded-full px-1 min-w-[14px] sm:min-w-[16px] md:min-w-[18px]
                                  h-[14px] sm:h-[16px] md:h-[18px]
                                  flex items-center justify-center
-                                 shadow-lg shadow-red-500/30">
+                                 shadow-lg shadow-red-500/30
+                                 z-50"> {{-- Tambahkan z-50 --}}
                         {{ $unreadCount > 9 ? '9+' : $unreadCount }}
                     </span>
                 @endif
             </button>
 
-            {{-- Notifications Dropdown - FULLY RESPONSIVE --}}
+            {{-- Notifications Dropdown --}}
             <div x-show="open"
                  x-transition:enter="transition ease-out duration-200"
                  x-transition:enter-start="opacity-0 scale-95"
@@ -162,22 +167,26 @@
         </div>
 
         {{-- User Profile --}}
-        <div x-data="{ open: false }" class="relative" @click.outside="open = false">
+        <div x-data="{ open: false }" class="relative overflow-visible" @click.outside="open = false">
             <button @click="open = !open"
                     class="flex items-center gap-1 sm:gap-1.5 md:gap-3 p-0.5 sm:p-1 rounded-xl flex-shrink-0
                            hover:bg-primary-100/50 dark:hover:bg-primary-800/50
                            transition-all duration-200
-                           border border-transparent hover:border-primary-200/50 dark:hover:border-primary-700/50">
+                           border border-transparent hover:border-primary-200/50 dark:hover:border-primary-700/50
+                           relative z-40 overflow-visible"> {{-- Tambahkan overflow-visible & z-40 --}}
                 <span class="hidden sm:inline-block text-xs sm:text-sm font-medium text-primary-700 dark:text-primary-300 truncate max-w-[60px] sm:max-w-[80px] md:max-w-[120px]">
                     {{ auth()->user()->name }}
                 </span>
-                <img src="{{ auth()->user()->avatar_url }}"
-                     class="w-7 h-7 sm:w-8 sm:h-8 md:w-9 md:h-9 rounded-xl border-2 border-primary-200/50 dark:border-primary-700/50
-                            object-cover shadow-sm
-                            hover:scale-105 transition-transform duration-200 flex-shrink-0" />
+                <div class="relative flex-shrink-0 overflow-visible"> {{-- Tambahkan wrapper --}}
+                    <img src="{{ auth()->user()->avatar_url ?? asset('img/default-avatar.png') }}"
+                         class="w-7 h-7 sm:w-8 sm:h-8 md:w-9 md:h-9 rounded-xl border-2 border-primary-200/50 dark:border-primary-700/50
+                                object-cover shadow-sm
+                                hover:scale-105 transition-transform duration-200
+                                block" /> {{-- Tambahkan block --}}
+                </div>
             </button>
 
-            {{-- Profile Dropdown - FULLY RESPONSIVE --}}
+            {{-- Profile Dropdown --}}
             <div x-show="open"
                  x-transition:enter="transition ease-out duration-200"
                  x-transition:enter-start="opacity-0 scale-95"

@@ -1,7 +1,6 @@
 <div
     id="sidebar-backdrop"
-    onclick="toggleSidebar()"
-    class="fixed inset-0 bg-primary-900/40 backdrop-blur-sm hidden md:hidden z-40">
+    class="fixed inset-0 bg-primary-900/40 backdrop-blur-sm hidden z-40">
 </div>
 
 <aside id="sidebar"
@@ -16,7 +15,20 @@
 
     {{-- Brand Section --}}
     <div class="flex-shrink-0 flex flex-col items-center py-8 gap-3
-                border-b border-primary-200/30 dark:border-primary-800/30">
+                border-b border-primary-200/30 dark:border-primary-800/30
+                relative"> {{-- Tambahkan relative --}}
+
+        {{-- Tombol close untuk mobile --}}
+        <button onclick="closeSidebar()"
+                class="md:hidden absolute top-4 right-4 p-2 rounded-full
+                       hover:bg-primary-100/50 dark:hover:bg-primary-800/50
+                       text-primary-700 dark:text-primary-300
+                       transition-all duration-200
+                       z-50"> {{-- Tambahkan z-50 --}}
+            <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                <path d="M6 18L18 6M6 6l12 12"/>
+            </svg>
+        </button>
 
         {{-- Logo with Glow Effect --}}
         <a href="{{ route('dashboard.redirect') }}" class="relative group">
