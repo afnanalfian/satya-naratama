@@ -1,12 +1,12 @@
+<!-- resources/views/front/partials/promo-banner.blade.php -->
 @if($activePromo && $activePromo->isCurrentlyActive() && $activePromo->type == 'banner')
-{{-- POSISI FIXED: TOP untuk semua banner --}}
 <div id="promoBanner"
      class="fixed top-0 left-0 right-0 z-[90] transition-all duration-300"
      data-delay="{{ $activePromo->display_delay }}"
      data-duration="{{ $activePromo->display_duration }}"
      data-promo-id="{{ $activePromo->id }}">
 
-    <div class="relative bg-gradient-to-r from-primary to-azwara-darker text-white shadow-lg">
+    <div class="relative bg-gradient-to-r from-[#2563EB] to-[#1D4ED8] text-white shadow-elegant-lg">
         <!-- Close Button -->
         <button id="closeBanner"
                 class="absolute top-1/2 -translate-y-1/2 right-4 z-20 w-8 h-8 rounded-full bg-white/20 hover:bg-white/30 flex items-center justify-center transition-colors">
@@ -16,7 +16,7 @@
         </button>
 
         <!-- Banner Content -->
-        <div class="max-w-7xl mx-auto px-4 py-3">
+        <div class="container-custom py-3">
             <div class="flex flex-col sm:flex-row items-center justify-between gap-3">
                 <!-- Text Content -->
                 <div class="flex-1 text-center sm:text-left">
@@ -33,7 +33,7 @@
                 <div>
                     <a href="{{ $activePromo->resolved_url }}"
                        target="_blank"
-                       class="inline-flex items-center gap-2 px-4 py-1.5 bg-white text-primary text-sm font-semibold rounded-lg hover:bg-gray-100 transition-colors whitespace-nowrap">
+                       class="inline-flex items-center gap-2 px-4 py-1.5 bg-white text-[#2563EB] text-sm font-semibold rounded-lg hover:bg-gray-100 transition-colors whitespace-nowrap shadow-elegant">
                         <span>Lihat Promo</span>
                         <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14 5l7 7m0 0l-7 7m7-7H3"></path>
@@ -73,14 +73,8 @@
     overflow: hidden;
 }
 
-/* Adjust body padding untuk banner */
 body.has-banner {
-    padding-top: 60px; /* Sesuaikan tinggi banner */
-}
-
-/* Dark mode */
-.dark #promoBanner {
-    background: linear-gradient(to right, #0B1F33, #102F4A);
+    padding-top: 60px;
 }
 </style>
 @endpush
@@ -96,11 +90,9 @@ document.addEventListener('DOMContentLoaded', function() {
     const bannerProgress = document.getElementById('bannerProgress');
     const progressBar = bannerProgress?.querySelector('div');
 
-    // Cek cookie
     const bannerClosedToday = getCookie(`banner_closed_${promoId}`);
 
     if (!bannerClosedToday) {
-        // Delay sebelum menampilkan
         const delay = parseInt(promoBanner.getAttribute('data-delay')) || 1000;
         const duration = parseInt(promoBanner.getAttribute('data-duration')) || 30;
 
@@ -108,7 +100,6 @@ document.addEventListener('DOMContentLoaded', function() {
             promoBanner.classList.remove('hidden');
             document.body.classList.add('has-banner');
 
-            // Auto close dengan progress bar
             if (progressBar && duration > 0) {
                 let progress = 0;
                 const interval = 100;
@@ -128,7 +119,6 @@ document.addEventListener('DOMContentLoaded', function() {
         }, delay);
     }
 
-    // Fungsi close banner
     function closeBanner() {
         promoBanner.style.transform = 'translateY(-100%)';
         promoBanner.style.transition = 'transform 0.5s ease-out';
@@ -138,16 +128,13 @@ document.addEventListener('DOMContentLoaded', function() {
             promoBanner.remove();
         }, 500);
 
-        // Set cookie
         setCookie(`banner_closed_${promoId}`, 'true', 1);
     }
 
-    // Event listeners
     if (closeBannerBtn) {
         closeBannerBtn.addEventListener('click', closeBanner);
     }
 
-    // Cookie helpers (global)
     function setCookie(name, value, days) {
         const date = new Date();
         date.setTime(date.getTime() + (days * 24 * 60 * 60 * 1000));

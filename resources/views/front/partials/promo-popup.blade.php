@@ -1,3 +1,4 @@
+<!-- resources/views/front/partials/promo-popup.blade.php -->
 @if($activePromo && $activePromo->isCurrentlyActive() && $activePromo->type == 'popup')
 <div id="promoPopup"
      class="fixed inset-0 z-[100] hidden flex items-center justify-center"
@@ -6,36 +7,36 @@
 
     {{-- Overlay --}}
     <div id="promoOverlay"
-         class="absolute inset-0 bg-black/80 backdrop-blur-sm"></div>
+         class="absolute inset-0 bg-black/60 backdrop-blur-md"></div>
 
     {{-- Image Wrapper --}}
     <div class="relative z-10 max-w-[90vw] max-h-[90vh] flex items-center justify-center animate-fadeIn">
 
         {{-- Close Button --}}
         <button id="closePromo"
-                class="absolute -top-4 -right-4 w-10 h-10 rounded-full bg-white shadow-lg flex items-center justify-center hover:scale-110 transition">
-            <svg class="w-6 h-6 text-black" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                class="absolute -top-4 -right-4 w-10 h-10 rounded-full bg-white shadow-elegant-lg flex items-center justify-center hover:scale-110 transition hover:shadow-elegant-hover">
+            <svg class="w-6 h-6 text-[#0F172A]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                       d="M6 18L18 6M6 6l12 12" />
             </svg>
         </button>
 
         {{-- Countdown --}}
-        <div class="absolute -top-4 -left-4 px-3 py-1 bg-primary text-white text-xs font-bold rounded-full">
+        <div class="absolute -top-4 -left-4 px-3 py-1 bg-[#2563EB] text-white text-xs font-bold rounded-full shadow-elegant">
             Menutup dalam <span id="countdownTimer">{{ $activePromo->display_duration }}</span>s
         </div>
 
         {{-- Promo Image --}}
         @if($activePromo->target_url)
-        <a href="{{ $activePromo->resolved_url }}" target="_blank">
+        <a href="{{ $activePromo->resolved_url }}" target="_blank" class="hover:opacity-95 transition">
             <img src="{{ $activePromo->image_url }}"
                  alt="{{ $activePromo->title }}"
-                 class="max-w-full max-h-[90vh] object-contain">
+                 class="max-w-full max-h-[90vh] object-contain rounded-2xl shadow-elegant-lg">
         </a>
         @else
         <img src="{{ $activePromo->image_url }}"
              alt="{{ $activePromo->title }}"
-             class="max-w-full max-h-[90vh] object-contain">
+             class="max-w-full max-h-[90vh] object-contain rounded-2xl shadow-elegant-lg">
         @endif
 
     </div>
@@ -44,11 +45,11 @@
 @push('styles')
 <style>
 @keyframes fadeIn {
-    from { opacity: 0; transform: scale(0.96); }
+    from { opacity: 0; transform: scale(0.95); }
     to   { opacity: 1; transform: scale(1); }
 }
 .animate-fadeIn {
-    animation: fadeIn 0.35s ease-out;
+    animation: fadeIn 0.4s ease-out;
 }
 </style>
 @endpush

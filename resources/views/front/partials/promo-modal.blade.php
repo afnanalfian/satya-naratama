@@ -1,26 +1,27 @@
+<!-- resources/views/front/partials/promo-modal.blade.php -->
 @if($activePromo && $activePromo->isCurrentlyActive() && $activePromo->type == 'modal')
 <div id="promoModal"
      class="fixed inset-0 z-[100] flex items-center justify-center p-4 hidden"
      data-delay="{{ $activePromo->display_delay }}">
 
     <!-- Overlay -->
-    <div class="fixed inset-0 bg-black/50 backdrop-blur-sm" id="modalOverlay"></div>
+    <div class="fixed inset-0 bg-black/60 backdrop-blur-sm" id="modalOverlay"></div>
 
     <!-- Modal Content -->
-    <div class="relative z-10 w-full max-w-md bg-white rounded-xl shadow-2xl animate-modalIn">
+    <div class="relative z-10 w-full max-w-md bg-white rounded-2xl shadow-elegant-lg animate-modalIn">
         <!-- Modal Header -->
-        <div class="p-6 border-b border-azwara-lighter">
+        <div class="p-6 border-b border-[#E2E8F0]">
             <div class="flex justify-between items-start">
                 <div>
                     @if($activePromo->title)
-                    <h3 class="text-lg font-bold text-azwara-darkest mb-1">{{ $activePromo->title }}</h3>
+                    <h3 class="text-lg font-bold text-[#0F172A] mb-1">{{ $activePromo->title }}</h3>
                     @endif
                     @if($activePromo->description)
-                    <p class="text-sm text-gray-600">{{ $activePromo->description }}</p>
+                    <p class="text-sm text-[#64748B]">{{ $activePromo->description }}</p>
                     @endif
                 </div>
                 <button id="closeModal"
-                        class="text-gray-400 hover:text-gray-600 p-1 rounded-lg hover:bg-gray-100 transition-colors">
+                        class="text-[#94A3B8] hover:text-[#0F172A] p-1 rounded-lg hover:bg-[#F1F5F9] transition-colors">
                     <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
                     </svg>
@@ -31,10 +32,10 @@
         <!-- Modal Body -->
         <div class="p-6">
             @if($activePromo->image_url)
-            <div class="relative w-full flex items-center justify-center bg-azwara-lightest rounded-lg">
+            <div class="relative w-full flex items-center justify-center bg-[#F8FAFC] rounded-xl mb-4">
                 <img src="{{ $activePromo->image_url }}"
                     alt="{{ $activePromo->title }}"
-                    class="max-w-full max-h-56 object-contain">
+                    class="max-w-full max-h-56 object-contain rounded-lg">
             </div>
             @endif
 
@@ -43,28 +44,28 @@
                 @if($activePromo->target_url)
                 <a href="{{ $activePromo->resolved_url }}"
                    target="_blank"
-                   class="flex-1 px-4 py-3 bg-primary text-white font-medium rounded-lg hover:bg-azwara-medium transition-colors text-center">
+                   class="flex-1 px-4 py-3 bg-[#2563EB] text-white font-medium rounded-xl hover:bg-[#1D4ED8] transition-colors text-center shadow-elegant">
                     Lihat Promo
                 </a>
                 @endif
 
                 <button id="modalCancel"
-                        class="flex-1 px-4 py-3 border border-azwara-lighter text-azwara-darkest font-medium rounded-lg hover:bg-azwara-lightest transition-colors">
+                        class="flex-1 px-4 py-3 border border-[#E2E8F0] text-[#0F172A] font-medium rounded-xl hover:bg-[#F1F5F9] transition-colors">
                     Nanti Saja
                 </button>
             </div>
         </div>
 
         <!-- Footer -->
-        <div class="px-6 py-3 bg-azwara-lightest rounded-b-xl border-t border-azwara-lighter">
-            <p class="text-xs text-gray-500 text-center">
+        <div class="px-6 py-3 bg-[#F8FAFC] rounded-b-2xl border-t border-[#E2E8F0]">
+            <p class="text-xs text-[#94A3B8] text-center">
                 Promo ini berlaku hingga {{ $activePromo->ends_at ? $activePromo->ends_at->format('d M Y') : 'waktu yang ditentukan' }}
             </p>
         </div>
     </div>
 </div>
-@push('styles')
 
+@push('styles')
 <style>
 @keyframes modalIn {
     from {
@@ -91,11 +92,9 @@ document.addEventListener('DOMContentLoaded', function() {
     const modalOverlay = document.getElementById('modalOverlay');
     const modalCancelBtn = document.getElementById('modalCancel');
 
-    // Cek cookie
     const modalClosedToday = getCookie('modal_closed_{{ $activePromo->id }}');
 
     if (!modalClosedToday) {
-        // Delay sebelum menampilkan
         const delay = parseInt(promoModal.getAttribute('data-delay')) || 2000;
 
         setTimeout(() => {
@@ -104,14 +103,12 @@ document.addEventListener('DOMContentLoaded', function() {
         }, delay);
     }
 
-    // Fungsi close modal
     function closeModal() {
         promoModal.classList.add('hidden');
         document.body.style.overflow = 'auto';
         setCookie('modal_closed_{{ $activePromo->id }}', 'true', 1);
     }
 
-    // Event listeners
     if (closeModalBtn) {
         closeModalBtn.addEventListener('click', closeModal);
     }
@@ -124,14 +121,12 @@ document.addEventListener('DOMContentLoaded', function() {
         modalCancelBtn.addEventListener('click', closeModal);
     }
 
-    // Close dengan ESC
     document.addEventListener('keydown', function(e) {
         if (e.key === 'Escape' && !promoModal.classList.contains('hidden')) {
             closeModal();
         }
     });
 
-    // Cookie helpers
     function setCookie(name, value, days) {
         const date = new Date();
         date.setTime(date.getTime() + (days * 24 * 60 * 60 * 1000));
