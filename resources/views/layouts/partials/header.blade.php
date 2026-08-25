@@ -37,24 +37,6 @@
     {{-- Right Section --}}
     <div class="flex items-center gap-4">
 
-        {{-- Search Bar --}}
-        <div class="hidden lg:flex items-center gap-2
-                    bg-primary-50/50 dark:bg-primary-800/30
-                    rounded-xl px-4 py-2
-                    border border-primary-200/30 dark:border-primary-700/30
-                    focus-within:border-primary-500 dark:focus-within:border-primary-400
-                    transition-all duration-200">
-            <svg class="w-4 h-4 text-secondary-400 dark:text-secondary-500" fill="none" stroke="currentColor" stroke-width="2">
-                <path d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/>
-            </svg>
-            <input type="text"
-                   placeholder="Cari..."
-                   class="bg-transparent border-none outline-none text-sm
-                          text-primary-800 dark:text-primary-200
-                          placeholder:text-secondary-400 dark:placeholder:text-secondary-500
-                          w-48 focus:w-64 transition-all duration-300">
-        </div>
-
         {{-- Theme Toggle --}}
         <button onclick="toggleTheme()"
                 class="p-2 rounded-xl
@@ -108,7 +90,7 @@
                         bg-white dark:bg-primary-900
                         rounded-2xl shadow-2xl border
                         dark:border-primary-800/50
-                        overflow-hidden z-50">
+                        overflow-visible z-50">
 
                 <div class="p-4 border-b dark:border-primary-800/50
                             flex items-center justify-between">
@@ -186,7 +168,7 @@
                         bg-white dark:bg-primary-900
                         rounded-2xl shadow-2xl border
                         dark:border-primary-800/50
-                        overflow-hidden z-50 py-1">
+                        overflow-visible z-50 py-1">
 
                 <div class="px-4 py-3 border-b dark:border-primary-800/50">
                     <p class="text-sm font-medium text-primary-800 dark:text-primary-200">

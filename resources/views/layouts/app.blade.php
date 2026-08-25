@@ -6,6 +6,20 @@
     @stack('styles')
     @include('layouts.partials.ga')
     @include('components.structured-data')
+
+    {{-- Inisialisasi dark mode di head --}}
+    <script>
+        (function() {
+            const storedTheme = localStorage.getItem('theme');
+            const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+
+            if (storedTheme === 'dark' || (!storedTheme && prefersDark)) {
+                document.documentElement.classList.add('dark');
+            } else {
+                document.documentElement.classList.remove('dark');
+            }
+        })();
+    </script>
 </head>
 
 <body
@@ -17,7 +31,7 @@
 
     @include('layouts.partials.sidebar')
 
-    <div class="flex-1 flex flex-col h-screen relative z-10">
+    <div class="flex-1 flex flex-col h-screen relative z-10 overflow-hidden">
         @include('layouts.partials.header')
 
         <main class="flex-1 p-6 overflow-y-auto
