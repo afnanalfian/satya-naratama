@@ -43,7 +43,7 @@ class CourseController extends Controller
             'name'        => 'required|max:255',
             'slug'        => 'required|max:255|unique:courses,slug',
             'description' => 'required|max:1000',
-            'thumbnail'   => 'required|image',
+            'thumbnail'   => 'nullable|image',
             'is_free'     => 'nullable|boolean',
         ]);
 
