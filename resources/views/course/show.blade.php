@@ -38,6 +38,7 @@
                             <h1 class="text-2xl md:text-3xl font-bold text-primary-800 dark:text-primary-100 truncate">
                                 {{ $course->name }}
                             </h1>
+                            <x-course-type-badge :type="$course->type" />
                             @if($course->is_free)
                             <span class="px-3 py-1 rounded-full text-xs font-medium bg-emerald-100 text-emerald-700 dark:bg-emerald-900/30 dark:text-emerald-300 border border-emerald-200 dark:border-emerald-800/30 flex items-center gap-1">
                                 <svg class="w-3 h-3" fill="none" stroke="currentColor" stroke-width="2">

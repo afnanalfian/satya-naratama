@@ -18,6 +18,7 @@ class MeetingVideoController extends Controller
     */
     public function create(Meeting $meeting)
     {
+        abort_if($meeting->isJasmani(), 403, 'Pertemuan jasmani tidak menggunakan video.');
         abort_if($meeting->video !== null, 409);
 
         return view('meetings.videos.create', compact('meeting'));
@@ -33,6 +34,7 @@ class MeetingVideoController extends Controller
         Meeting $meeting,
         VideoSourceResolver $resolver
     ) {
+        abort_if($meeting->isJasmani(), 403, 'Pertemuan jasmani tidak menggunakan video.');
         abort_if($meeting->video()->exists(), 409);
 
         $request->validate([

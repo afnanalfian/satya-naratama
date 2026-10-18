@@ -117,19 +117,27 @@
                             </button>
                         </form>
 
-                        <form method="POST" action="{{ route('siswa.destroy', $user->id) }}" class="sweet-confirm" data-message="Yakin ingin menghapus siswa ini? Data tidak dapat dikembalikan.">
-                            @csrf
-                            @method('DELETE')
-                            <button class="inline-flex items-center gap-2 px-4 py-2 rounded-xl bg-secondary-100 text-secondary-700 hover:bg-secondary-200 dark:bg-secondary-900/20 dark:text-secondary-300 dark:hover:bg-secondary-900/30 text-sm font-medium transition-all duration-200">
-                                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/>
-                                </svg>
-                                Hapus
-                            </button>
-                        </form>
+{{-- Hapus siswa: route belum tersedia, gunakan Nonaktifkan --}}
                     </div>
                 </div>
                 @endrole
+
+                {{-- Monitoring --}}
+                @hasanyrole('admin|tentor')
+                <div class="grid grid-cols-2 sm:grid-cols-4 gap-3">
+                    @foreach([
+                        [route('monitor.student', $user), 'Rapor Lengkap', 'Tryout, jasmani, presensi, fisik'],
+                        [route('attendance.student', $user), 'Kehadiran', 'Akademik & jasmani'],
+                        [route('physical.student', $user), 'Data Fisik', 'TB, BB, kesehatan'],
+                        [route('jasmani.index'), 'Evaluasi Jasmani', 'Hasil tes bulanan'],
+                    ] as [$href, $label, $sub])
+                        <a href="{{ $href }}" class="bg-white dark:bg-primary-900/30 rounded-2xl border border-primary-100 dark:border-primary-800/30 p-4 shadow-sm hover:shadow-md hover:border-primary-300 dark:hover:border-primary-600 transition">
+                            <p class="text-sm font-semibold text-primary-800 dark:text-primary-100">{{ $label }}</p>
+                            <p class="text-[11px] text-secondary-500 dark:text-secondary-400 mt-0.5">{{ $sub }}</p>
+                        </a>
+                    @endforeach
+                </div>
+                @endhasanyrole
 
                 {{-- Data Pendaftaran --}}
                 @if($user->studentRegistration)

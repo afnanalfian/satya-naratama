@@ -21,6 +21,24 @@
     </svg>
     Course
 </a>
+{{-- ================= QR ABSENSI ================= --}}
+<a href="{{ route('attendance.my-qr') }}"
+   class="menu-item {{ request()->routeIs('attendance.my-qr') ? 'active' : '' }}">
+    <svg class="menu-icon" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5">
+        <path stroke-linecap="round" stroke-linejoin="round" d="M4 4h6v6H4zM14 4h6v6h-6zM4 14h6v6H4zM14 14h2v2h-2zM18 18h2v2h-2zM14 18h2M18 14h2"/>
+    </svg>
+    QR Absensi
+</a>
+
+{{-- ================= DATA FISIK ================= --}}
+<a href="{{ route('physical.mine') }}"
+   class="menu-item {{ request()->routeIs('physical.mine*') ? 'active' : '' }}">
+    <svg class="menu-icon" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5">
+        <path stroke-linecap="round" stroke-linejoin="round" d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z"/>
+    </svg>
+    Data Fisik
+</a>
+
 <a href="{{ route('tryouts.index') }}"
    class="menu-item {{ request()->routeIs('tryouts.*') ? 'active' : '' }}">
     <svg class="menu-icon" xmlns="http://www.w3.org/2000/svg" fill="none"

@@ -67,6 +67,14 @@ use App\Http\Controllers\Auth\DaftarController;
 use App\Http\Controllers\Auth\CheckStatusController;
 use App\Http\Controllers\Admin\RegistrationManagementController;
 
+// ============================================
+// ABSENSI QR, EVALUASI JASMANI, DATA FISIK, PANTAUAN ORANG TUA
+// ============================================
+use App\Http\Controllers\Attendance\AttendanceController;
+use App\Http\Controllers\Jasmani\PhysicalEvaluationController;
+use App\Http\Controllers\Student\PhysicalRecordController;
+use App\Http\Controllers\Monitor\StudentMonitorController;
+
 /*
 |--------------------------------------------------------------------------
 | PUBLIC ROUTES
@@ -121,6 +129,15 @@ Route::prefix('daftar')->name('daftar.')->group(function () {
     // Redirect ke payment dari status
     Route::get('/status/payment/{registrationId}', [CheckStatusController::class, 'goToPayment'])->name('status.payment');
 });
+
+// ============================================
+// PANTAUAN ORANG TUA (PUBLIK, TANPA LOGIN)
+// Link berisi token rahasia per siswa, dibagikan admin ke orang tua.
+// ============================================
+Route::get('/pantau/{token}', [StudentMonitorController::class, 'parent'])
+    ->where('token', '[A-Za-z0-9]{20,64}')
+    ->middleware('throttle:60,1')
+    ->name('parent.monitor');
 
 /*
 |--------------------------------------------------------------------------
@@ -281,11 +298,98 @@ Route::middleware(['auth', 'verified'])->group(function () {
     | MEETING ATTENDANCE
     |--------------------------------------------------------------------------
     */
+    // Scan QR & monitoring (admin + tentor)
     Route::middleware(['role:admin|tentor'])->group(function () {
-        Route::get('/meetings/{meeting}/attendance',[MeetingAttendanceController::class, 'index'])->name('meeting.attendance.index');
-        Route::post('/meetings/{meeting}/attendance',[MeetingAttendanceController::class, 'store'])->name('meeting.attendance.store');
-        Route::post('meetings/{meeting}/attendance/quick-toggle', [MeetingAttendanceController::class, 'quickToggle'])->name('meeting.attendance.quick-toggle');
-        Route::get('/reports/course-attendance', [MeetingAttendanceController::class, 'courseAttendanceReport'])->name('reports.course-attendance');
+        Route::get('/meetings/{meeting}/attendance', [MeetingAttendanceController::class, 'index'])->name('meeting.attendance.index');
+        Route::post('/meetings/{meeting}/attendance/scan', [MeetingAttendanceController::class, 'scan'])
+            ->middleware('throttle:240,1')
+            ->name('meeting.attendance.scan');
+        Route::get('/meetings/{meeting}/attendance/feed', [MeetingAttendanceController::class, 'feed'])->name('meeting.attendance.feed');
+    });
+
+    // Absensi manual (KHUSUS ADMIN) — termasuk pertemuan yang sudah lewat
+    Route::middleware(['role:admin'])->group(function () {
+        Route::post('/meetings/{meeting}/attendance/manual', [MeetingAttendanceController::class, 'manual'])->name('meeting.attendance.manual');
+        Route::post('/meetings/{meeting}/attendance/bulk', [MeetingAttendanceController::class, 'bulk'])->name('meeting.attendance.bulk');
+        Route::post('/meetings/{meeting}/attendance/complete', [MeetingAttendanceController::class, 'complete'])->name('meeting.attendance.complete');
+    });
+
+    /*
+    |--------------------------------------------------------------------------
+    | MANAJEMEN ABSENSI (REKAP, GRAFIK, KARTU QR)
+    |--------------------------------------------------------------------------
+    */
+    Route::prefix('absensi')->name('attendance.')->group(function () {
+        Route::middleware(['role:admin|tentor'])->group(function () {
+            Route::get('/', [AttendanceController::class, 'index'])->name('index');
+            Route::get('/scan', [AttendanceController::class, 'hub'])->name('hub');
+            Route::get('/export', [AttendanceController::class, 'export'])->name('export');
+            Route::get('/siswa/{user}', [AttendanceController::class, 'student'])->name('student');
+        });
+        Route::middleware(['role:admin'])->group(function () {
+            Route::get('/kartu-qr', [AttendanceController::class, 'qrCards'])->name('qr-cards');
+            Route::post('/kartu-qr/{user}/regenerate', [AttendanceController::class, 'regenerateQr'])->name('qr-regenerate');
+        });
+    });
+    // Alias nama route lama (menu "Kehadiran")
+    Route::get('/reports/course-attendance', fn () => redirect()->route('attendance.index'))
+        ->middleware(['role:admin|tentor'])
+        ->name('reports.course-attendance');
+
+    // Siswa: QR absensi & data fisik bulanan
+    Route::middleware(['role:siswa'])->group(function () {
+        Route::get('/qr-saya', [AttendanceController::class, 'myQr'])->name('attendance.my-qr');
+        Route::get('/data-fisik', [PhysicalRecordController::class, 'mine'])->name('physical.mine');
+        Route::post('/data-fisik', [PhysicalRecordController::class, 'storeMine'])->name('physical.mine.store');
+    });
+
+    /*
+    |--------------------------------------------------------------------------
+    | EVALUASI JASMANI BULANAN
+    |--------------------------------------------------------------------------
+    */
+    Route::prefix('evaluasi-jasmani')->name('jasmani.')->middleware(['role:admin|tentor'])->group(function () {
+        Route::get('/', [PhysicalEvaluationController::class, 'index'])->name('index');
+        Route::get('/create', [PhysicalEvaluationController::class, 'create'])->name('create');
+        Route::post('/', [PhysicalEvaluationController::class, 'store'])->name('store');
+        Route::get('/{evaluation}', [PhysicalEvaluationController::class, 'show'])->name('show');
+        Route::get('/{evaluation}/edit', [PhysicalEvaluationController::class, 'edit'])->name('edit');
+        Route::put('/{evaluation}', [PhysicalEvaluationController::class, 'update'])->name('update');
+        Route::get('/{evaluation}/input', [PhysicalEvaluationController::class, 'input'])->name('input');
+        Route::put('/{evaluation}/input', [PhysicalEvaluationController::class, 'saveInput'])->name('input.save');
+        Route::get('/{evaluation}/export', [PhysicalEvaluationController::class, 'export'])->name('export');
+        Route::delete('/{evaluation}', [PhysicalEvaluationController::class, 'destroy'])
+            ->middleware('role:admin')
+            ->name('destroy');
+    });
+
+    /*
+    |--------------------------------------------------------------------------
+    | DATA FISIK BULANAN (MONITORING)
+    |--------------------------------------------------------------------------
+    */
+    Route::prefix('monitoring/data-fisik')->name('physical.')->group(function () {
+        Route::middleware(['role:admin|tentor'])->group(function () {
+            Route::get('/', [PhysicalRecordController::class, 'index'])->name('index');
+            Route::get('/siswa/{user}', [PhysicalRecordController::class, 'student'])->name('student');
+        });
+        Route::middleware(['role:admin'])->group(function () {
+            Route::post('/siswa/{user}', [PhysicalRecordController::class, 'storeForStudent'])->name('student.store');
+            Route::delete('/record/{record}', [PhysicalRecordController::class, 'destroy'])->name('destroy');
+        });
+    });
+
+    /*
+    |--------------------------------------------------------------------------
+    | PANTAUAN SISWA (INTERNAL) & LINK ORANG TUA
+    |--------------------------------------------------------------------------
+    */
+    Route::get('/monitoring/siswa/{user}', [StudentMonitorController::class, 'internal'])
+        ->middleware(['role:admin|tentor'])
+        ->name('monitor.student');
+    Route::middleware(['role:admin'])->group(function () {
+        Route::get('/monitoring/link-orang-tua', [StudentMonitorController::class, 'links'])->name('monitor.links');
+        Route::post('/monitoring/link-orang-tua/{user}/regenerate', [StudentMonitorController::class, 'regenerate'])->name('monitor.regenerate');
     });
 
 

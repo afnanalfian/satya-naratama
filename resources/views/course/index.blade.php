@@ -31,6 +31,7 @@
 
                 <div class="flex flex-col sm:flex-row items-center gap-3 w-full sm:w-auto">
                     <form method="GET" action="{{ route('course.index') }}" class="flex w-full sm:w-auto gap-2">
+                        @if($type ?? null)<input type="hidden" name="type" value="{{ $type }}">@endif
                         <div class="relative flex-1 sm:flex-none">
                             <svg class="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-secondary-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/>
@@ -55,6 +56,19 @@
                     @endrole
                 </div>
             </div>
+        </div>
+
+        {{-- Filter Jenis --}}
+        <div class="flex flex-wrap items-center gap-2 mb-6">
+            @foreach(['' => 'Semua', 'akademik' => 'Akademik', 'jasmani' => 'Jasmani'] as $val => $label)
+                <a href="{{ route('course.index', array_filter(['q' => $q, 'type' => $val])) }}"
+                   class="px-4 py-2 rounded-xl text-sm font-medium border transition-all duration-200
+                          {{ ($type ?? '') === $val
+                                ? 'bg-primary-600 text-white border-primary-600 shadow-sm'
+                                : 'bg-white dark:bg-primary-900/30 text-secondary-600 dark:text-secondary-300 border-primary-200 dark:border-primary-700/50 hover:bg-primary-50 dark:hover:bg-primary-800/30' }}">
+                    {{ $label }}
+                </a>
+            @endforeach
         </div>
 
         {{-- Course Grid --}}
@@ -120,6 +134,8 @@
                         <span class="absolute left-3 top-3 text-xs font-medium px-3 py-1 rounded-lg shadow-lg {{ $badgeClass }} backdrop-blur-sm">
                             {{ $badgeText }}
                         </span>
+
+                        <x-course-type-badge :type="$course->type" class="absolute right-3 top-3 shadow-sm" />
 
                         <span class="absolute right-3 bottom-3 text-xs font-medium px-3 py-1 rounded-lg bg-primary-900/80 backdrop-blur-sm text-white shadow-lg flex items-center gap-1.5">
                             <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" stroke-width="2">

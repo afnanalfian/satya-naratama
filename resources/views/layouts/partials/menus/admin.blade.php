@@ -14,7 +14,6 @@
     $userActive = request()->routeIs(
         'siswa.*',
         'tentor.*',
-        'reports.course-attendance',
         'admin.user-entitlements.*'
     );
 @endphp
@@ -69,11 +68,6 @@
             Tentor
         </a>
 
-        <a href="{{ route('reports.course-attendance') }}"
-           class="menu-subitem {{ request()->routeIs('reports.course-attendance') ? 'active' : '' }}">
-            <span class="w-1 h-1 rounded-full bg-current"></span>
-            Kehadiran
-        </a>
 
         {{-- <a href="{{ route('admin.user-entitlements.index') }}"
            class="menu-subitem {{ request()->routeIs('admin.user-entitlements.*') ? 'active' : '' }}">
@@ -86,7 +80,7 @@
 
 {{-- ================= COURSE ================= --}}
 <a href="{{ route('course.index') }}"
-   class="menu-item {{ request()->routeIs('course.*','meeting.*') ? 'active' : '' }}">
+   class="menu-item {{ (request()->routeIs('course.*','meeting.*') && ! request()->routeIs('meeting.attendance.*')) ? 'active' : '' }}">
     <svg class="menu-icon" xmlns="http://www.w3.org/2000/svg" fill="none"
          viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5">
         <path stroke-linecap="round" stroke-linejoin="round"
@@ -96,6 +90,8 @@
     </svg>
     Course
 </a>
+@include('layouts.partials.menu-monitoring')
+
 {{-- ================= TRYOUTS ========== --}}
 <a href="{{ route('tryouts.index') }}"
    class="menu-item {{ request()->routeIs('tryouts.*') ? 'active' : '' }}">

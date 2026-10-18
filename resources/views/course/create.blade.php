@@ -86,6 +86,8 @@
                     <p class="mt-1 text-xs text-secondary-500 dark:text-secondary-400">Slug adalah URL unik untuk course ini. Gunakan huruf kecil dan tanda hubung (-).</p>
                 </div>
 
+                @include('course.partials.type-field')
+
                 {{-- Deskripsi --}}
                 <div>
                     <label class="block text-sm font-medium text-primary-700 dark:text-primary-300 mb-1.5">

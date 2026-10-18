@@ -13,12 +13,14 @@ class CourseController extends Controller
     public function index(Request $request)
     {
         $q = $request->query('q');
+        $type = in_array($request->query('type'), ['akademik', 'jasmani'], true) ? $request->query('type') : null;
 
         $user = auth()->user();
         $isTentor = $user->hasRole('tentor');
 
         $courses = Course::with('teachers.user')
             ->when($q, fn($qr) => $qr->where('name', 'like', "%{$q}%"))
+            ->ofType($type)
             ->when($isTentor, function($query) use ($user) {
                 // Filter hanya course yang diajari oleh tentor ini
                 $query->whereHas('teachers', function($q) use ($user) {
@@ -29,7 +31,7 @@ class CourseController extends Controller
             ->paginate(12)
             ->withQueryString();
 
-        return view('course.index', compact('courses', 'q', 'isTentor'));
+        return view('course.index', compact('courses', 'q', 'isTentor', 'type'));
     }
 
     public function create()
@@ -45,11 +47,14 @@ class CourseController extends Controller
             'description' => 'required|max:1000',
             'thumbnail'   => 'nullable|image',
             'is_free'     => 'nullable|boolean',
+            'type'        => 'required|in:akademik,jasmani',
         ]);
 
-        $data = $request->only('name','slug','description');
+        $data = $request->only('name','slug','description','type');
         $data['is_free'] = $request->boolean('is_free');
-        $data['thumbnail'] = $request->file('thumbnail')->store('courses','public');
+        if ($request->hasFile('thumbnail')) {
+            $data['thumbnail'] = $request->file('thumbnail')->store('courses','public');
+        }
 
         Course::create($data);
 
@@ -84,9 +89,10 @@ class CourseController extends Controller
             'description' => 'required|max:1000',
             'thumbnail'   => 'nullable|image',
             'is_free'     => 'nullable|boolean',
+            'type'        => 'required|in:akademik,jasmani',
         ]);
 
-        $data = $request->only('name','slug','description');
+        $data = $request->only('name','slug','description','type');
         $data['is_free'] = $request->boolean('is_free');
         if ($request->hasFile('thumbnail')) {
 
@@ -114,9 +120,7 @@ class CourseController extends Controller
 
         foreach ($course->meetings as $meeting) {
 
-            foreach ($meeting->materials as $m) {
-                $m->delete();
-            }
+            $meeting->material?->delete();
 
             if ($meeting->postTest) {
                 $meeting->postTest->delete();

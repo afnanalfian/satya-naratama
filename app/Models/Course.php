@@ -12,6 +12,7 @@ class Course extends Model
     protected $fillable = [
         'name',
         'slug',
+        'type',
         'is_free',
         'description',
         'thumbnail',
@@ -19,6 +20,34 @@ class Course extends Model
     protected $casts = [
         'is_free' => 'boolean',
     ];
+    public const TYPE_AKADEMIK = 'akademik';
+    public const TYPE_JASMANI  = 'jasmani';
+
+    public const TYPES = [
+        self::TYPE_AKADEMIK => 'Akademik',
+        self::TYPE_JASMANI  => 'Jasmani',
+    ];
+
+    public function isJasmani(): bool
+    {
+        return $this->type === self::TYPE_JASMANI;
+    }
+
+    public function isAkademik(): bool
+    {
+        return ! $this->isJasmani();
+    }
+
+    public function getTypeLabelAttribute(): string
+    {
+        return self::TYPES[$this->type] ?? 'Akademik';
+    }
+
+    public function scopeOfType($query, ?string $type)
+    {
+        return $type ? $query->where('type', $type) : $query;
+    }
+
     public function teachers()
     {
         return $this->belongsToMany(Teacher::class, 'course_teacher');
@@ -26,7 +55,7 @@ class Course extends Model
 
     public function meetings()
     {
-        return $this->hasMany(Meeting::class)->orderBy('scheduled_at');;
+        return $this->hasMany(Meeting::class)->orderBy('scheduled_at');
     }
 
     public function questionCategories()

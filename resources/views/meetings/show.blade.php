@@ -43,11 +43,18 @@
         {{-- Info Meeting --}}
         @include('meetings.partials.info')
 
+        @php $isJasmaniMeeting = $meeting->isJasmani(); @endphp
+
+        {{-- Kehadiran siswa sendiri --}}
+        @role('siswa')
+            @include('meetings.partials.my-attendance')
+        @endrole
+
         {{-- Content Grid --}}
-        <div class="grid grid-cols-1 lg:grid-cols-3 gap-6 mt-6">
+        <div class="grid grid-cols-1 {{ $isJasmaniMeeting ? '' : 'lg:grid-cols-3' }} gap-6 mt-6">
 
             {{-- Left: Main Content --}}
-            <div class="lg:col-span-2 space-y-6">
+            <div class="{{ $isJasmaniMeeting ? '' : 'lg:col-span-2' }} space-y-6">
                 {{-- Absensi --}}
                 @role('admin|tentor')
                     @include('meetings.partials.attendance')
@@ -56,17 +63,21 @@
                 {{-- Materi --}}
                 @include('meetings.partials.material')
 
-                {{-- Video --}}
-                @include('meetings.partials.video')
+                {{-- Video (khusus course akademik) --}}
+                @unless($isJasmaniMeeting)
+                    @include('meetings.partials.video')
+                @endunless
             </div>
 
-            {{-- Right: Sidebar --}}
+            {{-- Right: Sidebar — Blind/Post Test (khusus course akademik) --}}
+            @unless($isJasmaniMeeting)
             <div class="lg:col-span-1 space-y-6">
-                {{-- Meeting Exam --}}
                 @include('meetings.partials.meetingExam')
             </div>
+            @endunless
         </div>
 
+        @unless($isJasmaniMeeting)
         {{-- ================================================= --}}
         {{-- MODAL : CREATE BLIND / POST TEST --}}
         {{-- ================================================= --}}
@@ -163,6 +174,7 @@
                 }
             });
         </script>
+        @endunless
     </div>
 </div>
 @endsection

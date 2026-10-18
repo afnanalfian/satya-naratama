@@ -6,214 +6,168 @@ use App\Http\Controllers\Controller;
 use App\Models\Meeting;
 use App\Models\MeetingAttendance;
 use App\Models\User;
+use App\Services\AttendanceService;
+use Carbon\Carbon;
 use Illuminate\Http\Request;
-use App\Models\Course;
+use Illuminate\Validation\Rule;
 
+/**
+ * Absensi per pertemuan:
+ * - Scan QR kartu siswa (admin & tentor)
+ * - Absensi manual / koreksi (khusus admin), termasuk pertemuan yang sudah lewat
+ */
 class MeetingAttendanceController extends Controller
 {
-     /**
-     * Display attendance page with eligibility check
-     */
-    public function index(Meeting $meeting, Request $request)
+    public function __construct(protected AttendanceService $attendance)
     {
-        $search = $request->query('search', '');
+    }
 
-        // Query siswa yang memiliki akses ke meeting ini
-        $query = User::role('siswa')
-            ->where(function($query) use ($meeting) {
-                // Siswa yang memiliki akses ke course ini
-                $query->whereHas('entitlements', function($q) use ($meeting) {
-                    $q->where('entitlement_type', 'course')
-                      ->where('entitlement_id', $meeting->course_id);
-                })
-                // ATAU siswa yang membeli meeting satuan ini
-                ->orWhereHas('entitlements', function($q) use ($meeting) {
-                    $q->where('entitlement_type', 'meeting')
-                      ->where('entitlement_id', $meeting->id);
-                });
-            })
-            ->orderBy('name');
+    /**
+     * Halaman absensi pertemuan: scanner + daftar peserta.
+     */
+    public function index(Meeting $meeting)
+    {
+        $meeting->load('course');
 
-        // Tambahkan filter pencarian jika ada
-        if ($search) {
-            $query->where('name', 'like', '%' . $search . '%');
-        }
-
-        $eligibleStudents = $query->paginate(20);
-
-        // Ambil absensi yang sudah ada HANYA untuk siswa yang eligible
-        $attendances = MeetingAttendance::where('meeting_id', $meeting->id)
-            ->whereIn('user_id', $eligibleStudents->pluck('id'))
+        $students = $this->attendance->participants();
+        $records = MeetingAttendance::with('marker:id,name')
+            ->where('meeting_id', $meeting->id)
             ->get()
+            ->each(fn ($a) => $a->setRelation('meeting', $meeting))
             ->keyBy('user_id');
 
-        // Hitung statistik
-        $presentCount = $attendances->where('is_present', true)->count();
-        $absentCount = $eligibleStudents->total() - $presentCount;
+        [$canScan, $scanReason] = $this->attendance->scanAvailability($meeting, auth()->user());
 
-        return view('meetings.attendance', [
-            'meeting'           => $meeting,
-            'eligibleStudents'  => $eligibleStudents,
-            'attendances'       => $attendances,
-            'search'            => $search,
-            'presentCount'      => $presentCount,
-            'absentCount'       => $absentCount,
+        $rows = $students->map(function (User $s) use ($records) {
+            $rec = $records->get($s->id);
+
+            return [
+                'id'     => $s->id,
+                'name'   => $s->name,
+                'avatar' => $s->avatar_url,
+                'class'  => $s->studentRegistration?->class,
+                'gender' => $s->studentRegistration?->gender,
+                'status' => $rec?->status,
+                'time'   => $rec?->marked_at?->format('H:i'),
+                'date'   => $rec?->marked_at?->format('Y-m-d'),
+                'late'   => (bool) $rec?->is_late,
+                'method' => $rec?->method,
+                'note'   => $rec?->note,
+                'marker' => $rec?->marker?->name,
+            ];
+        })->values();
+
+        return view('attendance.meeting', [
+            'meeting'    => $meeting,
+            'rows'       => $rows,
+            'counts'     => $this->attendance->meetingCounts($meeting, $students->count()),
+            'canScan'    => $canScan,
+            'scanReason' => $scanReason,
+            'isAdmin'    => auth()->user()->hasRole('admin'),
+            'statuses'   => MeetingAttendance::STATUSES,
         ]);
     }
 
     /**
-     * Store / update attendance ONLY for eligible students
+     * Endpoint scan QR (JSON).
      */
-    public function store(Request $request, Meeting $meeting)
+    public function scan(Request $request, Meeting $meeting)
     {
-        // Validasi: hanya boleh ada attendances untuk siswa yang eligible
-        $eligibleStudentIds = User::role('siswa')
-            ->where(function($query) use ($meeting) {
-                $query->whereHas('entitlements', function($q) use ($meeting) {
-                    $q->where('entitlement_type', 'course')
-                      ->where('entitlement_id', $meeting->course_id);
-                })
-                ->orWhereHas('entitlements', function($q) use ($meeting) {
-                    $q->where('entitlement_type', 'meeting')
-                      ->where('entitlement_id', $meeting->id);
-                });
-            })
-            ->pluck('id')
-            ->toArray();
+        $request->validate(['code' => 'required|string|max:255']);
 
-        // Filter hanya attendances untuk siswa yang eligible
-        $validAttendances = array_intersect_key(
-            $request->attendances ?? [],
-            array_flip($eligibleStudentIds)
-        );
+        $meeting->load('course');
+        $result = $this->attendance->recordScan($meeting, $request->input('code'), $request->user());
+        $result['counts'] = $this->attendance->meetingCounts($meeting->fresh());
+        $result['meeting_status'] = $meeting->fresh()->status;
 
-        // Update atau create attendance HANYA untuk siswa eligible
-        foreach ($eligibleStudentIds as $studentId) {
-            MeetingAttendance::updateOrCreate(
-                [
-                    'meeting_id' => $meeting->id,
-                    'user_id'    => $studentId,
-                ],
-                [
-                    'is_present' => isset($validAttendances[$studentId]),
-                    'marked_by'  => auth()->id(),
-                    'marked_at'  => now(),
-                ]
-            );
-        }
-
-        // Hapus absensi untuk siswa yang tidak eligible (jika ada)
-        MeetingAttendance::where('meeting_id', $meeting->id)
-            ->whereNotIn('user_id', $eligibleStudentIds)
-            ->delete();
-
-        toast('success', 'Absensi berhasil disimpan');
-        return redirect()->route('meeting.show', $meeting);
+        return response()->json($result, $result['ok'] ? 200 : 422);
     }
 
     /**
-     * Quick attendance - toggle kehadiran satu siswa
-     * DENGAN eligibility check
+     * Data terbaru untuk sinkronisasi (beberapa perangkat scan bersamaan).
      */
-    public function quickToggle(Request $request, Meeting $meeting)
+    public function feed(Meeting $meeting)
     {
-        $request->validate([
-            'student_id' => 'required|exists:users,id',
-            'status'     => 'required|boolean',
-        ]);
-
-        // Cek apakah siswa eligible untuk meeting ini
-        $isEligible = User::role('siswa')
-            ->where('id', $request->student_id)
-            ->where(function($query) use ($meeting) {
-                $query->whereHas('entitlements', function($q) use ($meeting) {
-                    $q->where('entitlement_type', 'course')
-                      ->where('entitlement_id', $meeting->course_id);
-                })
-                ->orWhereHas('entitlements', function($q) use ($meeting) {
-                    $q->where('entitlement_type', 'meeting')
-                      ->where('entitlement_id', $meeting->id);
-                });
-            })
-            ->exists();
-
-        if (!$isEligible) {
-            return response()->json([
-                'success' => false,
-                'message' => 'Siswa tidak memiliki akses ke meeting ini'
-            ], 403);
-        }
-
-        $student = User::findOrFail($request->student_id);
-
-        MeetingAttendance::updateOrCreate(
-            [
-                'meeting_id' => $meeting->id,
-                'user_id'    => $student->id,
-            ],
-            [
-                'is_present' => $request->status,
-                'marked_by'  => auth()->id(),
-                'marked_at'  => now(),
-            ]
-        );
+        $records = MeetingAttendance::where('meeting_id', $meeting->id)
+            ->get()
+            ->each(fn ($a) => $a->setRelation('meeting', $meeting));
 
         return response()->json([
-            'success' => true,
-            'message' => 'Absensi ' . $student->name . ' berhasil diupdate',
-            'status'  => $request->status ? 'hadir' : 'tidak hadir'
+            'counts'  => $this->attendance->meetingCounts($meeting),
+            'records' => $records->map(fn ($a) => $this->attendance->attendancePayload($a))->values(),
+            'meeting_status' => $meeting->status,
         ]);
     }
-    public function courseAttendanceReport(Request $request)
+
+    /**
+     * Absensi manual satu siswa (ADMIN).
+     */
+    public function manual(Request $request, Meeting $meeting)
     {
-        $courses = Course::orderBy('name')->get();
-        $selectedCourseId = $request->query('course_id');
+        $data = $request->validate([
+            'user_id' => 'required|integer|exists:users,id',
+            'status'  => ['required', Rule::in([...array_keys(MeetingAttendance::STATUSES), 'reset'])],
+            'time'    => 'nullable|date_format:H:i',
+            'note'    => 'nullable|string|max:255',
+        ]);
 
-        $attendanceData = collect();
+        $student = User::role('siswa')->findOrFail($data['user_id']);
+        $meeting->load('course');
 
-        if ($selectedCourseId) {
-            $course = Course::findOrFail($selectedCourseId);
-
-            // Ambil semua meeting yang sudah done di course ini
-            $doneMeetings = Meeting::where('course_id', $selectedCourseId)
-                ->where('status', 'done')
-                ->get();
-
-            // Ambil semua siswa yang memiliki akses ke course ini
-            $students = User::role('siswa')
-                ->with(['attendances' => function($q) use ($doneMeetings) {
-                    $q->whereIn('meeting_id', $doneMeetings->pluck('id'))
-                    ->where('is_present', true);
-                }])
-                ->get();
-
-            $totalDoneMeetings = $doneMeetings->count();
-
-            // Hitung persentase kehadiran per siswa
-            foreach ($students as $student) {
-                $attendedCount = $student->attendances->count();
-                $percentage = $totalDoneMeetings > 0
-                    ? round(($attendedCount / $totalDoneMeetings) * 100, 1)
-                    : null;
-
-                $attendanceData->push([
-                    'student' => $student,
-                    'attended_count' => $attendedCount,
-                    'total_done_meetings' => $totalDoneMeetings,
-                    'percentage' => $percentage,
-                    'attended_meetings' => $student->attendances->pluck('meeting_id')->toArray()
-                ]);
-            }
-
-            // Urutkan dari yang paling sering hadir ke paling jarang
-            $attendanceData = $attendanceData->sortByDesc('percentage');
+        $time = null;
+        if (! empty($data['time'])) {
+            $date = $meeting->scheduled_at ?? now();
+            $time = Carbon::parse($date->format('Y-m-d') . ' ' . $data['time'], config('app.timezone'));
         }
 
-        return view('reports.course-attendance', compact(
-            'courses',
-            'selectedCourseId',
-            'attendanceData'
-        ));
+        $record = $this->attendance->setManual($meeting, $student, $data['status'], $request->user(), $time, $data['note'] ?? null);
+
+        return response()->json([
+            'ok'         => true,
+            'message'    => $record
+                ? "{$student->name}: {$record->status_label}" . ($record->marked_at ? ' (' . $record->marked_at->format('H:i') . ')' : '')
+                : "Catatan absensi {$student->name} dihapus",
+            'attendance' => $record ? $this->attendance->attendancePayload($record) : ['user_id' => $student->id, 'status' => null],
+            'counts'     => $this->attendance->meetingCounts($meeting),
+        ]);
     }
 
+    /**
+     * Tandai massal siswa yang BELUM tercatat (ADMIN).
+     */
+    public function bulk(Request $request, Meeting $meeting)
+    {
+        $data = $request->validate([
+            'status' => ['required', Rule::in(array_keys(MeetingAttendance::STATUSES))],
+        ]);
+
+        $recorded = MeetingAttendance::where('meeting_id', $meeting->id)->pluck('user_id');
+        $students = $this->attendance->participantsQuery()->whereNotIn('users.id', $recorded)->get();
+
+        foreach ($students as $student) {
+            $this->attendance->setManual($meeting, $student, $data['status'], $request->user());
+        }
+
+        toast('success', "{$students->count()} siswa ditandai " . MeetingAttendance::STATUSES[$data['status']]);
+
+        return back();
+    }
+
+    /**
+     * Tandai pertemuan selesai dari halaman absensi (ADMIN) —
+     * dipakai untuk pertemuan lampau yang lupa diselesaikan.
+     */
+    public function complete(Meeting $meeting)
+    {
+        if ($meeting->status !== 'done') {
+            $meeting->update([
+                'status'     => 'done',
+                'started_at' => $meeting->started_at ?? $meeting->scheduled_at,
+            ]);
+        }
+
+        toast('success', 'Pertemuan ditandai selesai dan masuk ke perhitungan persentase.');
+
+        return back();
+    }
 }

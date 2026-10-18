@@ -32,6 +32,8 @@
     </svg>
     Course
 </a>
+@include('layouts.partials.menu-monitoring')
+
 <a href="{{ route('tryouts.index') }}"
    class="menu-item {{ request()->routeIs('tryouts.*') ? 'active' : '' }}">
     <svg class="menu-icon" xmlns="http://www.w3.org/2000/svg" fill="none"

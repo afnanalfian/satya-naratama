@@ -106,6 +106,20 @@ class Meeting extends Model
 
         return $this->productable?->product;
     }
+    /**
+     * Pertemuan course jasmani hanya berisi absensi & materi
+     * (tanpa video, blind test, post test).
+     */
+    public function isJasmani(): bool
+    {
+        return (bool) $this->course?->isJasmani();
+    }
+
+    public function supportsVideoAndExam(): bool
+    {
+        return ! $this->isJasmani();
+    }
+
     public function isFree(): bool
     {
         return $this->is_free;

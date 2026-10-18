@@ -29,6 +29,7 @@ class MeetingController extends Controller
         // LOAD RELATIONS
         // ===============================
         $meeting->load([
+            'course',
             'material',
             'video',
             'creator',
@@ -50,11 +51,17 @@ class MeetingController extends Controller
 
         $blindAttempt = null;
         $postAttempt  = null;
+        $myAttendance = null;
 
         // ===============================
         // ATTEMPT KHUSUS SISWA
         // ===============================
         if (auth()->check() && auth()->user()->hasRole('siswa')) {
+
+            $myAttendance = $meeting->attendances()
+                ->where('user_id', auth()->id())
+                ->first()
+                ?->setRelation('meeting', $meeting);
 
             if ($meeting->blindTest) {
                 $blindAttempt = $meeting->blindTest
@@ -77,6 +84,8 @@ class MeetingController extends Controller
             'postTest'      => $meeting->postTest,
             'blindAttempt'  => $blindAttempt,
             'postAttempt'   => $postAttempt,
+            'myAttendance'  => $myAttendance,
+            'attendanceCounts' => app(\App\Services\AttendanceService::class)->meetingCounts($meeting),
         ]);
     }
 
@@ -240,6 +249,11 @@ class MeetingController extends Controller
      */
     public function storeMeetingExam(Request $request, Meeting $meeting)
     {
+        if ($meeting->isJasmani()) {
+            toast('error', 'Pertemuan jasmani tidak menggunakan blind test / post test.');
+            return back();
+        }
+
         $data = $request->validate([
             'type' => 'required|in:post_test,blind_test',
             'test_type' => 'required|in:skd,mtk_stis,mtk_tka,tpa,tbi,general',

@@ -34,6 +34,9 @@
                                 {{ $meeting->course->name }}
                             </span>
                             @endif
+                            @if($meeting->course)
+                                <x-course-type-badge :type="$meeting->course->type" size="xs" />
+                            @endif
                             @if($meeting->is_free)
                             <span class="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-xs font-medium bg-emerald-100 text-emerald-700 dark:bg-emerald-900/20 dark:text-emerald-300 border border-emerald-200 dark:border-emerald-800/30">
                                 <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">

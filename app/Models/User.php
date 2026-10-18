@@ -10,6 +10,7 @@ use Laravel\Sanctum\HasApiTokens;
 use Spatie\Permission\Traits\HasRoles;
 use App\Notifications\ResetPasswordNotification;
 use Illuminate\Support\Facades\Storage;
+use Illuminate\Support\Str;
 
 /**
  * @method bool hasRole(string|int|array|\Spatie\Permission\Models\Role|\Illuminate\Support\Collection|\BackedEnum $roles, string|null $guard = null)
@@ -32,13 +33,104 @@ class User extends Authenticatable implements MustVerifyEmail
         'last_verification_sent_at',
     ];
 
-    protected $hidden = ['password', 'remember_token'];
+    protected $hidden = ['password', 'remember_token', 'qr_token', 'parent_token'];
 
     protected $casts = [
         'email_verified_at' => 'datetime',
         'last_verification_sent_at' => 'datetime',
         'is_active' => 'boolean',
     ];
+    /* =====================================================
+     | TOKENS: QR ABSENSI & LINK PANTAUAN ORANG TUA
+     |===================================================== */
+
+    protected static function booted()
+    {
+        static::creating(function (User $user) {
+            $user->qr_token     ??= self::newQrToken();
+            $user->parent_token ??= self::newParentToken();
+        });
+    }
+
+    public static function newQrToken(): string
+    {
+        do {
+            $token = Str::upper(Str::random(24));
+        } while (self::where('qr_token', $token)->exists());
+
+        return $token;
+    }
+
+    public static function newParentToken(): string
+    {
+        do {
+            $token = Str::random(40);
+        } while (self::where('parent_token', $token)->exists());
+
+        return $token;
+    }
+
+    /** Pastikan token ada (untuk user lama yang belum ter-backfill). */
+    public function ensureTokens(): self
+    {
+        $dirty = false;
+        if (! $this->qr_token) {
+            $this->qr_token = self::newQrToken();
+            $dirty = true;
+        }
+        if (! $this->parent_token) {
+            $this->parent_token = self::newParentToken();
+            $dirty = true;
+        }
+        if ($dirty) {
+            $this->saveQuietly();
+        }
+
+        return $this;
+    }
+
+    /** Isi QR code pada kartu siswa. */
+    public function getQrPayloadAttribute(): string
+    {
+        $this->ensureTokens();
+
+        return config('attendance.qr_prefix', 'SN-') . $this->qr_token;
+    }
+
+    /** Link publik untuk orang tua (tanpa login). */
+    public function getParentMonitorUrlAttribute(): string
+    {
+        $this->ensureTokens();
+
+        return route('parent.monitor', $this->parent_token);
+    }
+
+    /** L / P dari data pendaftaran (null jika tidak ada). */
+    public function getGenderAttribute(): ?string
+    {
+        return $this->studentRegistration?->gender;
+    }
+
+    public function getDisplayNameAttribute(): string
+    {
+        return $this->studentRegistration?->full_name ?: $this->name;
+    }
+
+    public function physicalRecords()
+    {
+        return $this->hasMany(StudentPhysicalRecord::class)->orderBy('period');
+    }
+
+    public function physicalEvaluationResults()
+    {
+        return $this->hasMany(PhysicalEvaluationResult::class);
+    }
+
+    public function scopeActiveStudents($query)
+    {
+        return $query->role('siswa')->where('is_active', true);
+    }
+
     public function getWhatsappPhoneAttribute(): ?string
     {
         if (empty($this->phone)) {
