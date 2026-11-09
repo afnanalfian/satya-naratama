@@ -74,6 +74,7 @@ use App\Http\Controllers\Attendance\AttendanceController;
 use App\Http\Controllers\Jasmani\PhysicalEvaluationController;
 use App\Http\Controllers\Student\PhysicalRecordController;
 use App\Http\Controllers\Monitor\StudentMonitorController;
+use App\Livewire;
 
 /*
 |--------------------------------------------------------------------------
@@ -108,14 +109,14 @@ Route::get('/sitemap.xml', function () {
 // ============================================
 Route::prefix('daftar')->name('daftar.')->group(function () {
     // Form pendaftaran
-    Route::get('/', [DaftarController::class, 'showForm'])->name('form');
+    Route::get('/', Livewire\Daftar\Form::class)->name('form');
     Route::post('/', [DaftarController::class, 'store'])->name('store');
 
     // Get kelurahan by kecamatan (AJAX)
     Route::get('/kelurahan', [DaftarController::class, 'getKelurahan'])->name('kelurahan');
 
     // Pembayaran
-    Route::get('/payment/{registrationId}', [DaftarController::class, 'showPayment'])->name('payment');
+    Route::get('/payment/{registrationId}', Livewire\Daftar\Payment::class)->name('payment');
     Route::post('/payment/{registrationId}', [DaftarController::class, 'uploadPayment'])->name('payment.upload');
     Route::get('/payment/{registrationId}/bayar-nanti', [DaftarController::class, 'bayarNanti'])->name('payment.nanti');
 
@@ -123,7 +124,7 @@ Route::prefix('daftar')->name('daftar.')->group(function () {
     Route::get('/success/{registrationId}', [DaftarController::class, 'showSuccess'])->name('success');
 
     // Cek status pendaftaran
-    Route::get('/status', [CheckStatusController::class, 'index'])->name('status.form');
+    Route::get('/status', Livewire\Daftar\CheckStatus::class)->name('status.form');
     Route::post('/status', [CheckStatusController::class, 'check'])->name('status.check');
 
     // Redirect ke payment dari status
@@ -145,6 +146,10 @@ Route::get('/pantau/{token}', [StudentMonitorController::class, 'parent'])
 |--------------------------------------------------------------------------
 */
 require __DIR__.'/auth.php';
+
+// Menjaga sesi & token CSRF tetap segar (dipanggil berkala oleh frontend).
+Route::get('/keep-alive', fn () => response()->json(['token' => csrf_token(), 'auth' => auth()->check()])
+    ->header('Cache-Control', 'no-store'))->middleware('throttle:120,1')->name('keep-alive');
 
 /*
 |--------------------------------------------------------------------------
@@ -179,7 +184,7 @@ Route::middleware(['auth', 'verified'])->group(function () {
     | DASHBOARD ROUTES
     |--------------------------------------------------------------------------
     */
-    Route::get('/admin/dashboard', [DashboardController::class, 'admin'])
+    Route::get('/admin/dashboard', Livewire\Dashboard\Admin::class)
         ->name('dashboard.admin')
         ->middleware(['role:admin']);
 
@@ -200,15 +205,15 @@ Route::middleware(['auth', 'verified'])->group(function () {
     Route::get('/profile', [ProfileController::class, 'show'])->name('profile.show');
 
     // Edit profile
-    Route::get('/profile/edit', [ProfileController::class, 'edit'])->name('profile.edit');
+    Route::get('/profile/edit', Livewire\Profile\Edit::class)->name('profile.edit');
     Route::post('/profile/edit', [ProfileController::class, 'update'])->name('profile.update');
 
     // Change password
-    Route::get('/profile/password', [ProfileController::class, 'password'])->name('profile.password');
+    Route::get('/profile/password', Livewire\Profile\Password::class)->name('profile.password');
     Route::post('/profile/password', [ProfileController::class, 'updatePassword'])->name('profile.password.update');
 
     // Delete account (deactivate)
-    Route::get('/profile/delete', [ProfileController::class, 'delete'])->name('profile.delete');
+    Route::get('/profile/delete', Livewire\Profile\Delete::class)->name('profile.delete');
     Route::post('/profile/delete', [ProfileController::class, 'destroy'])->name('profile.destroy');
     // NEW EDIT ADMIN USERS
     Route::middleware(['auth', 'role:admin'])->prefix('admin')->group(function () {
@@ -223,21 +228,21 @@ Route::middleware(['auth', 'verified'])->group(function () {
     // SISWA
     Route::prefix('siswa')->middleware(['role:admin|tentor'])->group(function () {
 
-        Route::get('/', [SiswaController::class, 'index'])->name('siswa.index');
+        Route::get('/', Livewire\Users\SiswaIndex::class)->name('siswa.index');
         Route::get('/{id}', [SiswaController::class, 'show'])->name('siswa.show');
         Route::post('/{id}/toggle', [SiswaController::class, 'toggleActive'])->name('siswa.toggle');
     });
     // TENTOR
     Route::prefix('tentor')->middleware(['role:admin'])->group(function () {
-        Route::get('/add', [TentorController::class, 'create'])->name('tentor.create');
+        Route::get('/add', Livewire\Users\TentorForm::class)->name('tentor.create');
         Route::post('/store', [TentorController::class, 'store'])->name('tentor.store');
-        Route::get('/{id}/edit', [TentorController::class, 'edit'])->name('tentor.edit');
+        Route::get('/{id}/edit', Livewire\Users\TentorForm::class)->name('tentor.edit');
         Route::put('/{id}', [TentorController::class, 'update'])->name('tentor.update');
         Route::delete('/{id}', [TentorController::class, 'remove'])->name('tentor.remove');
         Route::post('/{id}/toggle', [TentorController::class, 'toggleActive'])->name('tentor.toggle');
     });
     Route::prefix('tentor')->middleware(['role:admin|siswa'])->group(function () {
-        Route::get('/', [TentorController::class, 'index'])->name('tentor.index');
+        Route::get('/', Livewire\Users\TentorIndex::class)->name('tentor.index');
         Route::get('/{id}', [TentorController::class, 'show'])->name('tentor.show');
     });
 
@@ -248,16 +253,16 @@ Route::middleware(['auth', 'verified'])->group(function () {
     */
     // Admin-only
     Route::prefix('course')->middleware(['role:admin'])->group(function () {
-        Route::get('/create',            [CourseController::class, 'create'])->name('course.create');
+        Route::get('/create',            Livewire\Courses\Form::class)->name('course.create');
         Route::post('/store',            [CourseController::class, 'store'])->name('course.store');
-        Route::get('/{slug}/edit',       [CourseController::class, 'edit'])->name('course.edit');
+        Route::get('/{slug}/edit',       Livewire\Courses\Form::class)->name('course.edit');
         Route::post('/{slug}/update',    [CourseController::class, 'update'])->name('course.update');
         Route::delete('/{slug}/delete',  [CourseController::class, 'destroy'])->name('course.delete');
     });
 
     // All roles can view course
     Route::prefix('course')->middleware(['role:admin|tentor|siswa'])->group(function () {
-        Route::get('/',            [CourseController::class, 'index'])->name('course.index');
+        Route::get('/',            Livewire\Courses\Index::class)->name('course.index');
         Route::get('/{slug}',      [CourseController::class, 'show'])->name('course.show');
     });
 
@@ -388,7 +393,7 @@ Route::middleware(['auth', 'verified'])->group(function () {
         ->middleware(['role:admin|tentor'])
         ->name('monitor.student');
     Route::middleware(['role:admin'])->group(function () {
-        Route::get('/monitoring/link-orang-tua', [StudentMonitorController::class, 'links'])->name('monitor.links');
+        Route::get('/monitoring/link-orang-tua', Livewire\Monitor\ParentLinks::class)->name('monitor.links');
         Route::post('/monitoring/link-orang-tua/{user}/regenerate', [StudentMonitorController::class, 'regenerate'])->name('monitor.regenerate');
     });
 
@@ -430,10 +435,10 @@ Route::middleware(['auth', 'verified'])->group(function () {
     | EXAMS (PUBLIC)
     |--------------------------------------------------------------------------
     */
-    Route::get('/tryouts', [ExamController::class, 'indexTryout'])
+    Route::get('/tryouts', Livewire\Exams\Index::class)
         ->name('tryouts.index');
 
-    Route::get('/quizzes', [ExamController::class, 'indexQuiz'])
+    Route::get('/quizzes', Livewire\Exams\Index::class)
         ->name('quizzes.index');
 
     Route::get('/exams/{exam}', [ExamController::class, 'show'])
@@ -446,7 +451,9 @@ Route::middleware(['auth', 'verified'])->group(function () {
     Route::middleware('role:admin|tentor')->group(function () {
 
         Route::resource('exams', ExamController::class)
-            ->except(['show']);
+            ->except(['show', 'edit', 'index', 'create']);
+        Route::get('exams', fn () => redirect()->route('tryouts.index'))->name('exams.index');
+        Route::get('exams/{exam}/edit', Livewire\Exams\Builder::class)->name('exams.edit');
 
         Route::prefix('exams/{exam}')->group(function () {
 
@@ -548,27 +555,27 @@ Route::middleware(['auth', 'verified'])->group(function () {
 
         // KATEGORI SOAL
         Route::prefix('categories')->name('category.')->group(function () {
-            Route::get('/',[QuestionCategoryController::class, 'index'])->name('index');
-            Route::get('/create',[QuestionCategoryController::class, 'create'])->name('create');
+            Route::get('/', Livewire\Bank\Categories::class)->name('index');
+            Route::get('/create', Livewire\Bank\Categories::class)->name('create');
             Route::post('/store',[QuestionCategoryController::class, 'store'])->name('store');
-            Route::get('/{category}/edit',[QuestionCategoryController::class, 'edit'])->name('edit');
+            Route::get('/{category}/edit', Livewire\Bank\Categories::class)->name('edit');
             Route::put('/{category}',[QuestionCategoryController::class, 'update'])->name('update');
             Route::delete('/{category}',[QuestionCategoryController::class, 'destroy'])->name('delete');
 
-            Route::get('/{category}/materials',[QuestionMaterialController::class, 'index'])->name('materials.index');
-            Route::get('/{category}/materials/create',[QuestionMaterialController::class, 'create'])->name('materials.create');
+            Route::get('/{category}/materials', Livewire\Bank\Materials::class)->name('materials.index');
+            Route::get('/{category}/materials/create', Livewire\Bank\Materials::class)->name('materials.create');
             Route::post('/{category}/materials/store',[QuestionMaterialController::class, 'store'])->name('materials.store');
         });
 
         // MATERI SOAL UNTUK EDIT/UPDATE/DELETE
-        Route::get('/materials/{material}/edit',[QuestionMaterialController::class, 'edit'])->name('material.edit');
+        Route::get('/materials/{material}/edit', Livewire\Bank\Materials::class)->name('material.edit');
         Route::put('/materials/{material}',[QuestionMaterialController::class, 'update'])->name('material.update');
         Route::delete('/materials/{material}',[QuestionMaterialController::class, 'destroy'])->name('material.delete');
 
 
         // SOAL SOAL
         Route::prefix('materials')->name('material.')->group(function () {
-            Route::get('/{material}/questions',[QuestionController::class, 'index'])->name('questions.index');
+            Route::get('/{material}/questions', Livewire\Bank\Questions::class)->name('questions.index');
             Route::get('/{material}/questions/create',[QuestionController::class, 'create'])->name('questions.create');
             Route::post('/{material}/questions/store',[QuestionController::class, 'store'])->name('questions.store');
         });
@@ -585,21 +592,21 @@ Route::middleware(['auth', 'verified'])->group(function () {
     */
     Route::middleware('role:siswa')->group(function () {
         //CART
-        Route::get('/cart', [CartController::class, 'show'])->name('cart.show');
+        Route::get('/cart', Livewire\Shop\Cart::class)->name('cart.show');
         Route::post('/cart/add/{product}', [CartController::class, 'add'])->name('cart.add');
         Route::patch('/cart/item/{cartItem}', [CartController::class, 'updateQty'])->name('cart.update');
         Route::delete('/cart/item/{cartItem}', [CartController::class, 'remove'])->name('cart.remove');
         Route::post('/cart/add-addon', [CartController::class,'addAddonQuiz'])->name('cart.add-addon');
 
         // ETALASE
-        Route::get('/purchase/browse', [BrowseController::class, 'index'])->name('browse.index');
-        Route::get('purchase/browse/course/{course}', [BrowseController::class, 'course'])->name('browse.course');
+        Route::get('/purchase/browse', Livewire\Shop\Browse::class)->name('browse.index');
+        Route::get('purchase/browse/course/{course}', Livewire\Shop\BrowseCourse::class)->name('browse.course');
 
         //CHECKOUT
         Route::prefix('checkout')->name('checkout.')->group(function () {
-            Route::get('/', [CheckoutController::class, 'review'])->name('review');
+            Route::get('/', Livewire\Shop\Checkout::class)->name('review');
             Route::post('/', [CheckoutController::class, 'process'])->name('process');
-            Route::get('/{order}/payment', [CheckoutController::class, 'payment'])->name('payment');
+            Route::get('/{order}/payment', Livewire\Shop\Payment::class)->name('payment');
             Route::post('/{order}/upload-proof', [CheckoutController::class, 'uploadProof'])->name('uploadProof');
             Route::get('/{order}/waiting', [CheckoutController::class, 'waiting'])->name('waiting');
             Route::post('/preview-discount', [CheckoutController::class, 'previewDiscount'])->name('preview-discount');
@@ -607,7 +614,7 @@ Route::middleware(['auth', 'verified'])->group(function () {
 
         //ORDER HISTORY
         Route::prefix('my')->name('my.')->group(function () {
-            Route::get('/orders', [MyOrderController::class, 'index'])->name('orders.index');
+            Route::get('/orders', Livewire\Shop\MyOrders::class)->name('orders.index');
             Route::get('/orders/{order}', [MyOrderController::class, 'show'])->name('orders.show');
         });
     });
@@ -617,20 +624,21 @@ Route::middleware(['auth', 'verified'])->group(function () {
     Route::middleware('role:admin')->group(function () {
         //ADMIN PRODUCT -> CRUD
         Route::prefix('admin')->group(function(){
-            Route::resource('products', ProductController::class)->except(['show']);
+            Route::get('products', Livewire\Admin\Products::class)->name('products.index');
+            Route::resource('products', ProductController::class)->except(['show', 'index']);
             Route::patch('products/{product}/toggle',[ProductController::class, 'toggleStatus'])->name('products.toggle');
             Route::get('products/productables/{type}',[ProductController::class, 'productables'])->name('products.productables');
         });
 
         //ORDER
-        Route::get('/orders', [OrderController::class, 'index'])->name('orders.index');
+        Route::get('/orders', Livewire\Admin\Orders::class)->name('orders.index');
         Route::get('/orders/{order}', [OrderController::class, 'show'])->name('orders.show');
         Route::post('/orders/{order}/approve', [OrderController::class, 'approve'])->name('orders.approve');
         Route::post('/orders/{order}/reject', [OrderController::class, 'reject'])->name('orders.reject');
         Route::delete('/orders/{order}', [OrderController::class, 'destroy'])->name('orders.destroy');
 
         //PRICING
-        Route::get('/pricing', [ProductPricingController::class, 'index'])->name('pricing.index');
+        Route::get('/pricing', Livewire\Admin\Pricing::class)->name('pricing.index');
         Route::get('/pricing/create', [ProductPricingController::class, 'create'])->name('pricing.create');
         Route::post('/pricing', [ProductPricingController::class, 'store'])->name('pricing.store');
         Route::get('/pricing/{pricingRule}/edit', [ProductPricingController::class, 'edit'])->name('pricing.edit');
@@ -645,11 +653,12 @@ Route::middleware(['auth', 'verified'])->group(function () {
         Route::delete('/bonuses/item/{productBonus}', [ProductBonusController::class, 'destroy'])->name('bonuses.destroy');
 
         //DISCOUNT
-        Route::resource('discounts', DiscountController::class);
+        Route::get('/discounts', Livewire\Admin\Discounts::class)->name('discounts.index');
+        Route::resource('discounts', DiscountController::class)->except(['index']);
         Route::patch('/discounts/{discount}/toggle', [DiscountController::class, 'toggle'])->name('discounts.toggle');
 
         //PAYMENT-SETTING
-        Route::get('/payment-settings', [PaymentSettingController::class, 'edit'])->name('payment.settings.edit');
+        Route::get('/payment-settings', Livewire\Admin\PaymentSettings::class)->name('payment.settings.edit');
         Route::post('/payment-settings', [PaymentSettingController::class, 'update'])->name('payment.settings.update');
 
         //REPORT INCOME
@@ -662,8 +671,8 @@ Route::middleware(['auth', 'verified'])->group(function () {
     | USER ENTITLEMENTS ROUTES
     |--------------------------------------------------------------------------
     */
-    Route::prefix('admin')->name('admin.')->group(function () {
-        Route::get('/user-entitlements',[UserEntitlementController::class, 'index'])->name('user-entitlements.index');
+    Route::prefix('admin')->name('admin.')->middleware('role:admin')->group(function () {
+        Route::get('/user-entitlements',Livewire\Admin\Entitlements::class)->name('user-entitlements.index');
     });
 
     /*
@@ -671,7 +680,7 @@ Route::middleware(['auth', 'verified'])->group(function () {
     | NOTIFICATION ROUTES
     |--------------------------------------------------------------------------
     */
-    Route::get('/notifications', [NotificationController::class, 'index'])
+    Route::get('/notifications', Livewire\Notifications\Index::class)
         ->name('notifications.index');
 
     Route::post('/notifications/read-all', [NotificationController::class, 'readAll'])
@@ -702,7 +711,7 @@ Route::middleware(['auth', 'verified'])->group(function () {
     | SCHEDULE ROUTES
     |--------------------------------------------------------------------------
     */
-    Route::get('/schedule', [ScheduleController::class, 'index'])->name('schedule.index');
+    Route::get('/schedule', Livewire\Schedule\Calendar::class)->name('schedule.index');
 
     /*
     |--------------------------------------------------------------------------
@@ -711,7 +720,8 @@ Route::middleware(['auth', 'verified'])->group(function () {
     */
 
     Route::middleware('role:admin')->group(function () {
-        Route::resource('promo-banners', PromoBannerController::class);
+        Route::get('/promo-banners', Livewire\Admin\PromoBanners::class)->name('promo-banners.index');
+        Route::resource('promo-banners', PromoBannerController::class)->except(['index', 'show']);
         Route::put('/promo-banners/{promoBanner}/toggle-status', [PromoBannerController::class, 'toggleStatus'])->name('promo-banners.toggle-status');
     });
 
@@ -722,7 +732,8 @@ Route::middleware(['auth', 'verified'])->group(function () {
         // Manajemen Pendaftaran
         Route::prefix('registrations')->name('registrations.')->group(function () {
             // List pendaftaran
-            Route::get('/', [RegistrationManagementController::class, 'index'])->name('index');
+            Route::get('/', Livewire\Admin\Registrations::class)->name('index');
+            Route::get('/export', [RegistrationManagementController::class, 'export'])->name('export');
 
             // Detail pendaftaran
             Route::get('/{id}', [RegistrationManagementController::class, 'show'])->name('show');
@@ -738,8 +749,6 @@ Route::middleware(['auth', 'verified'])->group(function () {
             // Download bukti pembayaran
             Route::get('/{id}/download-proof', [RegistrationManagementController::class, 'downloadProof'])->name('download-proof');
 
-            // Export data
-            Route::get('/export', [RegistrationManagementController::class, 'export'])->name('export');
 
             // Hapus pendaftaran
             Route::delete('/{id}', [RegistrationManagementController::class, 'destroy'])->name('destroy');
@@ -750,20 +759,3 @@ Route::middleware(['auth', 'verified'])->group(function () {
 // ============================================
 // TAMBAHAN: ROUTES TEST NOTIF (DI LUAR AUTH)
 // ============================================
-Route::get('/test-notif-admin', function () {
-
-    $admin = User::role('admin')->first();
-
-    if (! $admin) {
-        return 'Admin tidak ditemukan';
-    }
-
-    notify_user(
-        $admin,
-        'TEST NOTIFIKASI: Ini notifikasi percobaan ke admin',
-        false,
-        'admin/dashboard'
-    );
-
-    return 'Notif dikirim ke admin: ' . $admin->email;
-});

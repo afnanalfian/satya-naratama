@@ -1,283 +1,177 @@
-{{--
-    Rapor perkembangan siswa (presensi, tryout, evaluasi jasmani, data fisik).
-    Dipakai oleh link publik orang tua & halaman monitoring internal.
-    Variabel: $student, $attendance, $tryouts, $jasmani, $physical
---}}
+{{-- Rapor siswa: presensi, tryout, jasmani, data fisik. Variabel dari StudentReportService::build() --}}
 @php
-    $num = fn ($v, $d = 1) => $v === null ? '–' : rtrim(rtrim(number_format($v, $d, ',', '.'), '0'), ',');
     $reg = $student->studentRegistration;
+    $sum = $attendance['summary'];
     $items = \App\Models\PhysicalEvaluation::ITEMS;
-    $gender = $jasmani['gender'];
-    $card = 'bg-white dark:bg-primary-900/30 rounded-2xl border border-primary-100 dark:border-primary-800/30 shadow-sm';
+    $latestJ = $jasmani['latest']; $prevJ = $jasmani['previous'];
+    $latestP = $physical['latest'];
 @endphp
+<x-chartjs />
 
-{{-- Profil --}}
-<section class="{{ $card }} overflow-hidden">
-    <div class="h-20 bg-gradient-to-r from-primary-600 to-primary-800"></div>
-    <div class="px-5 pb-5 -mt-10 flex flex-col sm:flex-row sm:items-end gap-4">
-        <img src="{{ $student->avatar_url }}" alt="" class="w-20 h-20 rounded-2xl object-cover ring-4 ring-white dark:ring-primary-900 shadow-md bg-white">
-        <div class="flex-1 min-w-0">
-            <h1 class="text-xl md:text-2xl font-bold text-primary-900 dark:text-white truncate">{{ $reg?->full_name ?: $student->name }}</h1>
-            <p class="text-sm text-secondary-500 dark:text-secondary-400">
-                {{ collect([$reg?->class ? 'Kelas ' . $reg->class : null, $reg?->school_origin, $reg?->priority_university_1 ? 'Target: ' . $reg->priority_university_1 : null])->filter()->join(' · ') }}
-            </p>
+{{-- Identitas --}}
+<div class="card-ink p-6 sm:p-8">
+    <div class="absolute inset-0 bg-grid-ink [background-size:30px_30px]"></div>
+    <div class="blob -right-10 -top-10 h-56 w-56 bg-garnet-600/40"></div>
+    <div class="relative flex flex-col gap-5 sm:flex-row sm:items-center">
+        <img src="{{ $student->avatar_url }}" class="h-20 w-20 rounded-3xl object-cover ring-4 ring-white/10" alt="">
+        <div class="flex-1">
+            <p class="text-xs font-bold uppercase tracking-widest text-saffron-400">Rapor Perkembangan Siswa</p>
+            <h2 class="mt-1 font-display text-2xl font-extrabold sm:text-3xl">{{ $student->display_name }}</h2>
+            <p class="mt-1 text-sm text-ink-300">{{ $reg?->school_origin ?? '—' }} {{ $reg?->class ? '· Kelas '.$reg->class : '' }} {{ $reg?->priority_university_1 ? '· Target '.$reg->priority_university_1 : '' }}</p>
         </div>
-        <p class="text-xs text-secondary-400 dark:text-secondary-500">Diperbarui {{ now()->translatedFormat('d F Y, H:i') }} WIB</p>
+        <div class="grid grid-cols-3 gap-2 text-center">
+            <div class="rounded-2xl bg-white/10 px-3 py-2"><p class="font-display text-2xl font-extrabold">{{ $sum['overall']['pct'] !== null ? $sum['overall']['pct'].'%' : '–' }}</p><p class="text-[10px] font-bold uppercase text-ink-300">Hadir</p></div>
+            <div class="rounded-2xl bg-white/10 px-3 py-2"><p class="font-display text-2xl font-extrabold">{{ $tryouts['rows']->count() }}</p><p class="text-[10px] font-bold uppercase text-ink-300">Tryout</p></div>
+            <div class="rounded-2xl bg-white/10 px-3 py-2"><p class="font-display text-2xl font-extrabold">{{ $jasmani['results']->count() }}</p><p class="text-[10px] font-bold uppercase text-ink-300">Eval. fisik</p></div>
+        </div>
     </div>
-    <nav class="px-5 pb-4 flex flex-wrap gap-2 text-sm">
-        @foreach(['presensi' => 'Presensi', 'tryout' => 'Tryout', 'jasmani' => 'Evaluasi Jasmani', 'fisik' => 'Data Fisik'] as $id => $label)
-            <a href="#{{ $id }}" class="px-3 py-1.5 rounded-lg bg-primary-50 dark:bg-primary-800/30 text-primary-700 dark:text-primary-200 hover:bg-primary-100 dark:hover:bg-primary-800/60">{{ $label }}</a>
+</div>
+
+{{-- Presensi --}}
+<section class="mt-6 grid gap-6 lg:grid-cols-3">
+    <div class="card card-pad">
+        <p class="section-title">Kehadiran</p>
+        @foreach(['akademik' => ['Kelas Akademik', 'garnet'], 'jasmani' => ['Latihan Jasmani', 'gold']] as $t => [$lbl, $tone])
+            @php $b = $sum[$t]; @endphp
+            <div class="mt-4">
+                <div class="flex items-end justify-between"><span class="text-sm font-bold">{{ $lbl }}</span><span class="font-display text-xl font-extrabold">{{ $b['pct'] !== null ? $b['pct'].'%' : '–' }}</span></div>
+                <div class="mt-2 h-2.5 overflow-hidden rounded-full bg-ink-50"><div class="h-full rounded-full {{ $tone === 'garnet' ? 'bg-garnet-500' : 'bg-saffron-400' }}" style="width: {{ $b['pct'] ?? 0 }}%"></div></div>
+                <p class="mt-1.5 text-xs text-ink-400">{{ $b['hadir'] }} hadir · {{ $b['izin'] }} izin · {{ $b['sakit'] }} sakit · {{ $b['alpa'] }} alpa dari {{ $b['done'] }} pertemuan</p>
+            </div>
         @endforeach
-    </nav>
-</section>
-
-{{-- ================= PRESENSI ================= --}}
-<section id="presensi" class="scroll-mt-6 space-y-4">
-    <h2 class="text-lg font-bold text-primary-900 dark:text-white">Presensi</h2>
-    @include('attendance.partials.summary-tiles', ['summary' => $attendance['summary']])
-
-    <div class="grid grid-cols-1 lg:grid-cols-5 gap-4">
-        <div class="lg:col-span-3 {{ $card }} p-5">
-            <h3 class="font-semibold text-primary-800 dark:text-primary-100">Kehadiran per Pekan</h3>
-            <p class="text-xs text-secondary-500 dark:text-secondary-400 mb-3">% hadir dari pertemuan yang selesai pada pekan tsb</p>
-            @if(count($attendance['weekly']['labels']))
-                <div class="h-60"><canvas id="rep-weekly" role="img" aria-label="Grafik kehadiran per pekan"></canvas></div>
-            @else
-                <p class="py-10 text-center text-sm text-secondary-500 dark:text-secondary-400">Belum ada pertemuan yang selesai.</p>
-            @endif
-        </div>
-        <div class="lg:col-span-2 {{ $card }} p-5">
-            <h3 class="font-semibold text-primary-800 dark:text-primary-100">Pertemuan Terakhir</h3>
-            <div class="max-h-72 overflow-y-auto pr-1">
-                @include('attendance.partials.history-list', ['history' => $attendance['history']])
-            </div>
-        </div>
+    </div>
+    <div class="card card-pad lg:col-span-2">
+        <p class="section-title">Tren kehadiran mingguan</p>
+        @if(count($attendance['weekly']['labels']))
+            <div class="mt-4 h-56" x-data="chart({ type: 'line', data: { labels: @js($attendance['weekly']['labels']), datasets: [
+                { label: 'Akademik', data: @js($attendance['weekly']['akademik']), borderColor: '#d81b4d', backgroundColor: 'rgba(216,27,77,.12)', fill: true, tension: .35, spanGaps: true },
+                { label: 'Jasmani', data: @js($attendance['weekly']['jasmani']), borderColor: '#f99c07', backgroundColor: 'rgba(249,156,7,.12)', fill: true, tension: .35, spanGaps: true } ] },
+                options: { maintainAspectRatio: false, scales: { y: { min: 0, max: 100, ticks: { callback: v => v + '%' } } } } })"><canvas x-ref="canvas"></canvas></div>
+        @else
+            <p class="mt-6 text-sm text-ink-400">Belum ada pertemuan selesai.</p>
+        @endif
     </div>
 </section>
 
-{{-- ================= TRYOUT ================= --}}
-<section id="tryout" class="scroll-mt-6 space-y-4">
-    <h2 class="text-lg font-bold text-primary-900 dark:text-white">Tryout Akademik</h2>
+@if($attendance['history']->count())
+<div class="card mt-6 card-pad">
+    <p class="section-title">Riwayat pertemuan terakhir</p>
+    <div class="mt-4 grid gap-2 sm:grid-cols-2 lg:grid-cols-3">
+        @foreach($attendance['history'] as $h)
+            <div class="flex items-center gap-3 rounded-2xl bg-cream p-3">
+                <span class="grid h-10 w-10 shrink-0 place-items-center rounded-xl {{ $h->meeting->course?->type === 'jasmani' ? 'bg-saffron-100 text-saffron-700' : 'bg-ink-100 text-ink-700' }}"><x-icon :name="$h->meeting->course?->type === 'jasmani' ? 'run' : 'book'" class="h-5 w-5"/></span>
+                <div class="min-w-0 flex-1"><p class="truncate text-sm font-bold">{{ $h->meeting->title }}</p><p class="text-xs text-ink-400">{{ $h->meeting->scheduled_at->translatedFormat('d M Y') }}{{ $h->time ? ' · '.$h->time->format('H:i') : '' }}{{ $h->late ? ' · terlambat' : '' }}</p></div>
+                <x-status-badge :status="$h->status"/>
+            </div>
+        @endforeach
+    </div>
+</div>
+@endif
+
+{{-- Tryout --}}
+<section class="mt-6 card card-pad">
+    <div class="flex flex-wrap items-center justify-between gap-2">
+        <p class="section-title">Hasil tryout</p>
+        @if($tryouts['rows']->count())<span class="badge-lagoon">{{ $tryouts['passed'] }} lulus dari {{ $tryouts['rows']->count() }}</span>@endif
+    </div>
     @if($tryouts['rows']->isEmpty())
-        <div class="{{ $card }} p-8 text-center text-sm text-secondary-500 dark:text-secondary-400">Belum ada tryout yang dikerjakan.</div>
+        <p class="mt-4 text-sm text-ink-400">Belum mengikuti tryout.</p>
     @else
-        @php $last = $tryouts['last']; @endphp
-        <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
-            <div class="{{ $card }} p-4">
-                <p class="text-xs text-secondary-500 dark:text-secondary-400">Tryout diikuti</p>
-                <p class="text-2xl font-bold tabular-nums text-primary-900 dark:text-white">{{ $tryouts['rows']->count() }}</p>
-            </div>
-            <div class="{{ $card }} p-4">
-                <p class="text-xs text-secondary-500 dark:text-secondary-400">Nilai terakhir</p>
-                <p class="text-2xl font-bold tabular-nums text-primary-900 dark:text-white">{{ $num($last->score) }}</p>
-                <p class="text-[11px] text-secondary-500 dark:text-secondary-400 truncate">{{ $last->title }}</p>
-            </div>
-            <div class="{{ $card }} p-4">
-                <p class="text-xs text-secondary-500 dark:text-secondary-400">Peringkat terakhir</p>
-                <p class="text-2xl font-bold tabular-nums text-primary-900 dark:text-white">{{ $last->rank }}<span class="text-sm text-secondary-400">/{{ $last->participants }}</span></p>
-            </div>
-            <div class="{{ $card }} p-4">
-                <p class="text-xs text-secondary-500 dark:text-secondary-400">Memenuhi passing grade</p>
-                <p class="text-2xl font-bold tabular-nums text-primary-900 dark:text-white">{{ $tryouts['passed'] }}<span class="text-sm text-secondary-400">/{{ $tryouts['rows']->count() }}</span></p>
-            </div>
-        </div>
-
-        <div class="grid grid-cols-1 {{ count($tryouts['series']) > 1 ? 'lg:grid-cols-2' : '' }} gap-4">
-            @foreach($tryouts['series'] as $i => $s)
-                <div class="{{ $card }} p-5">
-                    <div class="flex items-start justify-between gap-2 mb-3">
-                        <div>
-                            <h3 class="font-semibold text-primary-800 dark:text-primary-100">Perkembangan Nilai {{ $s['label'] }}</h3>
-                            <p class="text-xs text-secondary-500 dark:text-secondary-400">Garis putus-putus = rata-rata seluruh peserta</p>
-                        </div>
-                    </div>
-                    <div class="h-60"><canvas id="rep-tryout-{{ $i }}" role="img" aria-label="Grafik nilai tryout {{ $s['label'] }}"></canvas></div>
+        <div class="mt-4 grid gap-4 md:grid-cols-2">
+            @foreach($tryouts['series'] as $s)
+                <div class="rounded-2xl bg-cream p-4">
+                    <p class="text-xs font-bold uppercase tracking-wider text-ink-500">{{ $s['label'] }}</p>
+                    <div class="mt-2 h-48" x-data="chart({ type: 'bar', data: { labels: @js($s['labels']), datasets: [
+                        { label: 'Nilai', data: @js($s['scores']), backgroundColor: '#d81b4d', borderRadius: 8 },
+                        { label: 'Rata-rata peserta', data: @js($s['avgs']), type: 'line', borderColor: '#f99c07', backgroundColor: '#f99c07', tension: .3 } ] },
+                        options: { maintainAspectRatio: false } })"><canvas x-ref="canvas"></canvas></div>
                 </div>
             @endforeach
         </div>
-
-        <div class="{{ $card }} overflow-hidden">
-            <div class="overflow-x-auto">
-                <table class="w-full text-sm">
-                    <thead class="bg-primary-50/60 dark:bg-primary-800/20 text-xs uppercase tracking-wide text-secondary-500 dark:text-secondary-400">
-                        <tr>
-                            <th class="px-4 py-3 text-left">Tryout</th>
-                            <th class="px-3 py-3 text-right">Nilai</th>
-                            <th class="px-3 py-3 text-right">Rata-rata</th>
-                            <th class="px-3 py-3 text-center">Peringkat</th>
-                            <th class="px-3 py-3 text-left">Status</th>
-                        </tr>
-                    </thead>
-                    <tbody class="divide-y divide-primary-100 dark:divide-primary-800/30">
-                        @foreach($tryouts['rows'] as $r)
-                            <tr>
-                                <td class="px-4 py-3">
-                                    <p class="font-medium text-primary-800 dark:text-primary-100">{{ $r->title }}</p>
-                                    <p class="text-xs text-secondary-500 dark:text-secondary-400">{{ $r->type_label }} · {{ $r->date?->translatedFormat('d M Y') }}</p>
-                                </td>
-                                <td class="px-3 py-3 text-right font-semibold tabular-nums text-primary-900 dark:text-white">{{ $num($r->score, 2) }}</td>
-                                <td class="px-3 py-3 text-right tabular-nums text-secondary-600 dark:text-secondary-300">{{ $num($r->avg) }}</td>
-                                <td class="px-3 py-3 text-center tabular-nums text-primary-800 dark:text-primary-100">{{ $r->rank }}/{{ $r->participants }}</td>
-                                <td class="px-3 py-3">
-                                    @if($r->is_passed === null)
-                                        <span class="text-xs text-secondary-400">–</span>
-                                    @elseif($r->is_passed)
-                                        <span class="text-xs font-semibold px-2 py-0.5 rounded-full bg-emerald-100 text-emerald-700 dark:bg-emerald-900/30 dark:text-emerald-300">✓ Lulus PG</span>
-                                    @else
-                                        <span class="text-xs font-semibold px-2 py-0.5 rounded-full bg-red-100 text-red-700 dark:bg-red-900/30 dark:text-red-300">✕ Belum lulus</span>
-                                    @endif
-                                </td>
-                            </tr>
-                        @endforeach
-                    </tbody>
-                </table>
-            </div>
+        <div class="table-wrap mt-4 !shadow-none">
+            <table class="table">
+                <thead><tr><th>Tryout</th><th>Jenis</th><th>Tanggal</th><th class="text-right">Nilai</th><th class="text-center">Peringkat</th><th>Status</th></tr></thead>
+                <tbody>
+                @foreach($tryouts['rows'] as $r)
+                    <tr>
+                        <td class="font-bold">{{ $r->title }}</td>
+                        <td><span class="badge-ink">{{ $r->type_label }}</span></td>
+                        <td class="whitespace-nowrap text-ink-500">{{ $r->date ? \Carbon\Carbon::parse($r->date)->translatedFormat('d M Y') : '–' }}</td>
+                        <td class="text-right font-display text-lg font-extrabold">{{ rtrim(rtrim(number_format($r->score, 2, ',', '.'), '0'), ',') }}</td>
+                        <td class="text-center text-ink-600">{{ $r->rank }}/{{ $r->participants }}</td>
+                        <td>@if($r->is_passed === null)<span class="text-ink-300">–</span>@elseif($r->is_passed)<span class="badge-lagoon">Lulus</span>@else<span class="badge-garnet">Belum lulus</span>@endif</td>
+                    </tr>
+                @endforeach
+                </tbody>
+            </table>
         </div>
     @endif
 </section>
 
-{{-- ================= EVALUASI JASMANI ================= --}}
-<section id="jasmani" class="scroll-mt-6 space-y-4">
-    <h2 class="text-lg font-bold text-primary-900 dark:text-white">Evaluasi Jasmani</h2>
-    @if(! $jasmani['latest'])
-        <div class="{{ $card }} p-8 text-center text-sm text-secondary-500 dark:text-secondary-400">Belum ada hasil evaluasi jasmani.</div>
+{{-- Jasmani --}}
+<section class="mt-6 card card-pad">
+    <p class="section-title">Evaluasi jasmani</p>
+    @if(! $latestJ)
+        <p class="mt-4 text-sm text-ink-400">Belum ada hasil evaluasi jasmani.</p>
     @else
-        @php $lt = $jasmani['latest']; $pv = $jasmani['previous']; @endphp
-        <p class="text-sm text-secondary-500 dark:text-secondary-400 -mt-2">
-            Hasil terakhir: <strong class="text-primary-800 dark:text-primary-100">{{ $lt->evaluation->period_label }}</strong>
-            @if($pv) · dibandingkan {{ $pv->evaluation->period_label }} @endif
-        </p>
-        <div class="grid grid-cols-2 md:grid-cols-3 xl:grid-cols-5 gap-4">
-            @foreach($items as $key => $item)
+        <p class="text-xs text-ink-400">Terakhir: {{ $latestJ->evaluation->title }} ({{ $latestJ->evaluation->period->translatedFormat('F Y') }})</p>
+        <div class="mt-4 grid grid-cols-2 gap-3 sm:grid-cols-5">
+            @foreach($items as $key => $it)
                 @php
-                    $v = $lt->{$key}; $p = $pv?->{$key};
-                    $delta = ($v !== null && $p !== null) ? $v - $p : null;
-                    $improved = $delta ? ($item['better'] === 'low' ? $delta < 0 : $delta > 0) : null;
+                    $v = $latestJ->{$key}; $pv = $prevJ?->{$key};
+                    $delta = ($v !== null && $pv !== null) ? $v - $pv : null;
+                    $good = $delta !== null && (($it['better'] === 'high' && $delta > 0) || ($it['better'] === 'low' && $delta < 0));
                 @endphp
-                <div class="{{ $card }} p-4">
-                    <p class="text-xs font-medium text-secondary-500 dark:text-secondary-400">{{ \App\Models\PhysicalEvaluation::itemLabel($key, $gender) }}</p>
-                    <p class="mt-1 text-2xl font-bold tabular-nums text-primary-900 dark:text-white">{{ $num($v, 2) }} <span class="text-sm font-medium text-secondary-500">{{ $item['unit'] }}</span></p>
-                    @if($improved !== null)
-                        <p class="text-xs font-semibold {{ $improved ? 'text-emerald-600 dark:text-emerald-400' : 'text-red-600 dark:text-red-400' }}">
-                            {{ $delta > 0 ? '▲' : '▼' }} {{ $num(abs($delta), 2) }} {{ $improved ? 'membaik' : 'menurun' }}
-                        </p>
-                    @elseif($delta === 0.0 || $delta === 0)
-                        <p class="text-xs text-secondary-500">tetap</p>
+                <div class="rounded-2xl bg-cream p-4">
+                    <p class="text-[11px] font-bold uppercase tracking-wider text-ink-400">{{ \App\Models\PhysicalEvaluation::itemLabel($key, $jasmani['gender']) }}</p>
+                    <p class="mt-1 font-display text-2xl font-extrabold">{{ $v !== null ? rtrim(rtrim(number_format($v, 2, ',', '.'), '0'), ',') : '–' }} <span class="text-xs font-bold text-ink-400">{{ $it['unit'] }}</span></p>
+                    @if($delta !== null && $delta != 0)
+                        <p class="mt-1 text-xs font-bold {{ $good ? 'text-lagoon-600' : 'text-garnet-600' }}">{{ $delta > 0 ? '▲' : '▼' }} {{ rtrim(rtrim(number_format(abs($delta), 2, ',', '.'), '0'), ',') }} dari sebelumnya</p>
                     @endif
-                    <div class="h-20 mt-2"><canvas id="rep-jas-{{ $key }}" role="img" aria-label="Tren {{ $item['label'] }}"></canvas></div>
                 </div>
             @endforeach
         </div>
-        <details class="{{ $card }} overflow-hidden">
-            <summary class="px-5 py-3 cursor-pointer text-sm font-medium text-primary-700 dark:text-primary-200">Lihat semua hasil evaluasi</summary>
-            <div class="overflow-x-auto border-t border-primary-100 dark:border-primary-800/30">
-                <table class="w-full text-sm">
-                    <thead class="bg-primary-50/60 dark:bg-primary-800/20 text-xs uppercase text-secondary-500 dark:text-secondary-400">
-                        <tr>
-                            <th class="px-4 py-2.5 text-left">Bulan</th>
-                            @foreach($items as $key => $item)<th class="px-3 py-2.5 text-right">{{ \App\Models\PhysicalEvaluation::itemLabel($key, $gender) }}</th>@endforeach
-                        </tr>
-                    </thead>
-                    <tbody class="divide-y divide-primary-100 dark:divide-primary-800/30">
-                        @foreach($jasmani['results'] as $r)
-                            <tr>
-                                <td class="px-4 py-2.5 font-medium text-primary-800 dark:text-primary-100">{{ $r->evaluation->period_label }}</td>
-                                @foreach($items as $key => $item)<td class="px-3 py-2.5 text-right tabular-nums text-primary-800 dark:text-primary-100">{{ $num($r->{$key}, 2) }}</td>@endforeach
-                            </tr>
-                        @endforeach
-                    </tbody>
-                </table>
-            </div>
-        </details>
+        @if(count($jasmani['series']['labels']) > 1)
+            <div class="mt-5 h-60" x-data="chart({ type: 'line', data: { labels: @js($jasmani['series']['labels']), datasets: [
+                { label: 'Push up', data: @js($jasmani['series']['push_up']), borderColor: '#d81b4d', tension: .3 },
+                { label: 'Sit up', data: @js($jasmani['series']['sit_up']), borderColor: '#f99c07', tension: .3 },
+                { label: 'Pull up/Chinning', data: @js($jasmani['series']['pull_up_chinning']), borderColor: '#0fb59e', tension: .3 } ] },
+                options: { maintainAspectRatio: false } })"><canvas x-ref="canvas"></canvas></div>
+        @endif
     @endif
 </section>
 
-{{-- ================= DATA FISIK ================= --}}
-<section id="fisik" class="scroll-mt-6 space-y-4">
-    <h2 class="text-lg font-bold text-primary-900 dark:text-white">Data Fisik & Kesehatan</h2>
-    @if(! $physical['latest'])
-        <div class="{{ $card }} p-8 text-center text-sm text-secondary-500 dark:text-secondary-400">Belum ada data fisik bulanan.</div>
-    @else
-        @php $lp = $physical['latest']; $fp = $physical['first']; @endphp
-        <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
-            <div class="{{ $card }} p-4">
-                <p class="text-xs text-secondary-500 dark:text-secondary-400">Tinggi · {{ $lp->period_label }}</p>
-                <p class="text-2xl font-bold tabular-nums text-primary-900 dark:text-white">{{ $num($lp->height_cm) }} <span class="text-sm">cm</span></p>
-                @if($fp && $fp->id !== $lp->id)<p class="text-[11px] text-secondary-500">{{ $lp->height_cm - $fp->height_cm >= 0 ? '+' : '' }}{{ $num($lp->height_cm - $fp->height_cm) }} cm sejak {{ $fp->period_label }}</p>@endif
+{{-- Data fisik --}}
+<section class="mt-6 grid gap-6 lg:grid-cols-3">
+    <div class="card card-pad">
+        <p class="section-title">Data fisik terbaru</p>
+        @if($latestP)
+            <p class="text-xs text-ink-400">{{ $latestP->period->translatedFormat('F Y') }}</p>
+            <div class="mt-4 grid grid-cols-2 gap-3">
+                <div class="rounded-2xl bg-cream p-4"><p class="text-xs font-bold text-ink-400">Tinggi</p><p class="font-display text-2xl font-extrabold">{{ rtrim(rtrim(number_format($latestP->height_cm, 1, ',', '.'), '0'), ',') }} <span class="text-xs">cm</span></p></div>
+                <div class="rounded-2xl bg-cream p-4"><p class="text-xs font-bold text-ink-400">Berat</p><p class="font-display text-2xl font-extrabold">{{ rtrim(rtrim(number_format($latestP->weight_kg, 1, ',', '.'), '0'), ',') }} <span class="text-xs">kg</span></p></div>
             </div>
-            <div class="{{ $card }} p-4">
-                <p class="text-xs text-secondary-500 dark:text-secondary-400">Berat · {{ $lp->period_label }}</p>
-                <p class="text-2xl font-bold tabular-nums text-primary-900 dark:text-white">{{ $num($lp->weight_kg) }} <span class="text-sm">kg</span></p>
-                @if($fp && $fp->id !== $lp->id)<p class="text-[11px] text-secondary-500">{{ $lp->weight_kg - $fp->weight_kg >= 0 ? '+' : '' }}{{ $num($lp->weight_kg - $fp->weight_kg) }} kg sejak {{ $fp->period_label }}</p>@endif
+            <div class="mt-3 flex items-center justify-between rounded-2xl bg-cream p-4"><span class="text-sm font-bold">IMT {{ $latestP->bmi }}</span><x-bmi-badge :cat="$latestP->bmi_category"/></div>
+        @else
+            <p class="mt-4 text-sm text-ink-400">Belum ada data fisik.</p>
+        @endif
+    </div>
+    <div class="card card-pad lg:col-span-2">
+        <p class="section-title">Perkembangan tinggi & berat</p>
+        @if(count($physical['chart']['labels']) > 0)
+            <div class="mt-4 h-56" x-data="chart({ type: 'line', data: { labels: @js($physical['chart']['labels']), datasets: [
+                { label: 'Tinggi (cm)', data: @js($physical['chart']['height']), borderColor: '#5d4384', yAxisID: 'y', tension: .3 },
+                { label: 'Berat (kg)', data: @js($physical['chart']['weight']), borderColor: '#0fb59e', yAxisID: 'y1', tension: .3 } ] },
+                options: { maintainAspectRatio: false, scales: { y: { position: 'left' }, y1: { position: 'right', grid: { drawOnChartArea: false } } } } })"><canvas x-ref="canvas"></canvas></div>
+        @else
+            <p class="mt-6 text-sm text-ink-400">Grafik muncul setelah data bulanan diisi.</p>
+        @endif
+        @if($physical['health']->count())
+            <div class="mt-4 space-y-2">
+                @foreach($physical['health']->take(3) as $h)
+                    <div class="rounded-2xl bg-garnet-50 p-3 text-sm text-garnet-900"><b>{{ $h->period->translatedFormat('F Y') }}:</b> {{ collect([$h->has_illness ? 'Sakit: '.$h->illness_notes : null, $h->has_injury ? 'Cedera: '.$h->injury_notes : null])->filter()->implode(' · ') }}</div>
+                @endforeach
             </div>
-            <div class="{{ $card }} p-4">
-                <p class="text-xs text-secondary-500 dark:text-secondary-400">Indeks Massa Tubuh</p>
-                <p class="text-2xl font-bold tabular-nums text-primary-900 dark:text-white">{{ $num($lp->bmi) }}</p>
-                <p class="text-[11px] text-secondary-500">{{ $lp->bmi_category['label'] ?? '' }}</p>
-            </div>
-            <div class="{{ $card }} p-4">
-                <p class="text-xs text-secondary-500 dark:text-secondary-400">Kondisi {{ $lp->period_label }}</p>
-                <p class="text-lg font-bold {{ $lp->hasHealthIssue() ? 'text-red-600 dark:text-red-400' : 'text-emerald-600 dark:text-emerald-400' }}">
-                    {{ $lp->hasHealthIssue() ? collect([$lp->has_illness ? 'Sakit' : null, $lp->has_injury ? 'Cedera' : null])->filter()->join(' & ') : 'Sehat' }}
-                </p>
-            </div>
-        </div>
-
-        <div class="{{ $card }} p-5">
-            @include('physical.partials.charts', ['chart' => $physical['chart'], 'prefix' => 'rep-fis'])
-        </div>
-
-        <div class="{{ $card }} p-5">
-            <h3 class="font-semibold text-primary-800 dark:text-primary-100 mb-2">Riwayat Penyakit & Cedera</h3>
-            @forelse($physical['health'] as $h)
-                <div class="flex gap-3 py-2.5 border-t first:border-t-0 border-primary-100 dark:border-primary-800/30">
-                    <p class="w-24 shrink-0 text-sm font-medium text-primary-800 dark:text-primary-100">{{ $h->period_label }}</p>
-                    <div class="text-sm space-y-0.5">
-                        @if($h->has_illness)<p class="text-red-700 dark:text-red-300"><strong>Sakit:</strong> {{ $h->illness_notes }}</p>@endif
-                        @if($h->has_injury)<p class="text-red-700 dark:text-red-300"><strong>Cedera:</strong> {{ $h->injury_notes }}</p>@endif
-                    </div>
-                </div>
-            @empty
-                <p class="text-sm text-emerald-600 dark:text-emerald-400">Tidak ada catatan penyakit maupun cedera.</p>
-            @endforelse
-        </div>
-    @endif
+        @endif
+    </div>
 </section>
-
-@push('scripts')
-@include('partials.charts')
-<script>
-document.addEventListener('DOMContentLoaded', () => {
-    const w = @json($attendance['weekly']);
-    SNChart.render('rep-weekly', {
-        type: 'line', labels: w.labels, tooltipTitles: w.ranges, ySuffix: '%', yMin: 0, yMax: 100,
-        datasets: [
-            { label: 'Akademik', data: w.akademik, color: 'akademik' },
-            { label: 'Jasmani', data: w.jasmani, color: 'jasmani' },
-        ],
-    });
-
-    (@json($tryouts['series'])).forEach((s, i) => {
-        SNChart.render('rep-tryout-' + i, {
-            type: 'line', labels: s.labels, tooltipTitles: s.titles,
-            datasets: [
-                { label: 'Nilai', data: s.scores, color: 'primary' },
-                { label: 'Rata-rata peserta', data: s.avgs, color: 'muted', dashed: true },
-            ],
-        });
-    });
-
-    const js = @json($jasmani['series']);
-    const items = @json($items);
-    Object.keys(items).forEach((k) => {
-        const el = document.getElementById('rep-jas-' + k);
-        if (!el) return;
-        SNChart.render(el, {
-            type: 'line', labels: js.labels, legend: false, sparkline: true,
-            ySuffix: ' ' + (items[k].unit === 'detik' ? 's' : items[k].unit),
-            datasets: [{ label: items[k].label, data: js[k], color: 'jasmani' }],
-        });
-    });
-});
-</script>
-@endpush

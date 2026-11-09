@@ -18,4 +18,9 @@ class LandingController extends Controller
 
         return view('front.landing', $data);
     }
+
+    public function tutorial()
+    {
+        return view('front.tutorial');
+    }
 }

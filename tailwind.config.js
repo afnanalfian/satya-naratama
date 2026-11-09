@@ -1,144 +1,118 @@
+import defaultTheme from 'tailwindcss/defaultTheme';
+import forms from '@tailwindcss/forms';
+
+/**
+ * Satya Naratama — "Garnet & Saffron"
+ * Diambil dari logo elang (merah marun + emas), dibuat lebih hidup:
+ *  ink     : ungu-gelap pekat untuk sidebar, hero, teks utama
+ *  garnet  : merah-raspberry sebagai warna aksi utama
+ *  saffron : emas-kunyit untuk sorotan, badge, ilustrasi
+ *  lagoon  : toska segar untuk status sukses/informasi
+ *  cream   : latar hangat (bukan putih polos)
+ */
 /** @type {import('tailwindcss').Config} */
 export default {
-    darkMode: "class",
-
     content: [
-        "./resources/**/*.blade.php",
-        "./resources/**/*.js",
-        "./resources/**/*.vue",
-        "./resources/**/*.tsx",
-        "./resources/**/*.ts",
-        "./resources/**/*.php",
+        './resources/views/**/*.blade.php',
+        './resources/js/**/*.js',
+        './app/Livewire/**/*.php',
+        './app/View/**/*.php',
+        './app/Support/**/*.php',
+        './app/Models/**/*.php',
     ],
-
+    safelist: [
+        { pattern: /^(bg|text|ring|border)-(lagoon|saffron|garnet|ink|sky|rose|amber|emerald|slate|violet)-(50|100|200|300|400|500|600|700|800)$/ },
+    ],
     theme: {
         extend: {
-            spacing: {
-                '4.5': '1.125rem',
-            },
             fontFamily: {
-                sans: ["Inter", "ui-sans-serif", "system-ui"],
+                sans: ['"Plus Jakarta Sans"', ...defaultTheme.fontFamily.sans],
+                display: ['"Bricolage Grotesque"', '"Plus Jakarta Sans"', ...defaultTheme.fontFamily.sans],
+                mono: ['"JetBrains Mono"', ...defaultTheme.fontFamily.mono],
             },
-        // colors: {
-            // azwara: {
-            //     darkest:  "#0B1F33", // Navy sangat gelap (sidebar / header)
-            //     darker:   "#102F4A", // Navy tua (secondary background)
-            //     medium:   "#1E4E6D", // Navy medium (PRIMARY UI color)
-            //     light:    "#3A6F8F", // Biru lembut untuk hover / active
-            //     lighter:  "#BFD3E0", // Biru abu pastel (border / subtle bg)
-            //     lightest: "#F2EFE7", // Krem lembut (TETAP)
-            // },
-
-            // primary:   "#1E4E6D",   // Navy medium
-            // secondary: "#102F4A",   // Navy tua (BUKAN gold)
-        //     primary: "#1E4E6D",      // Navy Blue
-        //     secondary: "#0B2B3C",    // Dark Navy
-        //     accent: "#2A7F9F",       // Soft Blue
-        //     gold: "#C9A84C",         // Gold Muted
-        //     'azwara': {
-        //         lightest: "#F0F4F8",
-        //         lighter: "#E2E8F0",
-        //         light: "#CBD5E1",
-        //         medium: "#1E4E6D",
-        //         dark: "#0B2B3C",
-        //         darkest: "#0A1A2B",
-        //     }
-        // },
-        // backgroundImage: {
-        //     "brand-gradient":
-        //         "linear-gradient(135deg, #0B1F33 0%, #102F4A 60%, #1E4E6D 100%)",
-        // },
-        // backgroundImage: {
-        //     'brand-gradient': 'linear-gradient(135deg, #1E4E6D 0%, #0B2B3C 100%)',
-        //     'hero-gradient': 'linear-gradient(135deg, #0A1A2B 0%, #1E4E6D 50%, #0A1A2B 100%)',
-        // },
-        colors: {
-            // Primary - Deep Forest Green
-            primary: {
-                50:  "#ECF3EC",
-                100: "#D9E7D9",
-                200: "#B3CFB3",
-                300: "#8DB78D",
-                400: "#679F67",
-                500: "#418741",    // Sage Green
-                600: "#346C34",
-                700: "#275127",
-                800: "#1A361A",
-                900: "#0D1B0D",
-                950: "#0A1A0A",
-                DEFAULT: "#418741",
+            colors: {
+                ink: {
+                    50: '#f6f3fa',
+                    100: '#ece6f4',
+                    200: '#d8cce8',
+                    300: '#b9a6d4',
+                    400: '#9479b9',
+                    500: '#75589f',
+                    600: '#5d4384',
+                    700: '#4b356b',
+                    800: '#352650',
+                    900: '#22173a',
+                    950: '#150d26',
+                },
+                garnet: {
+                    50: '#fff1f3',
+                    100: '#ffe1e6',
+                    200: '#ffc7d1',
+                    300: '#ff9caf',
+                    400: '#fb6484',
+                    500: '#f13562',
+                    600: '#d81b4d',
+                    700: '#b5123f',
+                    800: '#96133b',
+                    900: '#7f1438',
+                    950: '#47051a',
+                },
+                saffron: {
+                    50: '#fffbeb',
+                    100: '#fff3c6',
+                    200: '#ffe588',
+                    300: '#ffd24a',
+                    400: '#ffbe20',
+                    500: '#f99c07',
+                    600: '#dd7402',
+                    700: '#b75006',
+                    800: '#943d0c',
+                    900: '#7a330d',
+                },
+                lagoon: {
+                    50: '#ecfdf9',
+                    100: '#d1faef',
+                    200: '#a7f3e1',
+                    300: '#6ee7cf',
+                    400: '#33d1b6',
+                    500: '#0fb59e',
+                    600: '#079282',
+                    700: '#0a756a',
+                    800: '#0d5d56',
+                    900: '#0f4d48',
+                },
+                cream: '#fff9f1',
             },
-
-            // Secondary - Warm Stone
-            secondary: {
-                50:  "#F5F2EE",
-                100: "#EBE5DD",
-                200: "#D7CBBC",
-                300: "#C3B19B",
-                400: "#AF977A",
-                500: "#9B7D59",    // Taupe
-                600: "#7C6447",
-                700: "#5D4B35",
-                800: "#3E3223",
-                900: "#1F1911",
-                DEFAULT: "#9B7D59",
+            boxShadow: {
+                soft: '0 1px 2px rgba(34,23,58,.05), 0 10px 30px -14px rgba(34,23,58,.22)',
+                lift: '0 2px 6px rgba(34,23,58,.06), 0 22px 46px -20px rgba(34,23,58,.42)',
+                glow: '0 10px 30px -10px rgba(216,27,77,.55)',
+                'glow-gold': '0 10px 30px -10px rgba(249,156,7,.6)',
+                pop: '4px 4px 0 0 #22173a',
             },
-
-            // Accent - Terracotta
-            accent: {
-                50:  "#F6EDE8",
-                100: "#EDDBD1",
-                200: "#DBB7A3",
-                300: "#C99375",
-                400: "#B76F47",
-                500: "#A54B19",    // Rust Orange
-                600: "#843C14",
-                700: "#632D0F",
-                800: "#421E0A",
-                900: "#210F05",
-                DEFAULT: "#A54B19",
+            borderRadius: {
+                '4xl': '2rem',
             },
-
-            // Neutral - Cool Gray
-            neutral: {
-                50:  "#F8F9FA",
-                100: "#F1F2F4",
-                200: "#E3E5E8",
-                300: "#D5D8DC",
-                400: "#C7CBD0",
-                500: "#B9BEC4",
-                600: "#94989D",
-                700: "#6F7276",
-                800: "#4A4C4F",
-                900: "#252628",
-                DEFAULT: "#B9BEC4",
+            backgroundImage: {
+                'grid-ink': 'linear-gradient(rgba(255,255,255,.05) 1px, transparent 1px), linear-gradient(90deg, rgba(255,255,255,.05) 1px, transparent 1px)',
+                'grid-soft': 'linear-gradient(rgba(34,23,58,.05) 1px, transparent 1px), linear-gradient(90deg, rgba(34,23,58,.05) 1px, transparent 1px)',
+                'sunrise': 'linear-gradient(135deg, #d81b4d 0%, #f13562 40%, #f99c07 100%)',
             },
-
-            // Gold - Mustard
-            gold: {
-                50:  "#F8F4E8",
-                100: "#F1E9D1",
-                200: "#E3D3A3",
-                300: "#D5BD75",
-                400: "#C7A747",
-                500: "#B99119",    // Mustard Gold
-                600: "#947414",
-                700: "#6F570F",
-                800: "#4A3A0A",
-                900: "#251D05",
-                DEFAULT: "#B99119",
+            keyframes: {
+                marquee: { from: { transform: 'translateX(0)' }, to: { transform: 'translateX(-50%)' } },
+                float: { '0%,100%': { transform: 'translateY(0)' }, '50%': { transform: 'translateY(-10px)' } },
+                'fade-up': { from: { opacity: 0, transform: 'translateY(14px)' }, to: { opacity: 1, transform: 'none' } },
+                wiggle: { '0%,100%': { transform: 'rotate(-3deg)' }, '50%': { transform: 'rotate(3deg)' } },
+                'spin-slow': { to: { transform: 'rotate(360deg)' } },
+            },
+            animation: {
+                marquee: 'marquee 38s linear infinite',
+                float: 'float 6s ease-in-out infinite',
+                'fade-up': 'fade-up .6s cubic-bezier(.2,.7,.2,1) both',
+                wiggle: 'wiggle 2.4s ease-in-out infinite',
+                'spin-slow': 'spin-slow 22s linear infinite',
             },
         },
-
-        backgroundImage: {
-            'brand-gradient': 'linear-gradient(135deg, #418741 0%, #346C34 100%)',
-            'hero-gradient': 'linear-gradient(135deg, #1A361A 0%, #418741 50%, #1A361A 100%)',
-            'accent-gradient': 'linear-gradient(135deg, #A54B19 0%, #843C14 100%)',
-        },
-
-        },
-
-    plugins: [
-        require("@tailwindcss/forms"),
-    ],
-}};
+    },
+    plugins: [forms],
+};

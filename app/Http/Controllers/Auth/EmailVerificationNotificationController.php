@@ -16,7 +16,7 @@ class EmailVerificationNotificationController extends Controller
 
         if (
             $user->last_verification_sent_at &&
-            now()->diffInSeconds($user->last_verification_sent_at) < 120
+            abs(now()->diffInSeconds($user->last_verification_sent_at)) < 120
         ) {
             toast('warning', 'Harap tunggu sebelum mengirim ulang email verifikasi.');
             return back();

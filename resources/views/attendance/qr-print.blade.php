@@ -1,60 +1,37 @@
 <!DOCTYPE html>
 <html lang="id">
 <head>
-    <meta charset="utf-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1">
-    <meta name="robots" content="noindex, nofollow">
-    <title>Cetak Kartu QR Siswa</title>
-    <style>
-        * { box-sizing: border-box; margin: 0; padding: 0; }
-        body { font-family: Inter, -apple-system, 'Segoe UI', Roboto, sans-serif; background: #F1F2F4; color: #0D1B0D; }
-        .toolbar { position: sticky; top: 0; background: #fff; border-bottom: 1px solid #E3E5E8; padding: 12px 16px; display: flex; gap: 12px; align-items: center; justify-content: space-between; }
-        .toolbar button { background: #418741; color: #fff; border: 0; border-radius: 10px; padding: 10px 18px; font-weight: 600; cursor: pointer; }
-        .sheet { display: grid; grid-template-columns: repeat(auto-fill, 85.6mm); gap: 6mm; justify-content: center; padding: 10mm; }
-        .card { width: 85.6mm; height: 54mm; background: #fff; border-radius: 3.5mm; border: 0.3mm solid #B3CFB3; overflow: hidden; display: flex; break-inside: avoid; page-break-inside: avoid; }
-        .card .side { width: 7mm; background: linear-gradient(180deg, #418741, #1A361A); }
-        .card .body { flex: 1; padding: 4mm; display: flex; gap: 4mm; align-items: center; }
-        .card .info { flex: 1; min-width: 0; display: flex; flex-direction: column; height: 100%; }
-        .brand { font-size: 8pt; font-weight: 800; letter-spacing: .02em; color: #418741; text-transform: uppercase; }
-        .label { font-size: 6.5pt; color: #6F7276; margin-top: .5mm; }
-        .name { font-size: 11pt; font-weight: 700; line-height: 1.15; margin-top: auto; }
-        .meta { font-size: 7.5pt; color: #4A4C4F; margin-top: 1mm; }
-        .code { font-family: ui-monospace, Menlo, monospace; font-size: 6pt; color: #6F7276; margin-top: 1.5mm; word-break: break-all; }
-        .qr { width: 34mm; height: 34mm; display: flex; align-items: center; justify-content: center; }
-        .qr img, .qr canvas { width: 34mm !important; height: 34mm !important; }
-        @media print {
-            body { background: #fff; }
-            .toolbar { display: none; }
-            .sheet { padding: 0; gap: 4mm; }
-            @page { size: A4; margin: 10mm; }
-        }
-    </style>
+<meta charset="utf-8"><title>Cetak Kartu QR</title>
+<script src="{{ asset('vendor/qrcodejs/qrcode.min.js') }}"></script>
+<style>
+    @page { size: A4; margin: 10mm; }
+    * { box-sizing: border-box; } body { font-family: system-ui, sans-serif; margin: 0; color: #22173a; }
+    .grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 6mm; }
+    .card { border: 1.5px solid #22173a; border-radius: 4mm; overflow: hidden; break-inside: avoid; height: 82mm; display: flex; flex-direction: column; }
+    .top { background: linear-gradient(135deg, #22173a, #7f1438); color: #fff; padding: 3mm 4mm; display: flex; align-items: center; gap: 2.5mm; }
+    .top img { width: 9mm; height: 9mm; background: #fff; border-radius: 2mm; padding: .6mm; }
+    .top b { font-size: 3.6mm; } .top small { display: block; font-size: 2.4mm; opacity: .8; }
+    .qr { flex: 1; display: grid; place-items: center; padding: 2mm; }
+    .name { text-align: center; font-weight: 800; font-size: 3.6mm; padding: 0 3mm; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+    .meta { text-align: center; font-size: 2.6mm; color: #75589f; padding-bottom: 3mm; }
+    .bar { height: 2mm; background: linear-gradient(90deg, #d81b4d, #f99c07); }
+    .tools { padding: 10px; text-align: center; } @media print { .tools { display: none; } }
+</style>
 </head>
 <body>
-    <div class="toolbar">
-        <span>{{ $students->count() }} kartu siap dicetak · ukuran kartu ID (85,6 × 54 mm)</span>
-        <button onclick="window.print()">Cetak</button>
+<div class="tools"><button onclick="window.print()">🖨 Cetak</button> · {{ $students->count() }} kartu</div>
+<div class="grid">
+@foreach($students as $s)
+    <div class="card">
+        <div class="top"><img src="{{ asset('img/logo.png') }}" alt=""><div><b>SATYA NARATAMA</b><small>Kartu Presensi Siswa</small></div></div>
+        <div class="qr"><div id="q{{ $s->id }}"></div></div>
+        <div class="name">{{ $s->display_name }}</div>
+        <div class="meta">{{ $s->studentRegistration?->school_origin }} {{ $s->studentRegistration?->class ? '· '.$s->studentRegistration->class : '' }}</div>
+        <div class="bar"></div>
     </div>
-    <div class="sheet">
-        @foreach($students as $s)
-            <div class="card">
-                <div class="side"></div>
-                <div class="body">
-                    <div class="info">
-                        <div class="brand">Satya Naratama</div>
-                        <div class="label">Kartu Absensi Siswa</div>
-                        <div class="name">{{ $s->name }}</div>
-                        <div class="meta">
-                            {{ $s->studentRegistration?->class ? 'Kelas ' . $s->studentRegistration->class : '' }}
-                            {{ $s->studentRegistration?->school_origin ? '· ' . \Illuminate\Support\Str::limit($s->studentRegistration->school_origin, 26) : '' }}
-                        </div>
-                        <div class="code">{{ $s->qr_payload }}</div>
-                    </div>
-                    <div class="qr"><div data-qr="{{ $s->qr_payload }}" data-size="256"></div></div>
-                </div>
-            </div>
-        @endforeach
-    </div>
-    @include('attendance.partials.qr-script')
+    <script>new QRCode(document.getElementById('q{{ $s->id }}'), { text: @json($s->qr_payload), width: 150, height: 150 });</script>
+@endforeach
+</div>
+<script>window.addEventListener('load', () => setTimeout(() => window.print(), 400));</script>
 </body>
 </html>

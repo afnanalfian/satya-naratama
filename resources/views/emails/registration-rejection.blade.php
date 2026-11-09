@@ -10,17 +10,17 @@
             <td align="center" style="padding:40px 0;">
                 <table width="600" style="background:white;border-radius:16px;overflow:hidden;box-shadow:0 8px 25px rgba(0,0,0,0.08)">
                     <tr>
-                        <td style="background:#052659;padding:32px;text-align:center;">
+                        <td style="background:#22173a;padding:32px;text-align:center;">
                             <h1 style="color:white;font-size:28px;margin:0;font-weight:700;">
                                 Satya Naratama
                             </h1>
-                            <p style="color:#C1E8FF;margin-top:8px;">❌ Pemberitahuan Penolakan</p>
+                            <p style="color:#ffe1e6;margin-top:8px;">❌ Pemberitahuan Penolakan</p>
                         </td>
                     </tr>
 
                     <tr>
                         <td style="padding:32px;">
-                            <p style="font-size:16px;color:#021024;">
+                            <p style="font-size:16px;color:#150d26;">
                                 Halo <strong>{{ $registration->full_name }}</strong>,<br><br>
                                 Kami informasikan bahwa pendaftaran Anda di <strong>Satya Naratama</strong> telah ditolak.
                             </p>

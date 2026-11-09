@@ -1,53 +1,47 @@
-@extends('layouts.app')
-
-@section('title', 'QR Absensi Saya')
-
-@section('content')
-<div class="py-6 md:py-8">
-    <div class="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div class="grid grid-cols-1 lg:grid-cols-5 gap-6">
-
-            {{-- QR --}}
-            <div class="lg:col-span-2">
-                <div class="bg-white dark:bg-primary-900/30 rounded-3xl border border-primary-100 dark:border-primary-800/30 shadow-sm overflow-hidden lg:sticky lg:top-4">
-                    <div class="bg-gradient-to-br from-primary-600 to-primary-800 px-6 py-5 text-white">
-                        <p class="text-xs uppercase tracking-widest opacity-80">Kartu Absensi</p>
-                        <p class="text-lg font-bold mt-0.5">{{ $user->name }}</p>
-                        <p class="text-xs opacity-80">{{ $user->studentRegistration?->class ? 'Kelas ' . $user->studentRegistration->class : '' }}</p>
-                    </div>
-                    <div class="p-6 flex flex-col items-center">
-                        <div class="bg-white p-3 rounded-2xl shadow-inner border border-primary-100">
-                            <div data-qr="{{ $user->qr_payload }}" data-size="232" class="w-[232px] h-[232px]"></div>
-                        </div>
-                        <p class="mt-4 text-sm text-center text-secondary-600 dark:text-secondary-300">
-                            Tunjukkan QR ini ke tentor saat pertemuan dimulai.
-                        </p>
-                        <p class="mt-1 text-xs text-center text-secondary-400 dark:text-secondary-500">
-                            Naikkan kecerahan layar agar mudah dipindai. Jangan bagikan QR ini ke orang lain.
-                        </p>
-                    </div>
+<x-layouts.app title="QR Presensi Saya">
+@push('head')<script src="{{ asset('vendor/qrcodejs/qrcode.min.js') }}"></script>@endpush
+<div class="grid gap-6 lg:grid-cols-5">
+    <div class="lg:col-span-2" x-data="{ bright: false }">
+        <div class="relative overflow-hidden rounded-[2rem] bg-ink-950 p-6 text-white shadow-lift">
+            <div class="absolute inset-0 bg-grid-ink [background-size:24px_24px]"></div>
+            <div class="blob -right-10 -top-10 h-40 w-40 bg-garnet-600/60"></div>
+            <div class="relative">
+                <div class="flex items-center gap-3">
+                    <img src="{{ asset('img/logo.png') }}" class="h-10 w-10 rounded-xl bg-white p-1" alt="">
+                    <div><p class="font-display font-extrabold">Satya<span class="text-saffron-400">Naratama</span></p><p class="text-[11px] text-ink-300">Kartu Presensi Siswa</p></div>
                 </div>
+                <div class="mx-auto mt-6 w-fit rounded-3xl bg-white p-4 shadow-glow-gold" :class="bright && 'scale-105'">
+                    <div x-data x-init="new QRCode($el, { text: @js($user->qr_payload), width: 220, height: 220, correctLevel: QRCode.CorrectLevel.M })"></div>
+                </div>
+                <div class="mt-5 flex items-center gap-3">
+                    <img src="{{ $user->avatar_url }}" class="h-12 w-12 rounded-2xl object-cover ring-2 ring-white/20" alt="">
+                    <div><p class="font-bold">{{ $user->display_name }}</p><p class="text-xs text-ink-300">{{ $user->studentRegistration?->school_origin }} {{ $user->studentRegistration?->class ? '· '.$user->studentRegistration->class : '' }}</p></div>
+                </div>
+                <p class="mt-4 rounded-xl bg-white/5 px-3 py-2 text-center font-mono text-xs tracking-wider text-ink-300">{{ $user->qr_payload }}</p>
             </div>
-
-            {{-- Ringkasan --}}
-            <div class="lg:col-span-3 space-y-6">
-                <div>
-                    <h1 class="text-xl font-bold text-primary-900 dark:text-white">Kehadiran Saya</h1>
-                    <p class="text-sm text-secondary-500 dark:text-secondary-400">Persentase dihitung dari pertemuan yang sudah selesai.</p>
-                </div>
-
-                @include('attendance.partials.summary-tiles', ['summary' => $summary])
-
-                <div class="bg-white dark:bg-primary-900/30 rounded-2xl border border-primary-100 dark:border-primary-800/30 shadow-sm p-5">
-                    <h2 class="font-semibold text-primary-800 dark:text-primary-100">Riwayat Terakhir</h2>
-                    @include('attendance.partials.history-list', ['history' => $history])
-                </div>
+        </div>
+        <p class="mt-3 text-center text-xs text-ink-400">Tunjukkan QR ini ke tentor saat pertemuan. Naikkan kecerahan layar agar mudah dipindai. Jangan bagikan ke orang lain.</p>
+    </div>
+    <div class="space-y-6 lg:col-span-3">
+        <div class="grid grid-cols-3 gap-3">
+            @foreach(['overall' => ['Total', 'ink'], 'akademik' => ['Akademik', 'garnet'], 'jasmani' => ['Jasmani', 'gold']] as $k => [$l, $tone])
+                <x-stat :label="$l" :value="$summary[$k]['pct'] !== null ? $summary[$k]['pct'].'%' : '–'" icon="check-circle" :tone="$tone" :hint="$summary[$k]['hadir'].'/'.$summary[$k]['done'].' hadir'"/>
+            @endforeach
+        </div>
+        <div class="card card-pad">
+            <p class="section-title">Riwayat terakhir</p>
+            <div class="mt-4 space-y-2">
+                @forelse($history as $h)
+                    <div class="flex items-center gap-3 rounded-2xl bg-cream p-3">
+                        <span class="grid h-10 w-10 place-items-center rounded-xl {{ $h->meeting->course?->type === 'jasmani' ? 'bg-saffron-100 text-saffron-700' : 'bg-ink-100 text-ink-700' }}"><x-icon :name="$h->meeting->course?->type === 'jasmani' ? 'run' : 'book'" class="h-5 w-5"/></span>
+                        <div class="min-w-0 flex-1"><p class="truncate text-sm font-bold">{{ $h->meeting->title }}</p><p class="text-xs text-ink-400">{{ $h->meeting->scheduled_at->translatedFormat('d M Y') }}{{ $h->time ? ' · '.$h->time->format('H:i') : '' }}{{ $h->late ? ' · terlambat' : '' }}</p></div>
+                        <x-status-badge :status="$h->status"/>
+                    </div>
+                @empty
+                    <p class="text-sm text-ink-400">Belum ada pertemuan selesai.</p>
+                @endforelse
             </div>
         </div>
     </div>
 </div>
-@endsection
-
-@push('scripts')
-@include('attendance.partials.qr-script')
-@endpush
+</x-layouts.app>

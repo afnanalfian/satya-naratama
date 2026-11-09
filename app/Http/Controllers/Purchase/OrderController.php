@@ -50,86 +50,30 @@ class OrderController extends Controller
     /**
      * APPROVE pembayaran + grant akses
      */
-    public function approve(Request $request, Order $order)
+    public function approve(Request $request, Order $order, \App\Services\OrderVerificationService $svc)
     {
-        DB::transaction(function () use ($order, $request) {
-
-            /** LOCK ORDER */
-            $order = Order::where('id', $order->id)
-                ->lockForUpdate()
-                ->with(['items.product.productable', 'payment'])
-                ->firstOrFail();
-
-            /** VALIDASI STATUS */
-            if (
-                $order->status !== 'paid' ||
-                $order->payment->status !== 'paid'
-            ) {
-                abort(409, 'Order tidak dalam status yang bisa diverifikasi');
-            }
-
-            /** UPDATE PAYMENT */
-            $order->payment->update([
-                'status'      => 'verified',
-                'verified_at' => now(),
-                'verified_by' => $request->user()->id,
-            ]);
-
-            /** UPDATE ORDER */
-            $order->update([
-                'status' => 'verified',
-            ]);
-        });
-
-        notify_user(
-            $order->user,
-            "Pembayaran Anda untuk Order #{$order->order_code} telah diverifikasi. Akses telah diberikan.",
-            true,
-            route('my.orders.show', $order)
-        );
-
+        try {
+            $svc->approve($order, $request->user());
+        } catch (\RuntimeException $e) {
+            abort(409, $e->getMessage());
+        }
         toast('success', 'Pembayaran berhasil diverifikasi dan akses diberikan');
+
         return redirect()->route('orders.index');
     }
 
-    /**
-     * REJECT pembayaran
-     */
-    public function reject(Request $request, Order $order)
+    public function reject(Request $request, Order $order, \App\Services\OrderVerificationService $svc)
     {
-        DB::transaction(function () use ($order) {
-
-            $order = Order::where('id', $order->id)
-                ->lockForUpdate()
-                ->with('payment')
-                ->firstOrFail();
-
-            if (! in_array($order->status, ['paid'])) {
-                abort(409, 'Order tidak bisa ditolak');
-            }
-
-            $order->payment->update([
-                'status' => 'rejected',
-            ]);
-
-            $order->update([
-                'status' => 'rejected',
-            ]);
-        });
-
-        notify_user(
-            $order->user,
-            "Pembayaran Order #{$order->order_code} ditolak. Silakan upload ulang bukti pembayaran.",
-            true,
-            route('checkout.payment', $order)
-        );
-
+        try {
+            $svc->reject($order);
+        } catch (\RuntimeException $e) {
+            abort(409, $e->getMessage());
+        }
         toast('info', 'Pembayaran telah ditolak');
+
         return redirect()->route('orders.index');
     }
-    /**
-     * DELETE order (admin only)
-     */
+
     public function destroy(Order $order)
     {
         // Order yang sudah diverifikasi tidak boleh dihapus

@@ -1,321 +1,122 @@
-@extends('layouts.app')
-
-@section('title', 'Rekap Absensi')
-
+<x-layouts.app title="Rekap Presensi" :wide="true">
+<x-chartjs/>
 @php
-    $fmt = fn ($v) => $v === null ? '–' : rtrim(rtrim(number_format($v, 1, ',', '.'), '0'), ',') . '%';
-    $query = array_filter([
-        'type' => $filters['type'], 'course_id' => $filters['course_id'],
-        'from' => $filters['from']?->toDateString(), 'to' => $filters['to']?->toDateString(),
-        'q' => $filters['q'] ?: null,
-    ]);
-    $compTotal = array_sum($composition) ?: 1;
+    $f = $filters;
+    $pctTone = fn ($p) => $p === null ? 'text-ink-300' : ($p >= $threshold ? 'text-lagoon-600' : ($p >= $threshold - 15 ? 'text-saffron-600' : 'text-garnet-600'));
+    $qs = array_filter(['type' => $f['type'], 'course_id' => $f['course_id'], 'from' => $f['from']?->toDateString(), 'to' => $f['to']?->toDateString()]);
 @endphp
+<x-page-header title="Rekap Presensi" sub="Persentase kehadiran dihitung dari pertemuan berstatus selesai.">
+    <x-slot:actions>
+        <a href="{{ route('attendance.export', request()->query()) }}" class="btn-soft"><x-icon name="download" class="h-4 w-4"/> Ekspor CSV</a>
+        <a href="{{ route('attendance.hub') }}" class="btn-ink"><x-icon name="scan" class="h-4 w-4"/> Scan presensi</a>
+    </x-slot:actions>
+</x-page-header>
 
-@section('content')
-<div class="py-6 md:py-8">
-    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+<form method="GET" class="card mb-6 grid gap-3 p-4 sm:grid-cols-2 lg:grid-cols-6">
+    <select name="type" class="select"><option value="">Semua jenis</option><option value="akademik" @selected($f['type'] === 'akademik')>Akademik</option><option value="jasmani" @selected($f['type'] === 'jasmani')>Jasmani</option></select>
+    <select name="course_id" class="select lg:col-span-2"><option value="">Semua kelas</option>@foreach($courses as $c)<option value="{{ $c->id }}" @selected($f['course_id'] == $c->id)>{{ $c->name }} ({{ $c->type }})</option>@endforeach</select>
+    <input type="date" name="from" value="{{ $f['from']?->toDateString() }}" class="input" title="Dari">
+    <input type="date" name="to" value="{{ $f['to']?->toDateString() }}" class="input" title="Sampai">
+    <div class="flex gap-2"><button class="btn-ink flex-1"><x-icon name="filter" class="h-4 w-4"/> Terapkan</button>@if(count($qs))<a href="{{ route('attendance.index') }}" class="btn-soft btn-icon" title="Reset"><x-icon name="x" class="h-4 w-4"/></a>@endif</div>
+</form>
 
-        <div class="flex flex-col md:flex-row md:items-end md:justify-between gap-3 mb-5">
-            <div>
-                <h1 class="text-2xl font-bold text-primary-900 dark:text-white">Manajemen Absensi</h1>
-                <p class="text-sm text-secondary-500 dark:text-secondary-400 mt-1">
-                    Persentase = jumlah hadir ÷ jumlah pertemuan yang <strong>sudah selesai</strong>, dihitung terpisah untuk akademik dan jasmani.
-                </p>
-            </div>
-            <a href="{{ route('attendance.export', $query) }}"
-               class="inline-flex items-center justify-center gap-2 px-4 py-2.5 rounded-xl border border-primary-200 dark:border-primary-700/50 bg-white dark:bg-primary-900/30 text-sm font-medium text-primary-700 dark:text-primary-200 hover:bg-primary-50 dark:hover:bg-primary-800/30">
-                <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"/></svg>
-                Export Excel (CSV)
-            </a>
-        </div>
+<div class="grid grid-cols-2 gap-4 lg:grid-cols-5">
+    <x-stat label="Siswa aktif" :value="$studentCount" icon="users" tone="ink"/>
+    <x-stat label="Pertemuan selesai" :value="$done->count()" icon="calendar" tone="sky" :hint="($doneByType['akademik'] ?? 0).' akademik · '.($doneByType['jasmani'] ?? 0).' jasmani'"/>
+    <x-stat label="Rata-rata akademik" :value="$averages['akademik'] !== null ? $averages['akademik'].'%' : '–'" icon="book" tone="garnet"/>
+    <x-stat label="Rata-rata jasmani" :value="$averages['jasmani'] !== null ? $averages['jasmani'].'%' : '–'" icon="run" tone="gold"/>
+    <x-stat label="Di bawah {{ $threshold }}%" :value="$lowAttendance" icon="alert" tone="garnet" hint="perlu perhatian"/>
+</div>
 
-        @include('attendance.partials.nav')
+@if($unfinishedPast->count())
+<div class="mt-6 rounded-3xl bg-saffron-50 p-5 ring-1 ring-saffron-200">
+    <p class="flex items-center gap-2 font-bold text-saffron-900"><x-icon name="alert" class="h-5 w-5"/> {{ $unfinishedPast->count() }} pertemuan lampau belum ditandai selesai (tidak dihitung)</p>
+    <div class="mt-3 flex flex-wrap gap-2">@foreach($unfinishedPast as $m)<a href="{{ route('meeting.attendance.index', $m) }}" class="btn-white btn-sm">{{ $m->scheduled_at->translatedFormat('d M') }} · {{ \Illuminate\Support\Str::limit($m->title, 28) }}</a>@endforeach</div>
+</div>
+@endif
 
-        {{-- Filter --}}
-        <form method="GET" class="bg-white dark:bg-primary-900/30 rounded-2xl border border-primary-100 dark:border-primary-800/30 p-4 shadow-sm mb-6 grid grid-cols-2 md:grid-cols-6 gap-3 items-end">
-            <label class="block">
-                <span class="text-xs font-medium text-secondary-500 dark:text-secondary-400">Jenis</span>
-                <select name="type" class="mt-1 w-full rounded-xl border-primary-200 dark:border-primary-700/50 bg-white dark:bg-primary-800/30 text-sm text-primary-800 dark:text-primary-100">
-                    <option value="">Semua</option>
-                    <option value="akademik" @selected($filters['type'] === 'akademik')>Akademik</option>
-                    <option value="jasmani" @selected($filters['type'] === 'jasmani')>Jasmani</option>
-                </select>
-            </label>
-            <label class="block col-span-2 md:col-span-1">
-                <span class="text-xs font-medium text-secondary-500 dark:text-secondary-400">Course</span>
-                <select name="course_id" class="mt-1 w-full rounded-xl border-primary-200 dark:border-primary-700/50 bg-white dark:bg-primary-800/30 text-sm text-primary-800 dark:text-primary-100">
-                    <option value="">Semua course</option>
-                    @foreach($courses as $c)
-                        <option value="{{ $c->id }}" @selected($filters['course_id'] == $c->id)>[{{ ucfirst($c->type) }}] {{ $c->name }}</option>
-                    @endforeach
-                </select>
-            </label>
-            <label class="block">
-                <span class="text-xs font-medium text-secondary-500 dark:text-secondary-400">Dari</span>
-                <input type="date" name="from" value="{{ $filters['from']?->toDateString() }}" class="mt-1 w-full rounded-xl border-primary-200 dark:border-primary-700/50 bg-white dark:bg-primary-800/30 text-sm text-primary-800 dark:text-primary-100">
-            </label>
-            <label class="block">
-                <span class="text-xs font-medium text-secondary-500 dark:text-secondary-400">Sampai</span>
-                <input type="date" name="to" value="{{ $filters['to']?->toDateString() }}" class="mt-1 w-full rounded-xl border-primary-200 dark:border-primary-700/50 bg-white dark:bg-primary-800/30 text-sm text-primary-800 dark:text-primary-100">
-            </label>
-            <label class="block">
-                <span class="text-xs font-medium text-secondary-500 dark:text-secondary-400">Nama siswa</span>
-                <input type="text" name="q" value="{{ $filters['q'] }}" placeholder="Cari..." class="mt-1 w-full rounded-xl border-primary-200 dark:border-primary-700/50 bg-white dark:bg-primary-800/30 text-sm text-primary-800 dark:text-primary-100">
-            </label>
-            <div class="flex gap-2 col-span-2 md:col-span-1">
-                <button class="flex-1 px-4 py-2.5 rounded-xl bg-primary-600 hover:bg-primary-700 text-white text-sm font-medium">Terapkan</button>
-                @if($query)
-                    <a href="{{ route('attendance.index') }}" class="px-3 py-2.5 rounded-xl border border-primary-200 dark:border-primary-700/50 text-sm text-secondary-600 dark:text-secondary-300">Reset</a>
-                @endif
-            </div>
-        </form>
-
-        {{-- Peringatan pertemuan lampau belum diselesaikan --}}
-        @role('admin')
-        @if($unfinishedPast->isNotEmpty())
-            <div class="rounded-2xl border border-amber-200 bg-amber-50 dark:border-amber-800/40 dark:bg-amber-900/20 p-4 mb-6">
-                <p class="text-sm font-semibold text-amber-800 dark:text-amber-200">
-                    {{ $unfinishedPast->count() }}{{ $unfinishedPast->count() >= 10 ? '+' : '' }} pertemuan lampau belum ditandai selesai — belum masuk perhitungan persentase.
-                </p>
-                <div class="mt-2 flex flex-wrap gap-2">
-                    @foreach($unfinishedPast as $m)
-                        <a href="{{ route('meeting.attendance.index', $m) }}" class="text-xs px-2.5 py-1 rounded-lg bg-white/70 dark:bg-primary-900/40 border border-amber-200 dark:border-amber-800/40 text-amber-800 dark:text-amber-200 hover:underline">
-                            {{ $m->scheduled_at?->translatedFormat('d M') }} · {{ \Illuminate\Support\Str::limit($m->title, 28) }}
-                        </a>
-                    @endforeach
-                </div>
-            </div>
+<div class="mt-6 grid gap-6 xl:grid-cols-3">
+    <div class="card card-pad xl:col-span-2">
+        <p class="section-title">Tren kehadiran mingguan</p>
+        @if(count($weekly['labels']))
+            <div class="mt-4 h-72" x-data="chart({ type: 'line', data: { labels: @js($weekly['labels']), datasets: [
+                { label: 'Akademik', data: @js($weekly['akademik']), borderColor: '#d81b4d', backgroundColor: 'rgba(216,27,77,.1)', fill: true, tension: .35, spanGaps: true },
+                { label: 'Jasmani', data: @js($weekly['jasmani']), borderColor: '#f99c07', backgroundColor: 'rgba(249,156,7,.1)', fill: true, tension: .35, spanGaps: true } ] },
+                options: { maintainAspectRatio: false, plugins: { tooltip: { callbacks: { title: (i) => @js($weekly['ranges'])[i[0].dataIndex] } } }, scales: { y: { min: 0, max: 100, ticks: { callback: v => v + '%' } } } } })"><canvas x-ref="canvas"></canvas></div>
+        @else
+            <x-empty icon="chart" title="Belum ada data" class="mt-4 !py-10"/>
         @endif
-        @endrole
-
-        {{-- KPI --}}
-        <div class="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
-            <div class="bg-white dark:bg-primary-900/30 rounded-2xl border border-primary-100 dark:border-primary-800/30 p-5 shadow-sm">
-                <div class="flex items-center gap-2 text-xs font-medium text-secondary-500 dark:text-secondary-400"><span class="w-2.5 h-2.5 rounded-full bg-[#2a6fdb] dark:bg-[#4a8ae6]"></span> Kehadiran Akademik</div>
-                <p class="mt-2 text-3xl font-bold text-primary-900 dark:text-white tabular-nums">{{ $fmt($averages['akademik']) }}</p>
-                <p class="text-xs text-secondary-500 dark:text-secondary-400 mt-1">rata-rata siswa · {{ $doneByType['akademik'] ?? 0 }} pertemuan selesai</p>
-            </div>
-            <div class="bg-white dark:bg-primary-900/30 rounded-2xl border border-primary-100 dark:border-primary-800/30 p-5 shadow-sm">
-                <div class="flex items-center gap-2 text-xs font-medium text-secondary-500 dark:text-secondary-400"><span class="w-2.5 h-2.5 rounded-full bg-[#c2570f] dark:bg-[#d96a26]"></span> Kehadiran Jasmani</div>
-                <p class="mt-2 text-3xl font-bold text-primary-900 dark:text-white tabular-nums">{{ $fmt($averages['jasmani']) }}</p>
-                <p class="text-xs text-secondary-500 dark:text-secondary-400 mt-1">rata-rata siswa · {{ $doneByType['jasmani'] ?? 0 }} pertemuan selesai</p>
-            </div>
-            <div class="bg-white dark:bg-primary-900/30 rounded-2xl border border-primary-100 dark:border-primary-800/30 p-5 shadow-sm">
-                <p class="text-xs font-medium text-secondary-500 dark:text-secondary-400">Siswa Aktif</p>
-                <p class="mt-2 text-3xl font-bold text-primary-900 dark:text-white tabular-nums">{{ $studentCount }}</p>
-                <p class="text-xs text-secondary-500 dark:text-secondary-400 mt-1">peserta absensi</p>
-            </div>
-            <div class="bg-white dark:bg-primary-900/30 rounded-2xl border p-5 shadow-sm {{ $lowAttendance ? 'border-red-200 dark:border-red-800/40' : 'border-primary-100 dark:border-primary-800/30' }}">
-                <p class="text-xs font-medium text-secondary-500 dark:text-secondary-400">Perlu Perhatian</p>
-                <p class="mt-2 text-3xl font-bold tabular-nums {{ $lowAttendance ? 'text-red-600 dark:text-red-400' : 'text-primary-900 dark:text-white' }}">{{ $lowAttendance }}</p>
-                <p class="text-xs text-secondary-500 dark:text-secondary-400 mt-1">siswa kehadiran &lt; {{ $threshold }}%</p>
-            </div>
-        </div>
-
-        {{-- Grafik --}}
-        <div class="grid grid-cols-1 xl:grid-cols-5 gap-6 mb-6">
-            <div class="xl:col-span-3 bg-white dark:bg-primary-900/30 rounded-2xl border border-primary-100 dark:border-primary-800/30 p-5 shadow-sm">
-                <div class="flex items-start justify-between gap-3 mb-3">
-                    <div>
-                        <h2 class="font-semibold text-primary-800 dark:text-primary-100">Kehadiran per Pekan</h2>
-                        <p class="text-xs text-secondary-500 dark:text-secondary-400">% siswa hadir dari pertemuan selesai pada pekan tsb (Senin–Minggu)</p>
-                    </div>
-                </div>
-                @if(count($weekly['labels']))
-                    <div class="h-72"><canvas id="weeklyChart" role="img" aria-label="Grafik kehadiran per pekan akademik dan jasmani"></canvas></div>
-                    <details class="mt-3 text-xs">
-                        <summary class="cursor-pointer text-secondary-500 dark:text-secondary-400">Lihat data tabel</summary>
-                        <div class="overflow-x-auto mt-2">
-                            <table class="w-full text-left">
-                                <thead class="text-secondary-500 dark:text-secondary-400"><tr><th class="py-1 pr-3">Pekan</th><th class="py-1 pr-3">Akademik</th><th class="py-1">Jasmani</th></tr></thead>
-                                <tbody class="text-primary-800 dark:text-primary-100">
-                                    @foreach($weekly['ranges'] as $i => $range)
-                                        <tr class="border-t border-primary-100 dark:border-primary-800/30">
-                                            <td class="py-1 pr-3">{{ $range }}</td>
-                                            <td class="py-1 pr-3 tabular-nums">{{ $fmt($weekly['akademik'][$i]) }}</td>
-                                            <td class="py-1 tabular-nums">{{ $fmt($weekly['jasmani'][$i]) }}</td>
-                                        </tr>
-                                    @endforeach
-                                </tbody>
-                            </table>
-                        </div>
-                    </details>
-                @else
-                    <div class="h-72 flex items-center justify-center text-sm text-secondary-500 dark:text-secondary-400">Belum ada pertemuan selesai pada filter ini.</div>
-                @endif
-            </div>
-
-            <div class="xl:col-span-2 bg-white dark:bg-primary-900/30 rounded-2xl border border-primary-100 dark:border-primary-800/30 p-5 shadow-sm">
-                <h2 class="font-semibold text-primary-800 dark:text-primary-100">Komposisi Status</h2>
-                <p class="text-xs text-secondary-500 dark:text-secondary-400 mb-4">Seluruh slot pertemuan selesai × siswa</p>
-                <div class="flex h-4 rounded-full overflow-hidden gap-[2px] bg-primary-50 dark:bg-primary-800/30">
-                    @foreach(['hadir' => 'bg-emerald-500', 'izin' => 'bg-amber-400', 'sakit' => 'bg-sky-500', 'alpa' => 'bg-red-500'] as $k => $cls)
-                        @if($composition[$k] > 0)
-                            <div class="{{ $cls }}" style="width: {{ $composition[$k] / $compTotal * 100 }}%" title="{{ ucfirst($k) }}: {{ $composition[$k] }}"></div>
-                        @endif
-                    @endforeach
-                </div>
-                <dl class="grid grid-cols-2 gap-3 mt-5">
-                    @foreach(['hadir' => ['Hadir', 'bg-emerald-500'], 'izin' => ['Izin', 'bg-amber-400'], 'sakit' => ['Sakit', 'bg-sky-500'], 'alpa' => ['Alpa', 'bg-red-500']] as $k => [$label, $cls])
-                        <div class="rounded-xl border border-primary-100 dark:border-primary-700/30 p-3">
-                            <dt class="flex items-center gap-2 text-xs text-secondary-500 dark:text-secondary-400"><span class="w-2.5 h-2.5 rounded-sm {{ $cls }}"></span>{{ $label }}</dt>
-                            <dd class="mt-1 text-lg font-bold text-primary-900 dark:text-white tabular-nums">{{ number_format($composition[$k], 0, ',', '.') }}
-                                <span class="text-xs font-medium text-secondary-500 dark:text-secondary-400">{{ $fmt($composition[$k] / $compTotal * 100) }}</span>
-                            </dd>
-                        </div>
-                    @endforeach
-                </dl>
-            </div>
-        </div>
-
-        @if(count($perMeeting))
-        <div class="bg-white dark:bg-primary-900/30 rounded-2xl border border-primary-100 dark:border-primary-800/30 p-5 shadow-sm mb-6">
-            <h2 class="font-semibold text-primary-800 dark:text-primary-100">Kehadiran per Pertemuan</h2>
-            <div class="flex flex-wrap items-center justify-between gap-2 mb-3">
-                <p class="text-xs text-secondary-500 dark:text-secondary-400">{{ count($perMeeting) }} pertemuan selesai terakhir</p>
-                <div class="flex items-center gap-4 text-xs text-secondary-600 dark:text-secondary-300">
-                    <span class="inline-flex items-center gap-1.5"><span class="w-2.5 h-2.5 rounded-full bg-[#2a6fdb] dark:bg-[#4a8ae6]"></span>Akademik</span>
-                    <span class="inline-flex items-center gap-1.5"><span class="w-2.5 h-2.5 rounded-full bg-[#c2570f] dark:bg-[#d96a26]"></span>Jasmani</span>
-                </div>
-            </div>
-            <div class="h-64"><canvas id="perMeetingChart" role="img" aria-label="Persentase kehadiran per pertemuan"></canvas></div>
-        </div>
-        @endif
-
-        {{-- Tabel siswa --}}
-        @php
-            $sortLink = fn ($key) => route('attendance.index', array_merge($query, ['sort' => $key]));
-            $sortCls = fn ($key) => $filters['sort'] === $key ? 'text-primary-700 dark:text-primary-200' : '';
-        @endphp
-        <div class="bg-white dark:bg-primary-900/30 rounded-2xl border border-primary-100 dark:border-primary-800/30 shadow-sm overflow-hidden mb-6">
-            <div class="px-5 py-4 border-b border-primary-100 dark:border-primary-800/30 flex flex-wrap items-center justify-between gap-2">
-                <h2 class="font-semibold text-primary-800 dark:text-primary-100">Rekap per Siswa</h2>
-                <p class="text-xs text-secondary-500 dark:text-secondary-400">Klik judul kolom untuk mengurutkan (terendah di atas)</p>
-            </div>
-            <div class="overflow-x-auto">
-                <table class="w-full text-sm">
-                    <thead class="bg-primary-50/60 dark:bg-primary-800/20 text-xs uppercase tracking-wide text-secondary-500 dark:text-secondary-400">
-                        <tr>
-                            <th class="px-5 py-3 text-left font-semibold"><a href="{{ $sortLink('name') }}" class="{{ $sortCls('name') }}">Siswa</a></th>
-                            <th class="px-4 py-3 text-left font-semibold"><a href="{{ $sortLink('akademik') }}" class="{{ $sortCls('akademik') }}">Akademik ↕</a></th>
-                            <th class="px-4 py-3 text-left font-semibold"><a href="{{ $sortLink('jasmani') }}" class="{{ $sortCls('jasmani') }}">Jasmani ↕</a></th>
-                            <th class="px-3 py-3 text-center font-semibold">Izin</th>
-                            <th class="px-3 py-3 text-center font-semibold">Sakit</th>
-                            <th class="px-3 py-3 text-center font-semibold">Alpa</th>
-                            <th class="px-4 py-3 text-left font-semibold">Terakhir hadir</th>
-                            <th class="px-4 py-3"></th>
-                        </tr>
-                    </thead>
-                    <tbody class="divide-y divide-primary-100 dark:divide-primary-800/30">
-                        @forelse($rows as $r)
-                            <tr class="hover:bg-primary-50/40 dark:hover:bg-primary-800/10">
-                                <td class="px-5 py-3">
-                                    <div class="flex items-center gap-3">
-                                        <img src="{{ $r['student']->avatar_url }}" class="w-8 h-8 rounded-full object-cover" alt="">
-                                        <div class="min-w-0">
-                                            <a href="{{ route('attendance.student', $r['student']) }}" class="font-medium text-primary-800 dark:text-primary-100 hover:underline">{{ $r['student']->name }}</a>
-                                            <p class="text-xs text-secondary-500 dark:text-secondary-400">{{ $r['student']->studentRegistration?->class ? 'Kelas ' . $r['student']->studentRegistration->class : '' }}</p>
-                                        </div>
-                                    </div>
-                                </td>
-                                <td class="px-4 py-3">@include('attendance.partials.pct', ['b' => $r['akademik']])</td>
-                                <td class="px-4 py-3">@include('attendance.partials.pct', ['b' => $r['jasmani']])</td>
-                                <td class="px-3 py-3 text-center tabular-nums text-secondary-600 dark:text-secondary-300">{{ $r['overall']['izin'] }}</td>
-                                <td class="px-3 py-3 text-center tabular-nums text-secondary-600 dark:text-secondary-300">{{ $r['overall']['sakit'] }}</td>
-                                <td class="px-3 py-3 text-center tabular-nums {{ $r['overall']['alpa'] ? 'text-red-600 dark:text-red-400 font-semibold' : 'text-secondary-600 dark:text-secondary-300' }}">{{ $r['overall']['alpa'] }}</td>
-                                <td class="px-4 py-3 text-xs text-secondary-500 dark:text-secondary-400 whitespace-nowrap">{{ $r['last_present_at'] ? \Carbon\Carbon::parse($r['last_present_at'])->translatedFormat('d M Y, H:i') : '–' }}</td>
-                                <td class="px-4 py-3 text-right whitespace-nowrap">
-                                    <a href="{{ route('attendance.student', $r['student']) }}" class="text-xs font-medium text-primary-600 dark:text-primary-300 hover:underline">Detail</a>
-                                </td>
-                            </tr>
-                        @empty
-                            <tr><td colspan="8" class="px-5 py-12 text-center text-secondary-500 dark:text-secondary-400">Tidak ada siswa.</td></tr>
-                        @endforelse
-                    </tbody>
-                </table>
-            </div>
-        </div>
-
-        {{-- Matriks kehadiran per course --}}
-        @if($matrix !== null && $done->isNotEmpty())
-            <div class="bg-white dark:bg-primary-900/30 rounded-2xl border border-primary-100 dark:border-primary-800/30 shadow-sm overflow-hidden">
-                <div class="px-5 py-4 border-b border-primary-100 dark:border-primary-800/30 flex flex-wrap items-center justify-between gap-2">
-                    <h2 class="font-semibold text-primary-800 dark:text-primary-100">Matriks Kehadiran</h2>
-                    <div class="flex flex-wrap gap-3 text-xs text-secondary-500 dark:text-secondary-400">
-                        <span class="inline-flex items-center gap-1"><span class="w-4 h-4 rounded bg-emerald-500 text-white text-[10px] font-bold flex items-center justify-center">H</span>Hadir</span>
-                        <span class="inline-flex items-center gap-1"><span class="w-4 h-4 rounded bg-amber-400 text-white text-[10px] font-bold flex items-center justify-center">I</span>Izin</span>
-                        <span class="inline-flex items-center gap-1"><span class="w-4 h-4 rounded bg-sky-500 text-white text-[10px] font-bold flex items-center justify-center">S</span>Sakit</span>
-                        <span class="inline-flex items-center gap-1"><span class="w-4 h-4 rounded bg-red-500 text-white text-[10px] font-bold flex items-center justify-center">A</span>Alpa</span>
-                    </div>
-                </div>
-                <div class="overflow-x-auto">
-                    <table class="text-xs">
-                        <thead>
-                            <tr class="text-secondary-500 dark:text-secondary-400">
-                                <th class="sticky left-0 bg-white dark:bg-primary-950 px-4 py-2 text-left font-semibold min-w-[180px]">Siswa</th>
-                                @foreach($done as $i => $m)
-                                    <th class="px-1 py-2 font-medium text-center" title="{{ $m->title }} — {{ $m->scheduled_at->translatedFormat('d M Y') }}">
-                                        <a href="{{ route('meeting.attendance.index', $m) }}" class="hover:underline">P{{ $i + 1 }}<br><span class="font-normal">{{ $m->scheduled_at->format('d/m') }}</span></a>
-                                    </th>
-                                @endforeach
-                            </tr>
-                        </thead>
-                        <tbody class="divide-y divide-primary-100 dark:divide-primary-800/30">
-                            @foreach($rows as $r)
-                                <tr>
-                                    <td class="sticky left-0 bg-white dark:bg-primary-950 px-4 py-1.5 text-primary-800 dark:text-primary-100 whitespace-nowrap">{{ $r['student']->name }}</td>
-                                    @foreach($done as $m)
-                                        @php
-                                            $rec = $matrix->get($r['student']->id)?->get($m->id);
-                                            $st = $rec?->status ?? 'alpa';
-                                            [$letter, $cls] = match($st) {
-                                                'hadir' => ['H', 'bg-emerald-500'], 'izin' => ['I', 'bg-amber-400'],
-                                                'sakit' => ['S', 'bg-sky-500'], default => ['A', 'bg-red-500'],
-                                            };
-                                        @endphp
-                                        <td class="px-1 py-1.5 text-center">
-                                            <span class="inline-flex w-6 h-6 rounded-md {{ $cls }} text-white font-bold items-center justify-center"
-                                                  title="{{ ucfirst($st) }}{{ $rec?->marked_at && $st === 'hadir' ? ' · ' . $rec->marked_at->format('H:i') : '' }}">{{ $letter }}</span>
-                                        </td>
-                                    @endforeach
-                                </tr>
-                            @endforeach
-                        </tbody>
-                    </table>
-                </div>
-            </div>
+    </div>
+    <div class="card card-pad">
+        <p class="section-title">Komposisi status</p>
+        @if(array_sum($composition))
+            <div class="mx-auto mt-4 h-60 max-w-xs" x-data="chart({ type: 'doughnut', data: { labels: ['Hadir','Izin','Sakit','Alpa'], datasets: [{ data: @js(array_values($composition)), backgroundColor: ['#0fb59e','#0ea5e9','#ffbe20','#d81b4d'], borderWidth: 0 }] }, options: { maintainAspectRatio: false, cutout: '68%', plugins: { legend: { position: 'bottom' } } } })"><canvas x-ref="canvas"></canvas></div>
+        @else
+            <x-empty icon="pie" title="Belum ada data" class="mt-4 !py-10"/>
         @endif
     </div>
 </div>
-@endsection
 
-@push('scripts')
-@include('partials.charts')
-<script>
-document.addEventListener('DOMContentLoaded', () => {
-    const weekly = @json($weekly);
-    const datasets = [];
-    @if($filters['type'] !== 'jasmani')
-        datasets.push({ label: 'Akademik', data: weekly.akademik, color: 'akademik' });
-    @endif
-    @if($filters['type'] !== 'akademik')
-        datasets.push({ label: 'Jasmani', data: weekly.jasmani, color: 'jasmani' });
-    @endif
-    SNChart.render('weeklyChart', {
-        type: 'line', labels: weekly.labels, tooltipTitles: weekly.ranges,
-        datasets, ySuffix: '%', yMin: 0, yMax: 100,
-    });
+@if(count($perMeeting))
+<div class="card mt-6 card-pad">
+    <p class="section-title">Kehadiran per pertemuan (24 terakhir)</p>
+    <div class="mt-4 h-64" x-data="chart({ type: 'bar', data: { labels: @js(array_column($perMeeting, 'date')), datasets: [{ label: 'Hadir %', data: @js(array_column($perMeeting, 'pct')), backgroundColor: @js(array_map(fn ($p) => $p['type'] === 'jasmani' ? '#ffbe20' : '#d81b4d', $perMeeting)), borderRadius: 8 }] },
+        options: { maintainAspectRatio: false, plugins: { legend: { display: false }, tooltip: { callbacks: { title: (i) => @js(array_column($perMeeting, 'title'))[i[0].dataIndex], afterLabel: (i) => @js(array_map(fn ($p) => $p['hadir'].'/'.$p['total'].' · '.$p['course'], $perMeeting))[i.dataIndex] } } }, scales: { y: { min: 0, max: 100 } } } })"><canvas x-ref="canvas"></canvas></div>
+</div>
+@endif
 
-    const per = @json($perMeeting);
-    SNChart.render('perMeetingChart', {
-        type: 'bar',
-        labels: per.map(m => m.date),
-        tooltipTitles: per.map(m => m.title + ' (' + m.course + ')'),
-        tooltipExtra: (ctx) => '(' + per[ctx.dataIndex].hadir + '/' + per[ctx.dataIndex].total + ' siswa)',
-        datasets: [{ label: 'Kehadiran', data: per.map(m => m.pct), colors: per.map(m => m.type) }],
-        ySuffix: '%', yMin: 0, yMax: 100,
-    });
-});
-</script>
-@endpush
+{{-- Tabel siswa --}}
+<div class="card mt-6 overflow-hidden">
+    <form method="GET" class="flex flex-col gap-3 border-b border-ink-50 p-4 sm:flex-row sm:items-center">
+        @foreach($qs as $k => $v)<input type="hidden" name="{{ $k }}" value="{{ $v }}">@endforeach
+        <p class="section-title flex-1">Rekap per siswa</p>
+        <input name="q" value="{{ $f['q'] }}" class="input input-sm sm:w-56" placeholder="Cari nama…">
+        <select name="sort" class="select input-sm sm:w-48" onchange="this.form.submit()">
+            @foreach(['name' => 'Urut nama', 'overall' => 'Total terendah', 'akademik' => 'Akademik terendah', 'jasmani' => 'Jasmani terendah'] as $k => $l)<option value="{{ $k }}" @selected($f['sort'] === $k)>{{ $l }}</option>@endforeach
+        </select>
+    </form>
+    <div class="overflow-x-auto">
+        <table class="table">
+            <thead><tr><th>Siswa</th><th class="text-center">Akademik</th><th class="text-center">Jasmani</th><th class="text-center">Total</th><th class="text-center">H / I / S / A</th><th>Terakhir hadir</th><th></th></tr></thead>
+            <tbody>
+            @forelse($rows as $r)
+                <tr>
+                    <td><div class="flex items-center gap-3"><img src="{{ $r['student']->avatar_url }}" class="h-9 w-9 rounded-xl object-cover" alt=""><div><p class="font-bold">{{ $r['student']->name }}</p><p class="text-xs text-ink-400">{{ $r['student']->studentRegistration?->class ? 'Kelas '.$r['student']->studentRegistration->class : '' }}</p></div></div></td>
+                    @foreach(['akademik', 'jasmani', 'overall'] as $t)
+                        <td class="text-center"><span class="font-display text-lg font-extrabold {{ $pctTone($r[$t]['pct']) }}">{{ $r[$t]['pct'] !== null ? $r[$t]['pct'].'%' : '–' }}</span><p class="text-[11px] text-ink-400">{{ $r[$t]['hadir'] }}/{{ $r[$t]['done'] }}</p></td>
+                    @endforeach
+                    <td class="whitespace-nowrap text-center text-xs font-bold"><span class="text-lagoon-600">{{ $r['overall']['hadir'] }}</span> / <span class="text-sky-600">{{ $r['overall']['izin'] }}</span> / <span class="text-saffron-600">{{ $r['overall']['sakit'] }}</span> / <span class="text-garnet-600">{{ $r['overall']['alpa'] }}</span></td>
+                    <td class="whitespace-nowrap text-xs text-ink-500">{{ $r['last_present_at'] ? \Carbon\Carbon::parse($r['last_present_at'])->translatedFormat('d M Y') : '—' }}</td>
+                    <td class="text-right"><a href="{{ route('attendance.student', array_merge(['user' => $r['student']->id], $qs)) }}" class="btn-soft btn-sm">Detail</a></td>
+                </tr>
+            @empty
+                <tr><td colspan="7" class="py-10 text-center text-ink-400">Tidak ada data.</td></tr>
+            @endforelse
+            </tbody>
+        </table>
+    </div>
+</div>
+
+{{-- Matriks per kelas --}}
+@if($matrix !== null && $done->count())
+<div class="card mt-6 overflow-hidden">
+    <p class="section-title p-4">Matriks kehadiran kelas</p>
+    <div class="overflow-x-auto">
+        <table class="table text-xs">
+            <thead><tr><th class="sticky left-0 bg-white">Siswa</th>@foreach($done as $m)<th class="text-center" title="{{ $m->title }}">{{ $m->scheduled_at->format('d/m') }}</th>@endforeach</tr></thead>
+            <tbody>
+            @foreach($rows as $r)
+                <tr>
+                    <td class="sticky left-0 whitespace-nowrap bg-white font-bold">{{ $r['student']->name }}</td>
+                    @foreach($done as $m)
+                        @php $st = $matrix[$r['student']->id][$m->id]->status ?? 'alpa'; @endphp
+                        <td class="text-center"><span class="inline-grid h-6 w-6 place-items-center rounded-md text-[10px] font-extrabold {{ ['hadir' => 'bg-lagoon-500 text-white', 'izin' => 'bg-sky-500 text-white', 'sakit' => 'bg-saffron-400 text-ink-900', 'alpa' => 'bg-garnet-100 text-garnet-700'][$st] ?? '' }}">{{ strtoupper(substr($st, 0, 1)) }}</span></td>
+                    @endforeach
+                </tr>
+            @endforeach
+            </tbody>
+        </table>
+    </div>
+</div>
+@endif
+</x-layouts.app>

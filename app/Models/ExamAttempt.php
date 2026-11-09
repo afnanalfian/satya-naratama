@@ -69,7 +69,7 @@ class ExamAttempt extends Model
             return $duration;
         }
 
-        $elapsed = now()->diffInSeconds($startedAt);
+        $elapsed = (int) abs(now()->diffInSeconds($startedAt));
 
         return max($duration - $elapsed, 0);
     }
@@ -77,7 +77,7 @@ class ExamAttempt extends Model
     {
         $duration = $this->exam->duration_minutes * 60;
         $elapsed = $this->started_at
-            ? $this->started_at->diffInSeconds(now())
+            ? (int) abs($this->started_at->diffInSeconds(now()))
             : 0;
 
         return max(0, $duration - $elapsed);
@@ -95,7 +95,7 @@ class ExamAttempt extends Model
 
         $end = $this->submitted_at ?? now();
 
-        return $this->started_at->diffInSeconds($end);
+        return (int) abs($this->started_at->diffInSeconds($end));
     }
     /* ================= HELPERS FOR NEW QUESTION TYPES ================= */
 

@@ -15,11 +15,11 @@ use App\Http\Controllers\Auth\EmailVerificationNotificationController;
 Route::middleware('guest')->group(function () {
 
     // Login
-    Route::get('/login', [LoginController::class, 'showLoginForm'])->name('login');
+    Route::get('/login', \App\Livewire\Auth\Login::class)->name('login');
     Route::post('/login', [LoginController::class, 'login']);
 
     // Register
-    Route::get('/register', [RegisterController::class, 'show'])->name('register');
+    Route::get('/register', \App\Livewire\Auth\Register::class)->name('register');
     Route::post('/register', [RegisterController::class, 'store'])->name('register.store');
 
     // AJAX regencies
@@ -28,7 +28,7 @@ Route::middleware('guest')->group(function () {
             ->orderBy('id') ->get(['id', 'name']); })
             ->name('api.regencies');
     // Forgot password - form
-    Route::get('/forgot-password', [LoginController::class, 'forgotPasswordForm'])
+    Route::get('/forgot-password', \App\Livewire\Auth\ForgotPassword::class)
         ->name('password.request');
 
     // Forgot password - send email
@@ -36,7 +36,7 @@ Route::middleware('guest')->group(function () {
         ->name('password.email');
 
     // Reset password - form from email link
-    Route::get('/reset-password/{token}', [LoginController::class, 'resetPasswordForm'])
+    Route::get('/reset-password/{token}', \App\Livewire\Auth\ResetPassword::class)
         ->name('password.reset');
 
     // Reset password - update the password

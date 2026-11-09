@@ -12,6 +12,9 @@ return new class extends Migration
      */
     public function up(): void
     {
+        // SQLite (pengujian lokal) tidak mengenal MODIFY ENUM. Produksi MySQL tidak terpengaruh.
+        if (DB::getDriverName() === 'sqlite') { Schema::table('questions', fn (Blueprint $t) => $t->string('test_type')->change()); Schema::table('exams', fn (Blueprint $t) => $t->string('test_type')->nullable()->change()); return; }
+
         // questions.test_type
         DB::statement("
             ALTER TABLE questions
@@ -46,6 +49,8 @@ return new class extends Migration
      */
     public function down(): void
     {
+        if (DB::getDriverName() === 'sqlite') { return; }
+
         DB::statement("
             ALTER TABLE questions
             MODIFY COLUMN test_type ENUM(

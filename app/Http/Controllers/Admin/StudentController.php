@@ -48,7 +48,7 @@ class StudentController extends Controller
     public function update(Request $request, $id)
     {
         $user = User::role('siswa')->findOrFail($id);
-        $registration = StudentRegistration::where('user_id', $user->id)->firstOrFail();
+        $registration = StudentRegistration::where('user_id', $user->id)->first();
 
         $rules = [
             // User fields
@@ -82,6 +82,10 @@ class StudentController extends Controller
             // Password
             'password' => 'nullable|string|min:8|confirmed',
         ];
+        // Siswa yang mendaftar lewat akun umum tidak punya data pendaftaran bimbel.
+        if (! $registration) {
+            $rules = array_intersect_key($rules, array_flip(['name', 'email', 'phone', 'province_id', 'regency_id', 'is_active', 'avatar', 'password']));
+        }
 
         $request->validate($rules);
 
@@ -130,7 +134,7 @@ class StudentController extends Controller
             'parent_phone' => $request->parent_phone,
         ];
 
-        $registration->update($registrationData);
+        $registration?->update($registrationData);
 
         toast('success', 'Data siswa berhasil diperbarui.');
         return redirect()->route('siswa.show', $user->id);

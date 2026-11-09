@@ -10,23 +10,23 @@
             <td align="center" style="padding:40px 0;">
                 <table width="600" style="background:white;border-radius:16px;overflow:hidden;box-shadow:0 8px 25px rgba(0,0,0,0.08)">
                     <tr>
-                        <td style="background:#052659;padding:32px;text-align:center;">
+                        <td style="background:#22173a;padding:32px;text-align:center;">
                             <h1 style="color:white;font-size:28px;margin:0;font-weight:700;">
                                 Satya Naratama
                             </h1>
-                            <p style="color:#C1E8FF;margin-top:8px;">📝 Status Pendaftaran</p>
+                            <p style="color:#ffe1e6;margin-top:8px;">📝 Status Pendaftaran</p>
                         </td>
                     </tr>
 
                     <tr>
                         <td style="padding:32px;">
-                            <p style="font-size:16px;color:#021024;">
+                            <p style="font-size:16px;color:#150d26;">
                                 Halo <strong>{{ $registration->full_name }}</strong>,<br><br>
                                 Berikut adalah status terbaru pendaftaran Anda di <strong>Satya Naratama</strong>:
                             </p>
 
                             <div style="background:#f5f7fa;border-radius:12px;padding:20px;margin:20px 0;">
-                                <p style="margin:0;font-size:16px;color:#021024;">
+                                <p style="margin:0;font-size:16px;color:#150d26;">
                                     <strong>Status:</strong>
                                     <span style="
                                         @if($registration->isVerified())
@@ -36,7 +36,7 @@
                                         @elseif($registration->isAwaitingVerification())
                                             color:#eab308;
                                         @else
-                                            color:#3b82f6;
+                                            color:#d81b4d;
                                         @endif
                                     ">
                                         {{ $registration->registration_status_label }}
@@ -46,7 +46,7 @@
 
                             <p style="text-align:center;margin:32px 0;">
                                 <a href="{{ route('daftar.status.form') }}"
-                                   style="background:#1E4E6D;color:white;padding:14px 32px;border-radius:10px;
+                                   style="background:#4b356b;color:white;padding:14px 32px;border-radius:10px;
                                           text-decoration:none;font-size:16px;font-weight:600;display:inline-block;">
                                     Cek Status Lengkap
                                 </a>

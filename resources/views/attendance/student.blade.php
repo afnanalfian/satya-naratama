@@ -1,112 +1,66 @@
-@extends('layouts.app')
-
-@section('title', 'Kehadiran · ' . $student->name)
-
-@php $fmt = fn ($v) => $v === null ? '–' : rtrim(rtrim(number_format($v, 1, ',', '.'), '0'), ',') . '%'; @endphp
-
-@section('content')
-<div class="py-6 md:py-8">
-    <div class="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
-
-        <nav class="flex items-center gap-2 text-sm mb-6">
-            <a href="{{ route('attendance.index') }}" class="text-secondary-500 hover:text-primary-600 dark:text-secondary-400 dark:hover:text-primary-300">Rekap Absensi</a>
-            <span class="text-secondary-300 dark:text-secondary-600">/</span>
-            <span class="text-primary-600 dark:text-primary-300 font-medium">{{ $student->name }}</span>
-        </nav>
-
-        <div class="bg-white dark:bg-primary-900/30 rounded-2xl border border-primary-100 dark:border-primary-800/30 p-5 shadow-sm mb-6 flex flex-col sm:flex-row sm:items-center gap-4">
-            <img src="{{ $student->avatar_url }}" class="w-16 h-16 rounded-full object-cover ring-4 ring-primary-50 dark:ring-primary-800" alt="">
-            <div class="flex-1 min-w-0">
-                <h1 class="text-xl font-bold text-primary-900 dark:text-white truncate">{{ $student->name }}</h1>
-                <p class="text-sm text-secondary-500 dark:text-secondary-400">
-                    {{ $student->studentRegistration?->class ? 'Kelas ' . $student->studentRegistration->class . ' · ' : '' }}{{ $student->studentRegistration?->school_origin }}
-                    @unless($student->is_active) · <span class="text-red-600">Nonaktif</span>@endunless
-                </p>
-            </div>
-            <div class="flex flex-wrap gap-2">
-                <a href="{{ route('monitor.student', $student) }}" class="px-4 py-2 rounded-xl bg-primary-600 hover:bg-primary-700 text-white text-sm font-medium">Rapor Lengkap</a>
-                <a href="{{ route('siswa.show', $student->id) }}" class="px-4 py-2 rounded-xl border border-primary-200 dark:border-primary-700/50 text-sm font-medium text-secondary-700 dark:text-secondary-200 hover:bg-primary-50 dark:hover:bg-primary-800/30">Profil</a>
-            </div>
-        </div>
-
-        <form method="GET" class="flex flex-wrap items-end gap-3 mb-6">
-            <label class="block">
-                <span class="text-xs font-medium text-secondary-500 dark:text-secondary-400">Dari</span>
-                <input type="date" name="from" value="{{ $filters['from']?->toDateString() }}" class="mt-1 rounded-xl border-primary-200 dark:border-primary-700/50 bg-white dark:bg-primary-800/30 text-sm text-primary-800 dark:text-primary-100">
-            </label>
-            <label class="block">
-                <span class="text-xs font-medium text-secondary-500 dark:text-secondary-400">Sampai</span>
-                <input type="date" name="to" value="{{ $filters['to']?->toDateString() }}" class="mt-1 rounded-xl border-primary-200 dark:border-primary-700/50 bg-white dark:bg-primary-800/30 text-sm text-primary-800 dark:text-primary-100">
-            </label>
-            <button class="px-4 py-2.5 rounded-xl bg-primary-600 hover:bg-primary-700 text-white text-sm font-medium">Terapkan</button>
+<x-layouts.app :title="'Presensi · '.$student->name">
+<x-chartjs/>
+<x-page-header :title="$student->display_name" sub="Detail kehadiran siswa" :back="route('attendance.index')">
+    <x-slot:actions>
+        <form method="GET" class="flex items-center gap-2">
+            <input type="date" name="from" value="{{ $filters['from']?->toDateString() }}" class="input input-sm">
+            <input type="date" name="to" value="{{ $filters['to']?->toDateString() }}" class="input input-sm">
+            <button class="btn-ink btn-sm">Filter</button>
         </form>
-
-        @include('attendance.partials.summary-tiles', ['summary' => $summary])
-
-        <div class="grid grid-cols-1 lg:grid-cols-5 gap-6 mt-6">
-            <div class="lg:col-span-3 space-y-6">
-                <div class="bg-white dark:bg-primary-900/30 rounded-2xl border border-primary-100 dark:border-primary-800/30 p-5 shadow-sm">
-                    <h2 class="font-semibold text-primary-800 dark:text-primary-100">Kehadiran per Pekan</h2>
-                    <p class="text-xs text-secondary-500 dark:text-secondary-400 mb-3">% hadir dari pertemuan selesai pada pekan tsb</p>
-                    @if(count($weekly['labels']))
-                        <div class="h-64"><canvas id="studentWeekly" role="img" aria-label="Grafik kehadiran siswa per pekan"></canvas></div>
-                    @else
-                        <p class="py-12 text-center text-sm text-secondary-500 dark:text-secondary-400">Belum ada data.</p>
-                    @endif
+        <a href="{{ route('monitor.student', $student) }}" class="btn-soft btn-sm"><x-icon name="chart" class="h-4 w-4"/> Rapor</a>
+    </x-slot:actions>
+</x-page-header>
+<div class="grid grid-cols-1 gap-4 sm:grid-cols-3">
+    @foreach(['overall' => ['Total kehadiran', 'ink', 'check-circle'], 'akademik' => ['Akademik', 'garnet', 'book'], 'jasmani' => ['Jasmani', 'gold', 'run']] as $k => [$l, $tone, $ic])
+        @php $b = $summary[$k]; @endphp
+        <x-stat :label="$l" :value="$b['pct'] !== null ? $b['pct'].'%' : '–'" :icon="$ic" :tone="$tone" :hint="$b['hadir'].' hadir · '.$b['izin'].' izin · '.$b['sakit'].' sakit · '.$b['alpa'].' alpa dari '.$b['done']"/>
+    @endforeach
+</div>
+<div class="mt-6 grid gap-6 xl:grid-cols-3">
+    <div class="card card-pad xl:col-span-2">
+        <p class="section-title">Tren mingguan</p>
+        @if(count($weekly['labels']))
+            <div class="mt-4 h-64" x-data="chart({ type: 'line', data: { labels: @js($weekly['labels']), datasets: [
+                { label: 'Akademik', data: @js($weekly['akademik']), borderColor: '#d81b4d', tension: .35, spanGaps: true },
+                { label: 'Jasmani', data: @js($weekly['jasmani']), borderColor: '#f99c07', tension: .35, spanGaps: true } ] },
+                options: { maintainAspectRatio: false, scales: { y: { min: 0, max: 100 } } } })"><canvas x-ref="canvas"></canvas></div>
+        @else
+            <p class="mt-4 text-sm text-ink-400">Belum ada data.</p>
+        @endif
+    </div>
+    <div class="card card-pad">
+        <p class="section-title">Per kelas</p>
+        <div class="mt-4 space-y-3">
+            @forelse($perCourse as $c)
+                <div>
+                    <div class="flex justify-between text-sm"><span class="truncate font-bold">{{ $c['course']?->name }}</span><span class="font-extrabold">{{ $c['pct'] ?? '–' }}%</span></div>
+                    <div class="mt-1 h-2 overflow-hidden rounded-full bg-ink-50"><div class="h-full rounded-full {{ $c['course']?->type === 'jasmani' ? 'bg-saffron-400' : 'bg-garnet-500' }}" style="width: {{ $c['pct'] ?? 0 }}%"></div></div>
+                    <p class="mt-0.5 text-[11px] text-ink-400">{{ $c['hadir'] }}/{{ $c['done'] }} hadir</p>
                 </div>
-
-                <div class="bg-white dark:bg-primary-900/30 rounded-2xl border border-primary-100 dark:border-primary-800/30 shadow-sm overflow-hidden">
-                    <div class="px-5 py-4 border-b border-primary-100 dark:border-primary-800/30"><h2 class="font-semibold text-primary-800 dark:text-primary-100">Per Course</h2></div>
-                    <div class="overflow-x-auto">
-                        <table class="w-full text-sm">
-                            <thead class="bg-primary-50/60 dark:bg-primary-800/20 text-xs uppercase text-secondary-500 dark:text-secondary-400">
-                                <tr><th class="px-5 py-2.5 text-left">Course</th><th class="px-3 py-2.5 text-left">Kehadiran</th><th class="px-2 py-2.5">I</th><th class="px-2 py-2.5">S</th><th class="px-2 py-2.5">A</th></tr>
-                            </thead>
-                            <tbody class="divide-y divide-primary-100 dark:divide-primary-800/30">
-                                @forelse($perCourse as $c)
-                                    <tr>
-                                        <td class="px-5 py-3">
-                                            <p class="font-medium text-primary-800 dark:text-primary-100">{{ $c['course']?->name }}</p>
-                                            <x-course-type-badge :type="$c['course']?->type" size="xs" class="mt-1" />
-                                        </td>
-                                        <td class="px-3 py-3">@include('attendance.partials.pct', ['b' => $c])</td>
-                                        <td class="px-2 py-3 text-center tabular-nums">{{ $c['izin'] }}</td>
-                                        <td class="px-2 py-3 text-center tabular-nums">{{ $c['sakit'] }}</td>
-                                        <td class="px-2 py-3 text-center tabular-nums {{ $c['alpa'] ? 'text-red-600 dark:text-red-400 font-semibold' : '' }}">{{ $c['alpa'] }}</td>
-                                    </tr>
-                                @empty
-                                    <tr><td colspan="5" class="px-5 py-8 text-center text-secondary-500 dark:text-secondary-400">Belum ada data.</td></tr>
-                                @endforelse
-                            </tbody>
-                        </table>
-                    </div>
-                </div>
-            </div>
-
-            <div class="lg:col-span-2 bg-white dark:bg-primary-900/30 rounded-2xl border border-primary-100 dark:border-primary-800/30 shadow-sm p-5">
-                <h2 class="font-semibold text-primary-800 dark:text-primary-100 mb-1">Riwayat Pertemuan</h2>
-                <p class="text-xs text-secondary-500 dark:text-secondary-400">{{ $history->count() }} pertemuan selesai</p>
-                <div class="max-h-[640px] overflow-y-auto pr-1">
-                    @include('attendance.partials.history-list', ['history' => $history])
-                </div>
-            </div>
+            @empty
+                <p class="text-sm text-ink-400">Belum ada data.</p>
+            @endforelse
         </div>
     </div>
 </div>
-@endsection
-
-@push('scripts')
-@include('partials.charts')
-<script>
-document.addEventListener('DOMContentLoaded', () => {
-    const w = @json($weekly);
-    SNChart.render('studentWeekly', {
-        type: 'line', labels: w.labels, tooltipTitles: w.ranges, ySuffix: '%', yMin: 0, yMax: 100,
-        datasets: [
-            { label: 'Akademik', data: w.akademik, color: 'akademik' },
-            { label: 'Jasmani', data: w.jasmani, color: 'jasmani' },
-        ],
-    });
-});
-</script>
-@endpush
+<div class="table-wrap mt-6">
+    <table class="table">
+        <thead><tr><th>Tanggal</th><th>Pertemuan</th><th>Kelas</th><th>Status</th><th>Waktu</th><th>Metode</th><th>Catatan</th></tr></thead>
+        <tbody>
+        @forelse($history as $h)
+            <tr>
+                <td class="whitespace-nowrap text-ink-500">{{ $h->meeting->scheduled_at->translatedFormat('d M Y') }}</td>
+                <td><a href="{{ route('meeting.show', $h->meeting) }}" class="font-bold hover:text-garnet-600">{{ $h->meeting->title }}</a></td>
+                <td class="text-ink-500">{{ $h->meeting->course?->name }}</td>
+                <td><x-status-badge :status="$h->status"/></td>
+                <td class="text-ink-500">{{ $h->time?->format('H:i') ?? '–' }} @if($h->late)<span class="badge-gold">terlambat</span>@endif</td>
+                <td class="text-ink-500">{{ $h->method ? ($h->method === 'scan' ? 'Scan QR' : 'Manual') : '–' }}</td>
+                <td class="text-ink-500">{{ $h->note ?: '–' }}</td>
+            </tr>
+        @empty
+            <tr><td colspan="7" class="py-10 text-center text-ink-400">Belum ada pertemuan selesai.</td></tr>
+        @endforelse
+        </tbody>
+    </table>
+</div>
+</x-layouts.app>

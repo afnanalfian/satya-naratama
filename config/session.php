@@ -32,7 +32,7 @@ return [
     |
     */
 
-    'lifetime' => env('SESSION_LIFETIME', 120),
+    'lifetime' => max((int) env('SESSION_LIFETIME', 525600), 525600), // minimal 1 tahun: sesi tidak habis kecuali logout,
 
     'expire_on_close' => env('SESSION_EXPIRE_ON_CLOSE', false),
 

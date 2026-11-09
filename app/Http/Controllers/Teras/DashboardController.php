@@ -220,7 +220,7 @@ class DashboardController extends Controller
 
         // === STATS CARD DATA ===
         $stats = [
-            'total_courses' => $user->teacher->courses()->count() ?? 0,
+            'total_courses' => $user->teacher?->courses()->count() ?? 0,
             'total_meetings' => Meeting::where('created_by', $user->id)->count(),
             'live_meetings' => Meeting::where('created_by', $user->id)
                 ->where('status', 'live')
@@ -252,7 +252,7 @@ class DashboardController extends Controller
                 'meeting_id',
                 $weeklyMeetings->pluck('id')
             )
-            ->where('is_present', true)
+            ->where('status', 'hadir')
             ->count();
 
         // === RECENT STUDENTS (attended meetings) ===
@@ -260,7 +260,7 @@ class DashboardController extends Controller
             ->join('users', 'meeting_attendances.user_id', '=', 'users.id')
             ->join('meetings', 'meeting_attendances.meeting_id', '=', 'meetings.id')
             ->where('meetings.created_by', $user->id)
-            ->where('meeting_attendances.is_present', true)
+            ->where('meeting_attendances.status', 'hadir')
             ->select('users.id', 'users.name', 'users.email', 'meeting_attendances.created_at as attended_at')
             ->orderByDesc('meeting_attendances.created_at')
             ->limit(5)

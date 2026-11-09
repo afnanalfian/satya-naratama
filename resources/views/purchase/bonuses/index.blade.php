@@ -1,143 +1,26 @@
-@extends('layouts.app')
-
-@section('content')
-<div class="max-w-7xl mx-auto space-y-6 px-4 sm:px-6 lg:px-0">
-
-    {{-- HEADER --}}
-    <div>
-        <h1 class="text-2xl font-bold text-azwara-darker dark:text-white">
-            Bonus Produk
-        </h1>
-        <p class="text-sm text-gray-600 dark:text-gray-400">
-            Atur bonus otomatis yang didapat saat membeli produk
-        </p>
-    </div>
-
-    {{-- MOBILE LIST --}}
-    <div class="space-y-4 sm:hidden">
-        @forelse($products as $product)
-            <div class="rounded-2xl border dark:border-azwara-darker
-                        bg-azwara-lightest dark:bg-azwara-darkest
-                        p-4 space-y-3">
-
-                <div class="flex items-start justify-between gap-3">
-                    <div>
-                        <h3 class="font-semibold text-gray-900 dark:text-white">
-                            {{ $product->name }}
-                        </h3>
-                        <p class="mt-1 text-xs uppercase
-                            inline-block px-2 py-1 rounded-lg
-                            bg-gray-100 dark:bg-azwara-darker
-                            text-gray-700 dark:text-gray-300">
-                            {{ strtoupper($product->type) }}
-                        </p>
-                    </div>
-                </div>
-
-                <div class="text-sm text-gray-700 dark:text-gray-300">
-                    <p class="text-xs text-gray-500 mb-1">Bonus</p>
-                    @if($product->bonuses->isEmpty())
-                        <span class="text-gray-500 dark:text-gray-400">—</span>
-                    @else
-                        <ul class="list-disc list-inside space-y-1">
-                            @foreach($product->bonuses as $bonus)
-                                <li>{{ strtoupper($bonus->bonus_type) }}</li>
-                            @endforeach
-                        </ul>
-                    @endif
-                </div>
-
-                <div class="flex justify-end pt-2">
-                    <a href="{{ route('bonuses.edit', $product) }}"
-                       class="text-primary font-semibold hover:underline dark:text-azwara-lighter">
-                        Atur Bonus
-                    </a>
-                </div>
+<x-layouts.app title="Bonus Produk">
+<x-page-header title="Bonus Produk" sub="Tambahkan bonus tryout, kelas, atau akses kuis pada produk (umumnya paket kelas)."/>
+<form method="GET" class="mb-5 max-w-md"><x-search name="q" :value="request('q')" placeholder="Cari produk lalu Enter…"/></form>
+<div class="grid gap-4 md:grid-cols-2">
+    @foreach($products as $p)
+        @continue(request('q') && ! str_contains(mb_strtolower($p->name), mb_strtolower(request('q'))))
+        <div class="card p-5">
+            <div class="flex items-start justify-between gap-3">
+                <div><span class="badge-ink">{{ $p->type }}</span><p class="mt-2 font-bold">{{ $p->name }}</p></div>
+                <a href="{{ route('bonuses.edit', $p) }}" class="btn-soft btn-sm"><x-icon name="gift" class="h-4 w-4"/> Atur bonus</a>
             </div>
-        @empty
-            <div class="text-center text-gray-500 py-10">
-                Belum ada produk.
-            </div>
-        @endforelse
-    </div>
-
-    {{-- DESKTOP TABLE --}}
-    <div class="hidden sm:block overflow-hidden rounded-2xl border
-                dark:border-azwara-darker
-                bg-azwara-lightest dark:bg-azwara-darkest">
-
-        <table class="min-w-full text-sm">
-            <thead class="bg-primary dark:bg-azwara-darker">
-                <tr class="text-left text-azwara-lightest dark:text-gray-300">
-                    <th class="px-6 py-4">Produk</th>
-                    <th class="px-6 py-4">Tipe</th>
-                    <th class="px-6 py-4">Bonus</th>
-                    <th class="px-6 py-4 text-right"></th>
-                </tr>
-            </thead>
-
-            <tbody class="divide-y dark:divide-azwara-darker">
-                @forelse($products as $product)
-                    <tr>
-
-                        <td class="px-6 py-4 font-medium text-gray-900 dark:text-white">
-                            {{ $product->name }}
-                        </td>
-
-                        <td class="px-6 py-4 dark:text-white">
-                            {{ strtoupper($product->type) }}
-                        </td>
-
-                        <td class="px-6 py-4 text-gray-700 dark:text-gray-300">
-                            @if($product->bonuses->isEmpty())
-                                <span class="text-gray-500 dark:text-gray-400">—</span>
-                            @else
-                                <ul class="list-disc list-inside space-y-1">
-                                    @foreach($product->bonuses as $bonus)
-                                        <li>
-                                            @if($bonus->bonus_type === 'tryout')
-                                                <span class="font-medium">
-                                                    {{ $bonus->tryout?->title ?? 'Tryout #' . $bonus->bonus_id }}
-                                                </span>
-
-                                            @elseif($bonus->bonus_type === 'course')
-                                                <span class="font-medium">
-                                                    {{ $bonus->course?->name ?? 'Course #' . $bonus->bonus_id }}
-                                                </span>
-
-                                            @elseif($bonus->bonus_type === 'quiz')
-                                                <span class="italic text-gray-500 dark:text-gray-400">
-                                                    Semua Quiz
-                                                </span>
-                                            @endif
-                                        </li>
-                                    @endforeach
-                                </ul>
-                            @endif
-                        </td>
-
-                        <td class="px-6 py-4 text-right">
-                            <a href="{{ route('bonuses.edit', $product) }}"
-                               class="text-primary font-semibold hover:underline dark:text-azwara-lighter">
-                                Atur Bonus
-                            </a>
-                        </td>
-
-                    </tr>
+            <div class="mt-3 flex flex-wrap gap-2">
+                @forelse($p->bonuses as $b)
+                    <span class="inline-flex items-center gap-1.5 rounded-full bg-lagoon-50 py-1 pl-3 pr-1 text-xs font-bold text-lagoon-800 ring-1 ring-lagoon-100">
+                        {{ $b->bonus_type === 'tryout' ? 'Tryout: '.($b->tryout?->title ?? '-') : ($b->bonus_type === 'course' ? 'Kelas: '.($b->course?->name ?? '-') : 'Akses kuis') }}
+                        <form method="POST" action="{{ route('bonuses.destroy', $b) }}" data-confirm="Hapus bonus ini?">@csrf @method('DELETE')<button class="grid h-5 w-5 place-items-center rounded-full hover:bg-lagoon-200"><x-icon name="x" class="h-3 w-3"/></button></form>
+                    </span>
                 @empty
-                    <tr>
-                        <td colspan="4" class="px-6 py-10 text-center text-gray-500">
-                            Belum ada produk.
-                        </td>
-                    </tr>
+                    <span class="text-xs text-ink-400">Belum ada bonus</span>
                 @endforelse
-            </tbody>
-        </table>
-    </div>
-
-    <div class="pt-4">
-        {{ $products->links() }}
-    </div>
-
+            </div>
+        </div>
+    @endforeach
 </div>
-@endsection
+{{ $products->links() }}
+</x-layouts.app>

@@ -26,7 +26,7 @@
         }
 
         .header {
-            background: linear-gradient(135deg, #021024 0%, #052659 50%, #5483B3 100%);
+            background: linear-gradient(135deg, #150d26 0%, #22173a 50%, #d81b4d 100%);
             padding: 32px 24px;
             text-align: center;
             color: white;
@@ -46,7 +46,7 @@
         .title {
             font-size: 22px;
             font-weight: 700;
-            color: #052659;
+            color: #22173a;
             margin-bottom: 10px;
         }
 
@@ -60,7 +60,7 @@
             display: inline-block;
             margin: 24px 0;
             padding: 14px 24px;
-            background-color: #5483B3;
+            background-color: #d81b4d;
             color: #fff !important;
             text-decoration: none;
             font-weight: 600;
@@ -75,7 +75,7 @@
         }
 
         .footer a {
-            color: #5483B3;
+            color: #d81b4d;
             text-decoration: none;
         }
     </style>

@@ -1,71 +1,60 @@
-@extends('layouts.app')
-
-@section('title', 'Scan Absensi')
-
-@section('content')
-<div class="py-6 md:py-8">
-    <div class="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
-
-        <div class="mb-5">
-            <h1 class="text-2xl font-bold text-primary-900 dark:text-white">Scan Absensi</h1>
-            <p class="text-sm text-secondary-500 dark:text-secondary-400 mt-1">Pilih pertemuan, lalu scan QR code siswa untuk mencatat kehadiran beserta jamnya.</p>
-        </div>
-
-        @include('attendance.partials.nav')
-
-        {{-- Hari ini --}}
-        <section class="bg-white dark:bg-primary-900/30 rounded-2xl border border-primary-100 dark:border-primary-800/30 shadow-sm overflow-hidden mb-6">
-            <div class="px-5 py-4 border-b border-primary-100 dark:border-primary-800/30 flex items-center justify-between">
-                <h2 class="font-semibold text-primary-800 dark:text-primary-100">Hari ini · {{ now()->translatedFormat('l, d F Y') }}</h2>
-                <span class="text-xs text-secondary-500 dark:text-secondary-400">{{ $today->count() }} pertemuan</span>
-            </div>
-            <div class="divide-y divide-primary-100 dark:divide-primary-800/30">
-                @forelse($today as $m)
-                    @include('attendance.partials.meeting-row')
-                @empty
-                    <div class="px-5 py-12 text-center">
-                        <p class="text-sm text-secondary-500 dark:text-secondary-400">Tidak ada pertemuan terjadwal hari ini.</p>
-                    </div>
-                @endforelse
-            </div>
-        </section>
-
-        {{-- Mendatang --}}
-        @if($upcoming->isNotEmpty())
-        <section class="bg-white dark:bg-primary-900/30 rounded-2xl border border-primary-100 dark:border-primary-800/30 shadow-sm overflow-hidden mb-6">
-            <div class="px-5 py-4 border-b border-primary-100 dark:border-primary-800/30">
-                <h2 class="font-semibold text-primary-800 dark:text-primary-100">Pertemuan Mendatang</h2>
-            </div>
-            <div class="divide-y divide-primary-100 dark:divide-primary-800/30">
-                @foreach($upcoming as $m)
-                    @include('attendance.partials.meeting-row')
-                @endforeach
-            </div>
-        </section>
-        @endif
-
-        {{-- Lampau: absensi manual (admin) --}}
-        @if($isAdmin && $past)
-        <section class="bg-white dark:bg-primary-900/30 rounded-2xl border border-primary-100 dark:border-primary-800/30 shadow-sm overflow-hidden">
-            <div class="px-5 py-4 border-b border-primary-100 dark:border-primary-800/30 flex flex-wrap items-center justify-between gap-2">
-                <div>
-                    <h2 class="font-semibold text-primary-800 dark:text-primary-100">Pertemuan Lampau · Absensi Manual</h2>
-                    <p class="text-xs text-secondary-500 dark:text-secondary-400">Khusus admin: koreksi atau isi absensi pertemuan yang sudah lewat.</p>
-                </div>
-                <span class="text-[11px] font-semibold px-2 py-1 rounded-lg bg-accent-50 text-accent-700 dark:bg-accent-900/30 dark:text-accent-200">ADMIN</span>
-            </div>
-            <div class="divide-y divide-primary-100 dark:divide-primary-800/30">
-                @forelse($past as $m)
-                    @include('attendance.partials.meeting-row')
-                @empty
-                    <div class="px-5 py-10 text-center text-sm text-secondary-500 dark:text-secondary-400">Belum ada pertemuan lampau.</div>
-                @endforelse
-            </div>
-            @if($past->hasPages())
-                <div class="px-5 py-4 border-t border-primary-100 dark:border-primary-800/30">{{ $past->links() }}</div>
+<x-layouts.app title="Scan Presensi">
+<x-page-header title="Scan Presensi" sub="Pilih pertemuan untuk membuka scanner QR & daftar hadir."/>
+@php
+    $card = function ($m) use ($counts) { return $counts[$m->id] ?? null; };
+@endphp
+<p class="section-title mb-3">Hari ini & sedang live</p>
+<div class="grid gap-4 md:grid-cols-2 xl:grid-cols-3">
+    @forelse($today as $m)
+        @php $c = $counts[$m->id] ?? null; @endphp
+        <a href="{{ route('meeting.attendance.index', $m) }}" class="card card-hover relative overflow-hidden p-5 {{ $m->status === 'live' ? 'ring-2 ring-garnet-400' : '' }}">
+            @if($m->status === 'live')<span class="absolute right-4 top-4 flex h-3 w-3"><span class="absolute h-3 w-3 animate-ping rounded-full bg-garnet-400"></span><span class="h-3 w-3 rounded-full bg-garnet-600"></span></span>@endif
+            <div class="flex items-center gap-2"><x-course-type-badge :type="$m->course?->type"/><x-status-badge :status="$m->status"/></div>
+            <p class="mt-3 font-display text-lg font-bold">{{ $m->title }}</p>
+            <p class="text-xs text-ink-400">{{ $m->course?->name }} · {{ $m->scheduled_at?->format('H:i') }}</p>
+            @if($c)
+                <div class="mt-4 flex items-end justify-between"><span class="text-xs font-bold text-ink-500">{{ $c['hadir'] }}/{{ $c['total'] }} hadir</span><span class="font-display text-2xl font-extrabold text-lagoon-600">{{ $c['pct'] }}%</span></div>
+                <div class="mt-1.5 h-2 overflow-hidden rounded-full bg-ink-50"><div class="h-full rounded-full bg-lagoon-500" style="width: {{ $c['pct'] }}%"></div></div>
             @endif
-        </section>
-        @endif
-    </div>
+            <span class="btn-ink btn-sm mt-4 w-full"><x-icon name="scan" class="h-4 w-4"/> Buka scanner</span>
+        </a>
+    @empty
+        <div class="md:col-span-2 xl:col-span-3"><x-empty icon="calendar" title="Tidak ada pertemuan hari ini" text="Pertemuan yang dijadwalkan hari ini atau sedang live akan muncul di sini."/></div>
+    @endforelse
 </div>
-@endsection
+
+@if($upcoming->count())
+<p class="section-title mb-3 mt-8">Akan datang</p>
+<div class="grid gap-3 md:grid-cols-2 xl:grid-cols-3">
+    @foreach($upcoming as $m)
+        <a href="{{ route('meeting.attendance.index', $m) }}" class="card flex items-center gap-3 p-4 hover:bg-cream">
+            <div class="grid h-12 w-12 place-items-center rounded-2xl bg-ink-50 text-center"><div><p class="text-[10px] font-bold uppercase">{{ $m->scheduled_at->translatedFormat('M') }}</p><p class="font-display text-lg font-extrabold leading-none">{{ $m->scheduled_at->format('d') }}</p></div></div>
+            <div class="min-w-0 flex-1"><p class="truncate font-bold">{{ $m->title }}</p><p class="text-xs text-ink-400">{{ $m->course?->name }}</p></div>
+        </a>
+    @endforeach
+</div>
+@endif
+
+@if($isAdmin && $past)
+<p class="section-title mb-3 mt-8">Pertemuan sebelumnya (koreksi presensi)</p>
+<div class="table-wrap">
+    <table class="table">
+        <thead><tr><th>Tanggal</th><th>Pertemuan</th><th>Kelas</th><th>Status</th><th class="text-right">Kehadiran</th><th></th></tr></thead>
+        <tbody>
+        @foreach($past as $m)
+            @php $c = $counts[$m->id] ?? null; @endphp
+            <tr>
+                <td class="whitespace-nowrap text-ink-500">{{ $m->scheduled_at?->translatedFormat('d M Y') }}</td>
+                <td class="font-bold">{{ $m->title }}</td>
+                <td class="text-ink-500">{{ $m->course?->name }}</td>
+                <td><x-status-badge :status="$m->status"/></td>
+                <td class="text-right font-bold">{{ $c ? $c['hadir'].'/'.$c['total'].' · '.$c['pct'].'%' : '–' }}</td>
+                <td class="text-right"><a href="{{ route('meeting.attendance.index', $m) }}" class="btn-soft btn-sm">Buka</a></td>
+            </tr>
+        @endforeach
+        </tbody>
+    </table>
+</div>
+{{ $past->links() }}
+@endif
+</x-layouts.app>

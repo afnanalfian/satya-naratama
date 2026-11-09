@@ -16,7 +16,7 @@
         @if($url)
             <p style="margin-top:20px">
                 <a href="{{ $url }}"
-                   style="background:#2563eb;color:#fff;
+                   style="background:#b5123f;color:#fff;
                           padding:10px 16px;border-radius:8px;
                           text-decoration:none;font-weight:bold">
                     Lihat Detail

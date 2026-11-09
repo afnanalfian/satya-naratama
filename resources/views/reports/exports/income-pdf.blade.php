@@ -16,7 +16,7 @@
         .header {
             text-align: center;
             margin-bottom: 25px;
-            border-bottom: 2px solid #3b82f6;
+            border-bottom: 2px solid #d81b4d;
             padding-bottom: 15px;
         }
         .header h1 {
@@ -77,12 +77,12 @@
             margin-top: 15px;
         }
         .table th {
-            background: #3b82f6;
+            background: #d81b4d;
             color: white;
             text-align: left;
             padding: 10px;
             font-size: 11px;
-            border: 1px solid #2563eb;
+            border: 1px solid #b5123f;
         }
         .table td {
             padding: 10px;

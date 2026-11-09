@@ -240,12 +240,8 @@ class RegistrationManagementController extends Controller
         Mail::to($registration->email)->send(new RegistrationRejectionMail($registration));
 
         // Notifikasi ke user
-        notify_user(
-            $registration, // Bisa pakai model langsung karena ada notifiable trait?
-            "Maaf, pendaftaran Anda di Satya Naratama ditolak. Silakan cek email untuk informasi lebih lanjut.",
-            false,
-            route('daftar.status.form')
-        );
+        // Pendaftar belum punya akun, pemberitahuan dikirim lewat email (RegistrationRejectionMail) di atas.
+
 
         // Notifikasi ke admin lain
         $admins = User::role('admin')->where('id', '!=', auth()->id())->get();
@@ -287,13 +283,23 @@ class RegistrationManagementController extends Controller
      */
     public function export(Request $request)
     {
-        // Will be implemented later
-        return redirect()->back()->with('info', 'Fitur export sedang dalam pengembangan.');
+        $rows = StudentRegistration::with(['kecamatan', 'kelurahan'])
+            ->when($request->filled('status') && $request->status !== 'all', fn ($q) => $q->where('registration_status', $request->status))
+            ->orderByDesc('created_at')->get();
+
+        return response()->streamDownload(function () use ($rows) {
+            $out = fopen('php://output', 'w');
+            fwrite($out, "\xEF\xBB\xBF");
+            fputcsv($out, ['No', 'Tanggal', 'Nama', 'Panggilan', 'L/P', 'Tgl Lahir', 'Sekolah', 'Kelas', 'WA', 'Email', 'Kecamatan', 'Kelurahan', 'TB', 'BB', 'Baju', 'Kampus 1', 'Kampus 2', 'Orang Tua', 'Pekerjaan', 'HP Ortu', 'Status', 'Pembayaran'], ';');
+            foreach ($rows as $i => $r) {
+                fputcsv($out, [$i + 1, $r->created_at?->format('Y-m-d H:i'), $r->full_name, $r->nickname, $r->gender, $r->birth_date?->format('Y-m-d'), $r->school_origin, $r->class, $r->phone, $r->email,
+                    $r->kecamatan?->name, $r->kelurahan?->name, $r->height_cm, $r->weight_kg, $r->shirt_size, $r->priority_university_1, $r->priority_university_2,
+                    $r->parent_name, $r->parent_occupation, $r->parent_phone, $r->registration_status_label, $r->payment_status_label], ';');
+            }
+            fclose($out);
+        }, 'pendaftaran-'.now()->format('Ymd-His').'.csv', ['Content-Type' => 'text/csv; charset=UTF-8']);
     }
 
-    /**
-     * Hapus pendaftaran (soft delete?)
-     */
     public function destroy($id)
     {
         $registration = StudentRegistration::findOrFail($id);

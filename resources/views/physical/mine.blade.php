@@ -1,83 +1,35 @@
-@extends('layouts.app')
-
-@section('title', 'Data Fisik Saya')
-
-@section('content')
-<div class="py-6 md:py-8">
-    <div class="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div class="mb-6">
-            <h1 class="text-2xl font-bold text-primary-900 dark:text-white">Data Fisik Bulanan</h1>
-            <p class="text-sm text-secondary-500 dark:text-secondary-400 mt-1">Isi tinggi badan, berat badan, serta kondisi kesehatan Anda setiap bulan.</p>
-        </div>
-
-        <div class="grid grid-cols-1 lg:grid-cols-5 gap-6">
-            <div class="lg:col-span-2">
-                <form method="POST" action="{{ route('physical.mine.store') }}" class="bg-white dark:bg-primary-900/30 rounded-2xl border border-primary-100 dark:border-primary-800/30 shadow-sm p-5 space-y-4 lg:sticky lg:top-4">
-                    @csrf
-                    <div class="flex items-start justify-between gap-3">
-                        <div>
-                            <p class="text-xs font-semibold uppercase tracking-wider text-secondary-500 dark:text-secondary-400">Bulan ini</p>
-                            <h2 class="text-lg font-bold text-primary-900 dark:text-white">{{ $period->translatedFormat('F Y') }}</h2>
-                        </div>
-                        @if($current)
-                            <span class="text-[11px] font-semibold px-2 py-1 rounded-full bg-emerald-100 text-emerald-700 dark:bg-emerald-900/30 dark:text-emerald-300">✓ Sudah diisi</span>
-                        @else
-                            <span class="text-[11px] font-semibold px-2 py-1 rounded-full bg-amber-100 text-amber-700 dark:bg-amber-900/30 dark:text-amber-300">Belum diisi</span>
-                        @endif
-                    </div>
-
-                    @if($errors->any())
-                        <div class="p-3 rounded-xl bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800/40 text-sm text-red-700 dark:text-red-300">
-                            <ul class="list-disc pl-5">@foreach($errors->all() as $e)<li>{{ $e }}</li>@endforeach</ul>
-                        </div>
-                    @endif
-
-                    @include('physical.partials.form-fields', ['record' => $current ?? ($previous ? new \App\Models\StudentPhysicalRecord(['height_cm' => $previous->height_cm, 'weight_kg' => $previous->weight_kg]) : null)])
-
-                    @if(!$current && $previous)
-                        <p class="text-xs text-secondary-500 dark:text-secondary-400">Angka diisi otomatis dari {{ $previous->period_label }} — perbarui sesuai pengukuran terbaru.</p>
-                    @endif
-                    @if($current?->editor && $current->updated_by !== auth()->id())
-                        <p class="text-xs text-secondary-500 dark:text-secondary-400">Terakhir diperbarui oleh {{ $current->editor->name }}.</p>
-                    @endif
-
-                    <button class="w-full px-5 py-3 rounded-xl bg-primary-600 hover:bg-primary-700 text-white font-semibold">
-                        {{ $current ? 'Perbarui Data' : 'Simpan Data' }}
-                    </button>
-                </form>
+<x-layouts.app title="Data Fisik Bulanan">
+<x-chartjs/>
+<x-page-header title="Data Fisik Bulanan" sub="Perbarui tinggi & berat badan setiap bulan agar pelatih bisa memantau perkembanganmu."/>
+<div class="grid gap-6 lg:grid-cols-5">
+    <div class="lg:col-span-2">
+        <div class="card overflow-hidden">
+            <div class="{{ $current ? 'bg-lagoon-500' : 'bg-sunrise' }} p-5 text-white">
+                <p class="text-xs font-bold uppercase tracking-widest text-white/80">Periode</p>
+                <p class="font-display text-2xl font-extrabold">{{ $period->translatedFormat('F Y') }}</p>
+                <p class="mt-1 text-sm text-white/85">{{ $current ? 'Sudah diisi — kamu masih bisa memperbaruinya.' : 'Belum diisi bulan ini.' }}</p>
             </div>
-
-            <div class="lg:col-span-3 space-y-6">
-                @if($records->isNotEmpty())
-                    @php $latest = $records->last(); @endphp
-                    <div class="grid grid-cols-3 gap-3">
-                        <div class="bg-white dark:bg-primary-900/30 rounded-2xl border border-primary-100 dark:border-primary-800/30 p-4 shadow-sm">
-                            <p class="text-xs text-secondary-500 dark:text-secondary-400">Tinggi terakhir</p>
-                            <p class="text-2xl font-bold tabular-nums text-primary-900 dark:text-white">{{ rtrim(rtrim(number_format($latest->height_cm, 1, ',', ''), '0'), ',') }} <span class="text-sm font-medium">cm</span></p>
-                        </div>
-                        <div class="bg-white dark:bg-primary-900/30 rounded-2xl border border-primary-100 dark:border-primary-800/30 p-4 shadow-sm">
-                            <p class="text-xs text-secondary-500 dark:text-secondary-400">Berat terakhir</p>
-                            <p class="text-2xl font-bold tabular-nums text-primary-900 dark:text-white">{{ rtrim(rtrim(number_format($latest->weight_kg, 1, ',', ''), '0'), ',') }} <span class="text-sm font-medium">kg</span></p>
-                        </div>
-                        <div class="bg-white dark:bg-primary-900/30 rounded-2xl border border-primary-100 dark:border-primary-800/30 p-4 shadow-sm">
-                            <p class="text-xs text-secondary-500 dark:text-secondary-400">IMT</p>
-                            <p class="text-2xl font-bold tabular-nums text-primary-900 dark:text-white">{{ number_format($latest->bmi, 1, ',', '') }}</p>
-                            <p class="text-xs text-secondary-500 dark:text-secondary-400">{{ $latest->bmi_category['label'] ?? '' }}</p>
-                        </div>
-                    </div>
-
-                    <div class="bg-white dark:bg-primary-900/30 rounded-2xl border border-primary-100 dark:border-primary-800/30 p-5 shadow-sm">
-                        <h2 class="font-semibold text-primary-800 dark:text-primary-100 mb-3">Perkembangan</h2>
-                        @include('physical.partials.charts', ['chart' => $chart, 'prefix' => 'mine'])
-                    </div>
-                @endif
-
-                <div class="bg-white dark:bg-primary-900/30 rounded-2xl border border-primary-100 dark:border-primary-800/30 shadow-sm overflow-hidden">
-                    <div class="px-5 py-4 border-b border-primary-100 dark:border-primary-800/30"><h2 class="font-semibold text-primary-800 dark:text-primary-100">Riwayat</h2></div>
-                    @include('physical.partials.history-table', ['records' => $records])
-                </div>
+            <div class="p-5">
+                @if($previous)<p class="mb-4 rounded-2xl bg-cream p-3 text-xs text-ink-500">Bulan lalu ({{ $previous->period->translatedFormat('F') }}): <b>{{ $previous->height_cm }} cm · {{ $previous->weight_kg }} kg</b></p>@endif
+                @include('physical.partials.form', ['action' => route('physical.mine.store'), 'record' => $current, 'withPeriod' => false])
             </div>
         </div>
     </div>
+    <div class="space-y-6 lg:col-span-3">
+        <div class="card card-pad"><p class="section-title mb-4">Grafik perkembangan</p>@include('physical.partials.chart')</div>
+        <div class="table-wrap">
+            <table class="table">
+                <thead><tr><th>Bulan</th><th class="text-right">Tinggi</th><th class="text-right">Berat</th><th class="text-right">IMT</th><th>Kategori</th><th>Kesehatan</th></tr></thead>
+                <tbody>
+                @forelse($records->reverse() as $r)
+                    <tr><td class="font-bold">{{ $r->period->translatedFormat('M Y') }}</td><td class="text-right">{{ $r->height_cm }} cm</td><td class="text-right">{{ $r->weight_kg }} kg</td><td class="text-right font-bold">{{ $r->bmi ?? '–' }}</td><td><x-bmi-badge :cat="$r->bmi_category"/></td>
+                        <td class="text-xs">{{ $r->hasHealthIssue() ? collect([$r->has_illness ? 'Sakit' : null, $r->has_injury ? 'Cedera' : null])->filter()->join(', ') : 'Sehat' }}</td></tr>
+                @empty
+                    <tr><td colspan="6" class="py-8 text-center text-ink-400">Belum ada data.</td></tr>
+                @endforelse
+                </tbody>
+            </table>
+        </div>
+    </div>
 </div>
-@endsection
+</x-layouts.app>

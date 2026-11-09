@@ -1,212 +1,48 @@
-# 🎓 Satya Naratama – Online Tutoring Platform (Laravel 11)
+# Satya Naratama — TALL Stack
 
-Satya Naratama is a web-based **online tutoring (bimbel) platform** built with **Laravel 11**, designed to manage courses, meetings, exams (tryout & quiz), purchases, entitlements, notifications, and interactive learning features.
+Aplikasi bimbel persiapan **sekolah kedinasan & TNI–POLRI** (Pangkep), dibangun ulang dengan **TALL Stack**: Tailwind CSS 3 · Alpine.js · Laravel 11 · Livewire 3, memakai tema baru **"Garnet & Saffron"** (merah garnet + emas kunyit, diambil dari logo elang).
 
-This project supports **Admin**, **Tentor (Teacher)**, and **Siswa (Student)** roles with a clear access control system.
+**Data lama tetap dipakai.** Skema database, nama migrasi, `APP_KEY`, dan path file unggahan tidak berubah, sehingga versi ini bisa langsung menggantikan aplikasi lama di server memakai database yang sama.
 
----
+## Dokumentasi
 
-## 🚀 Main Features
+| Dokumen | Isi |
+|---|---|
+| [`docs/GANTI-PROYEK-VPS.md`](docs/GANTI-PROYEK-VPS.md) | **Mengganti proyek lama di VPS**: backup, deploy ke folder baru, tukar folder, cek, rollback, Nginx 1.24, upload besar |
+| [`docs/INSTALL-LOKAL.md`](docs/INSTALL-LOKAL.md) | Menjalankan di komputer sendiri + data contoh |
+| [`docs/PERUBAHAN.md`](docs/PERUBAHAN.md) | Daftar modul, apa yang berubah, perbaikan bug, catatan kompatibilitas |
+| `deploy.sh` | Script update aplikasi di server |
 
-### 👤 User Roles
-- **Admin**
-  - Manage users, courses, meetings, exams
-  - Manage orders & verify purchases
-  - View all student entitlements
-  - Full system access (no restrictions)
+## Modul
 
-- **Tentor (Teacher)**
-  - Manage meetings
-  - Create and manage exams (post-test, tryout, quiz)
-  - View student attempts and results
+- **Publik**: landing page baru, tutorial, pendaftaran bimbel 4 langkah (+ unggah bukti transfer), cek status pendaftaran, rapor publik untuk orang tua (`/pantau/{token}`).
+- **Akun**: masuk (selalu "ingat saya"), daftar akun umum, lupa/atur ulang password, verifikasi email, profil, ganti password, nonaktifkan akun.
+- **Dashboard**: admin (statistik, grafik penjualan per minggu, pesanan menunggu, jadwal), tentor, siswa.
+- **Pengguna**: siswa (cari, filter, aktif/nonaktif, detail, ubah data), tentor (angkat dari siswa, kelas yang diampu), pendaftaran (verifikasi → akun otomatis, tolak, ekspor CSV), hak akses siswa (lihat, beri & cabut manual).
+- **Akademik**: kelas (akademik/jasmani), pertemuan (mulai/selesai, Zoom), materi PDF, video YouTube/Bunny, blind test & post-test, jadwal kalender.
+- **Presensi & monitoring**: scanner QR (kamera/scanner USB), presensi manual & massal, rekap + grafik + matriks + ekspor CSV, kartu QR cetak, QR siswa, evaluasi jasmani bulanan (input grid, perbandingan, CSV), data fisik bulanan (IMT, keluhan kesehatan), rapor siswa & link orang tua.
+- **Ujian**: tryout & kuis (SKD, TPA, TBI, MTK STIS/TKA, umum), penyusun soal dari bank soal, prasyarat tryout, mesin ujian CAT (timer server, simpan otomatis + cadangan offline, ragu-ragu, pintasan keyboard, zoom teks, layar penuh, kumpul otomatis), hasil & pembahasan, peringkat, analisis per soal.
+- **Bank soal**: kategori → materi → soal; PG, PG kompleks, benar/salah, isian, majemuk; TKP berbobot; editor rumus MathQuill + pratinjau KaTeX.
+- **Penjualan**: beli paket kelas/pertemuan/tryout/addon kuis, keranjang, diskon & voucher, pembayaran QRIS + unggah bukti, verifikasi admin, invoice PDF, produk, aturan harga, bonus produk, pengaturan pembayaran, laporan pendapatan (+PDF), promo & banner landing.
+- **Lainnya**: notifikasi (lonceng real-time + halaman), game matematika & snake.
 
-- **Siswa (Student)**
-  - Buy courses, meetings, tryouts, quizzes
-  - Access content based on entitlements
-  - Attend meetings
-  - Take exams and view results
+## Sesi tidak habis
 
----
+- `SESSION_LIFETIME` minimal 1 tahun (dipaksa di `config/session.php`) dan diperpanjang setiap kali aplikasi dibuka.
+- Login selalu memakai *remember me* (cookie ± 400 hari).
+- Frontend memperbarui token CSRF setiap 10 menit (`/keep-alive`) dan saat tab dibuka kembali, sehingga form & Livewire tidak kena `419`.
 
-### 📚 Course & Meeting System
-- Courses contain multiple meetings
-- Students can:
-  - Buy **full course package**
-  - Buy **individual meetings**
-- Meeting access logic:
-  - Full course → access all meetings
-  - Individual meeting → access only purchased meetings
-  - No access → meeting is locked (🔒 icon + toast message)
+Pengguna hanya keluar bila menekan **Keluar**.
 
----
+## Teknologi
 
-### 🧾 Purchase & Entitlement System
-- Automatic entitlement granting after order verification
-- Supported entitlement types:
-  - `course`
-  - `meeting`
-  - `tryout` (global)
-  - `quiz` (global)
-- Bonus entitlements supported
-- Centralized in `user_entitlements` table
+PHP 8.2+ (disarankan 8.3), Laravel 11, Livewire 3.7 (Alpine bawaan Livewire), Tailwind 3, Vite 5, MySQL/MariaDB. Chart.js, html5-qrcode, qrcodejs & KaTeX di-*host* sendiri di `public/vendor`.
 
----
-
-### 📝 Exam System
-- Exam types:
-  - **Tryout** (global access)
-  - **Daily Quiz** (global access)
-  - **Post Test** (attached to meeting)
-- Features:
-  - Time-based access
-  - Auto submit on timeout
-  - Attempt tracking
-  - Scoring & result pages
-- Access control:
-  - Students without entitlement cannot start exams
-  - Call-to-action: *“Purchase Access”*
-
----
-
-### 🔔 Notification System
-- Database notifications
-- Optional email delivery (Brevo SMTP)
-- Real-time updates with **Pusher / WebSocket**
-- Features:
-  - Notification bell with unread badge
-  - Latest 5 notifications dropdown
-  - Full notification page
-  - Mark as read
-  - Mark all as read
-  - Delete single or all notifications
-
----
-
-### 📧 Email Notifications
-- Custom Blade email templates
-- Used for:
-  - Purchase confirmation
-  - Bonus granted
-  - Exam activation
-  - Important system updates
-- SMTP provider: **Brevo**
-
----
-
-### 🎮 Mini Games (Optional Fun Features)
-- **Snake Game** (classic)
-  - Keyboard (desktop)
-  - Swipe controls (mobile)
-- **Math Quiz Game**
-- Frontend-only (no controller needed)
-- Built with HTML + CSS + JavaScript
-- Integrated into Laravel views
-
----
-
-## 🛠 Tech Stack
-
-- **Laravel 11**
-- PHP 8.2+
-- MySQL / MariaDB
-- Tailwind CSS
-- Alpine.js
-- Pusher (Realtime)
-- Brevo SMTP (Email)
-- Spatie Laravel Permission
-
----
-
-## ⚙️ Installation Guide (Laravel 11)
-
-### 1️⃣ Clone Repository
-```bash
-git clone https://github.com/your-username/azwara-learning.git
-cd azwara-learning
-```
-
-### 2️⃣ Install Dependencies
-```bash
-composer install
-npm install
-npm run build
-```
-
-### 3️⃣ Environment Setup
-```bash
-cp .env.example .env
-php artisan key:generate
-```
-
-### 4️⃣ Configure Database
-
-Edit .env:
+## Pengujian
 
 ```bash
-DB_DATABASE=azwara_learning
-DB_USERNAME=root
-DB_PASSWORD=
+php artisan migrate:fresh --seed && php artisan db:seed --class=DemoDataSeeder   # DB lokal saja!
+php artisan test
 ```
 
-### 5️⃣ Configure Mail (Brevo SMTP)
-```bash
-MAIL_MAILER=smtp
-MAIL_HOST=smtp-relay.brevo.com
-MAIL_PORT=587
-MAIL_USERNAME=your-smtp-username@smtp-brevo.com
-MAIL_PASSWORD=your-smtp-password
-MAIL_ENCRYPTION=tls
-MAIL_FROM_ADDRESS="xxxxxxxx@gmail.com"
-MAIL_FROM_NAME=
-```
-
-### 6️⃣ Configure Pusher (Realtime Notifications)
-```bash
-BROADCAST_CONNECTION=pusher
-
-PUSHER_APP_ID=your_app_id
-PUSHER_APP_KEY=your_key
-PUSHER_APP_SECRET=your_secret
-PUSHER_APP_CLUSTER=ap1
-```
-
-### 7️⃣ Run Migration & Seeder
-```bash
-php artisan migrate --seed
-```
-
-### 8️⃣ Storage & Cache
-```bash
-php artisan storage:link
-php artisan optimize
-```
-
-### 9️⃣ Run Development Server
-```bash
-php artisan serve
-```
-
-## 🔐 Demo Accounts
-
-All demo accounts use the same password:password
-Admin
-- Email: admin@bimbel.com
-
-Students
-- Email: siswa1@bimbel.com
-- Email: siswa2@bimbel.com
-- Email: siswa3@bimbel.com
-
-## 📌 Notes
-- Admin role is not restricted by access policies
-- All access control applies only to Siswa
-- Notifications do not conflict with: Email verification and Password reset notifications
-
-## 📄 License
-This project is open for educational and portfolio purposes.
-
-## ✨ Author
-Muhammad Afnan Alfian, S.Tr.Stat.
-Alumni Politeknik Statistika STIS
-
-Built with ❤️ for online education using Laravel 11.
+`SmokeTest` membuka seluruh halaman untuk tamu/admin/tentor/siswa; `FlowTest` menguji alur beli → bayar → verifikasi → akses, pengerjaan tryout, pendaftaran bimbel, presensi QR, dan login permanen.
