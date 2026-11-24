@@ -19,7 +19,7 @@ class BarisanDeretPaket2Seeder extends Seeder
     public function run(): void
     {
         $now = Carbon::now();
-        $materialId = 39;
+        $materialId = 17;
 
         $questions = [
             // Soal 1 | Barisan dan Deret | mudah | Kunci: E

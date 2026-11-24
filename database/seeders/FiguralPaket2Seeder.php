@@ -19,7 +19,7 @@ class FiguralPaket2Seeder extends Seeder
     public function run(): void
     {
         $now = Carbon::now();
-        $materialId = 37;
+        $materialId = 15;
 
         $questions = [
             // Soal 1 | Deret gambar | mudah | Kunci: D
